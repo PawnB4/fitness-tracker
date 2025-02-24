@@ -13,6 +13,7 @@
     "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
   },
   "dependencies": {
+    "@react-navigation/material-top-tabs": "^7.1.0",
     "@react-navigation/native": "^7.0.0",
     "@rn-primitives/avatar": "~1.1.0",
     "@rn-primitives/portal": "~1.1.0",
@@ -23,10 +24,12 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "expo": "^52.0.25",
+    "expo-dev-client": "~5.0.12",
     "expo-linking": "~7.0.4",
     "expo-navigation-bar": "~4.0.7",
     "expo-router": "~4.0.16",
     "expo-splash-screen": "~0.29.20",
+    "expo-sqlite": "~15.1.2",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.7",
     "lucide-react-native": "^0.378.0",

@@ -16,3 +16,32 @@ export const NAV_THEME = {
     text: 'hsl(0 0% 98%)', // foreground
   },
 };
+
+export const WORKOUT_TYPES = ['Upper Body', 'Lower Body', 'Full Body', 'Custom'];
+
+export const EXERCISES = [
+  'Abductor Machine',
+  'Barbell Row',
+  'Bench Press',
+  'Bicep Curls (Cable)',
+  'Bicep Curls (Dumbbells)',
+  'Incline Dumbbell Curls',
+  'Cable Crunches',
+  'Calf Raises',
+  'Deadlifts',
+  'Dips',
+  'Face Pulls',
+  'Hamstring Curl (Lying)',
+  'Hamstring Curl (Seated)',
+  'Incline Dumbbell Press',
+  'Lat Pulldown',
+  'Lateral Raises',
+  'Leg Press',
+  'Leg Raises',
+  'Overhead Press',
+  'Pull-Ups',
+  'Push-Ups',
+  'Quad Extension',
+  'Squats',
+  'Custom'
+];
