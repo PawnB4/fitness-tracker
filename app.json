@@ -33,7 +33,16 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/preahvihear/Preahvihear_400Regular.ttf",
+            "node_modules/@expo-google-fonts/contrail-one/ContrailOne_400Regular.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

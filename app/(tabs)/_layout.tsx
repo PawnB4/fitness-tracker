@@ -1,53 +1,43 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
+import { Text, View } from 'react-native';
 import { ThemeToggle } from '~/components/ThemeToggle';
-import { withLayoutContext } from 'expo-router'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-
-const { Navigator } = createMaterialTopTabNavigator()
-export const Tab = withLayoutContext(Navigator)
+import { BicepsFlexed } from '~/lib/icons/BicepsFlexed';
+import { ChartNoAxesCombined } from '~/lib/icons/ChartNoAxesCombined';
+import { Dumbbell } from '~/lib/icons/Dumbbell';
 
 export default function TabLayout() {
-    return (
-        // <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }}>
-
-        // </Tabs>
-        <Tab
-        screenOptions={{
-            tabBarAllowFontScaling: true,
-            tabBarShowIcon: true,
-            tabBarScrollEnabled: true,
-            tabBarShowLabel: true,
-            swipeEnabled: true,
-            lazy: true,
-            lazyPreloadDistance: 0,
-            //   lazyPlaceholder: lazyPlaceholder,
+  return (
+    <Tabs >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Workouts',
+          headerRight: () => <ThemeToggle />,
+          tabBarLabel: ({ children, color, focused, position }) => <Text
+          className={`text-xs font-semibold ${focused ? "text-sky-600" : "text-foreground"}`}>{children}</Text>,
+          tabBarIcon: ({ color, focused }) => <BicepsFlexed className={focused ? "text-sky-600" : "text-foreground"} size={23}  />,
         }}
-    >
-        <Tabs.Screen
-            name="index"
-            options={{
-                title: 'Workouts',
-                headerRight: () => <ThemeToggle />,
-                tabBarIcon: ({ color }) => <FontAwesome size={28} name="bars" color={color} />,
-            }}
-        />
-        <Tabs.Screen
-            name="progress"
-            options={{
-                title: 'Progress',
-                headerRight: () => <ThemeToggle />,
-                tabBarIcon: ({ color }) => <FontAwesome size={28} name="bar-chart" color={color} />,
-            }}
-        />
-        <Tabs.Screen
-            name="exercises"
-            options={{
-                title: 'Exercises',
-                headerRight: () => <ThemeToggle />,
-                tabBarIcon: ({ color }) => <FontAwesome size={28} name="drupal" color={color} />,
-            }}
-        />
-    </Tab>
-    );
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: 'Progress',
+          headerRight: () => <ThemeToggle />,
+          tabBarLabel: ({ children, color, focused, position }) => <Text
+          className={`text-xs font-semibold ${focused ? "text-sky-600" : "text-foreground"}`}>{children}</Text>,
+          tabBarIcon: ({ color, focused }) => <ChartNoAxesCombined className={focused ? "text-sky-600" : "text-foreground"} size={23}  />,
+        }}
+      />
+      <Tabs.Screen
+        name="exercises"
+        options={{
+          title: 'Exercises',
+          headerRight: () => <ThemeToggle />,
+          tabBarLabel: ({ children, color, focused, position }) => <Text
+          className={`text-xs font-semibold ${focused ? "text-sky-600" : "text-foreground"}`}>{children}</Text>,
+          tabBarIcon: ({ color, focused }) => <Dumbbell className={focused ? "text-sky-600" : "text-foreground"} size={23}  />,
+        }}
+      />
+    </Tabs>
+  );
 }
