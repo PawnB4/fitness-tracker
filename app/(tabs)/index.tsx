@@ -17,15 +17,49 @@ import { Text } from '~/components/ui/text';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 import { Link } from 'expo-router';
 
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { openDatabaseSync } from 'expo-sqlite';
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations from '../../drizzle/migrations';
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+
+const fitnessTrackerDb = openDatabaseSync("fitness-tracker-2.db");
+
+const db = drizzle(fitnessTrackerDb);
+
+
 const GITHUB_AVATAR_URI =
   'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
 
+
 export default function Screen() {
+  useDrizzleStudio(fitnessTrackerDb);
+
+  const { success, error } = useMigrations(db, migrations);
+
   const [progress, setProgress] = React.useState(78);
 
   function updateProgressValue() {
     setProgress(Math.floor(Math.random() * 100));
   }
+
+  if (error) {
+    console.log(error)
+    return (
+      <View>
+        <Text>Migration error</Text>
+      </View>
+    );
+  }
+
+  if (!success) {
+    return (
+      <View>
+        <Text>Migration is in progress...</Text>
+      </View>
+    );
+  }
+
   return (
     <View className='flex-1 justify-center items-center gap-5 p-6 bg-secondary/30'>
       <Card className='w-full max-w-sm p-6 rounded-2xl'>
@@ -37,7 +71,8 @@ export default function Screen() {
             </AvatarFallback>
           </Avatar>
           <View className='p-3' />
-          <CardTitle className='pb-2 text-center'>Rick Sanchez</CardTitle>
+          <CardTitle className='pb-2 text-center'
+          >Rick Sanchez</CardTitle>
           <View className='flex-row'>
             <CardDescription className='text-base font-semibold'>Scientist</CardDescription>
             <Tooltip delayDuration={150}>
