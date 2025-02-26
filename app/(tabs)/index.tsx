@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
 import { Info } from '~/lib/icons/Info';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
@@ -17,15 +17,11 @@ import { Text } from '~/components/ui/text';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 import { Link } from 'expo-router';
 
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { openDatabaseSync } from 'expo-sqlite';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import migrations from '../../drizzle/migrations';
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
-
-const fitnessTrackerDb = openDatabaseSync("fitness-tracker-2.db");
-
-const db = drizzle(fitnessTrackerDb);
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import { fitnessTrackerDb } from '~/db/drizzle';
+import migrations from '~/drizzle/migrations';
+import { db } from '~/db/drizzle';
 
 
 const GITHUB_AVATAR_URI =
@@ -44,18 +40,17 @@ export default function Screen() {
   }
 
   if (error) {
-    console.log(error)
     return (
       <View>
-        <Text>Migration error</Text>
+        <Text>Something went wrong</Text>
       </View>
     );
   }
 
   if (!success) {
     return (
-      <View>
-        <Text>Migration is in progress...</Text>
+      <View className='flex-1 justify-center items-center gap-5 p-6 bg-secondary/30'>
+        <ActivityIndicator size="large" color="##0284c7" />
       </View>
     );
   }

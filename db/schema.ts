@@ -48,9 +48,3 @@ export type NewExercise = typeof exercises.$inferInsert;
 export type WorkoutExercise = typeof workoutExercises.$inferSelect;
 export type NewWorkoutExercise = typeof workoutExercises.$inferInsert;
 
-// Relations helper function
-export const getWorkoutExercises = (workoutId: number) => {
-    return {
-        where: eq(workoutExercises.workoutId, workoutId),
-    };
-};

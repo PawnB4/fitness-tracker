@@ -5,37 +5,6 @@ import { BicepsFlexed } from '~/lib/icons/BicepsFlexed';
 import { ChartNoAxesCombined } from '~/lib/icons/ChartNoAxesCombined';
 import { Dumbbell } from '~/lib/icons/Dumbbell';
 
-const workouts = [
-  {
-    id: 1,
-    name: 'Workout 1',
-    date: '2024-01-01',
-    exercises: [
-      {
-        id: 1,
-        name: 'Deadlift',
-        sets: 3,
-        reps: 10,
-        weight: 100,
-      },
-      {
-        id: 2,
-        name: 'Bench Press',
-        sets: 3,
-        reps: 12,
-        weight: 80,
-      },
-      {
-        id: 3,
-        name: 'Squat',
-        sets: 5,
-        reps: 5,
-        weight: 200,
-      },
-    ],
-  },
-]
-
 
 export default function TabLayout() {
   return (
