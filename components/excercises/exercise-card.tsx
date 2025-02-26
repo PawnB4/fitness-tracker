@@ -13,24 +13,29 @@ import { Exercise } from '~/db/schema';
 
 export const ExerciseCard = ({ name, type, primaryMuscleGroup, secondaryMuscleGroups, description }: Exercise) => {
     return (
-        <Card className='w-full max-w-sm p-6 rounded-2xl'>
-            <CardHeader className='items-center'>
-                <View className='p-3' />
-                <CardTitle className='pb-2 text-center'
-                >{name}</CardTitle>
-                <View className='flex-row'>
-                    <CardDescription className='text-base font-semibold'>{type}</CardDescription>
+        <Card className='flex-1rounded-2xl shadow'>
+            <CardContent className='py-2 px-3'>
+                <View className='flex flex-row justify-start items-center py-1'>
+                    <CardTitle className='leading-normal'
+                        style={{ fontFamily: "ContrailOne_400Regular" }}>
+                        {name}
+                    </CardTitle>
+                    <Text className='ml-auto text-foreground/70'>
+                        {type}
+                    </Text>
                 </View>
-            </CardHeader>
-            <CardContent>
-                <View className='flex-row justify-around gap-3'>
-                    <Text>{description}</Text>
+                <View className='h-1 bg-sky-500 rounded'></View>
+                <View className='flex gap-1 py-2 '>
+                    <View className='flex flex-row items-center gap-1 overflow-hidden'>
+                        <Text>Primary muscle group: </Text>
+                        <Text className='text-foreground/70'>{primaryMuscleGroup}</Text>
+                    </View>
+                    <View className='flex flex-row items-center gap-1 overflow-hidden'>
+                        <Text>Secondary muscle groups: </Text>
+                        <Text className='text-foreground/70'>{secondaryMuscleGroups}</Text>
+                    </View>
                 </View>
             </CardContent>
-            <CardFooter className='flex-col gap-3 pb-0'>
-                <Text>{primaryMuscleGroup}</Text>
-                <Text>{secondaryMuscleGroups}</Text>
-            </CardFooter>
         </Card>
     )
 }

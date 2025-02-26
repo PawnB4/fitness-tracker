@@ -8,20 +8,20 @@ import { FlashList } from "@shopify/flash-list";
 import { ExerciseCard } from '~/components/excercises/exercise-card';
 
 export default function Page() {
-  const { data:exercises } = useLiveQuery(db.select().from(schema.exercises));
+  const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
 
-  return <View className='flex-1 items-stretch p-4'>
+  return <View className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'>
     <Button
-      variant='outline'
       className='shadow shadow-foreground/5'
-    >
+      >
       <Text>Add exercise</Text>
     </Button>
     <FlashList
       data={exercises}
-      // renderItem={({ item }) => <ExerciseCard {...item} />}
-      renderItem={({ item }) => <Text>{item.name}</Text>}
-      estimatedItemSize={200}
+      renderItem={({ item, index }) => <ExerciseCard {...item} key={index} />}
+      estimatedItemSize={50}
+      showsVerticalScrollIndicator={false}
+      ItemSeparatorComponent={() => <View className='h-4' />}
     />
   </View>;
 }

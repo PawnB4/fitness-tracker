@@ -16,8 +16,7 @@ export const exercises = sqliteTable('exercises', {
     id: integer().primaryKey({ autoIncrement: true }),
     name: text().notNull(),
     type: text().notNull(), // "upper body", "lower body", "core", "cardio", etc.
-    description: text(),
-    // Optional fields that might be useful
+    description: text(), // Optional fields that might be useful
     primaryMuscleGroup: text(),
     secondaryMuscleGroups: text(),
     createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
