@@ -1,5 +1,9 @@
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 
 export default function Page() {
-  return <Text>Progress page</Text>;
+  return (
+    <View className='bg-secondary/70'>
+      <Text>Progress</Text>
+    </View>
+  );
 }

@@ -27,10 +27,12 @@
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
     "@shopify/flash-list": "1.7.3",
+    "@tanstack/react-form": "^0.45.1",
     "babel-plugin-inline-import": "^3.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "drizzle-orm": "^0.39.3",
+    "drizzle-zod": "^0.7.0",
     "expo": "^52.0.25",
     "expo-dev-client": "~5.0.12",
     "expo-drizzle-studio-plugin": "^0.1.1",
@@ -55,6 +57,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.2",
     "zustand": "^4.4.7"
   },
   "devDependencies": {

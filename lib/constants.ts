@@ -17,7 +17,36 @@ export const NAV_THEME = {
   },
 };
 
-export const WORKOUT_TYPES = ['Upper Body', 'Lower Body', 'Full Body'];
+export const EXERCISES_TYPES = ['Upper Body', 'Lower Body', 'Core', 'Cardio'];
+
+export const MUSCLE_GROUPS = [
+  'Abs',
+  'Adductors',
+  'Ankles',
+  'Back',
+  'Biceps',
+  'Calves',
+  'Chest',
+  'Core',
+  'Forearms',
+  'Glutes',
+  'Hamstrings',
+  'Hip Flexors',
+  'Knee Stabilizers',
+  'Lats',
+  'Lower Abs',
+  'Lower Back',
+  'Middle Back',
+  'Obliques',
+  'Quadriceps',
+  'Rear Delts',
+  'Rhomboids',
+  'Shoulders',
+  'Side Delts',
+  'Traps',
+  'Triceps',
+  'Upper Chest'
+];
 
 export const EXERCISES = [
   'Abductor Machine',
