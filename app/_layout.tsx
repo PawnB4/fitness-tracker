@@ -9,6 +9,7 @@ import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '@rn-primitives/portal';
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
+import { ThemeToggle } from '~/components/ThemeToggle';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -54,6 +55,14 @@ export default function RootLayout() {
         <Stack.Screen
           name='(tabs)'
           options={{ headerShown: false }} 
+        />
+        <Stack.Screen
+          name='workout/[id]'
+          options={{
+            headerTitle: "",
+            headerRight: () => <ThemeToggle />,
+            // headerShown: false
+          }}
         />
       </Stack>
       <PortalHost />

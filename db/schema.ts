@@ -1,14 +1,12 @@
 import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { eq, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { createSelectSchema, createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { EXERCISES_TYPES } from '~/lib/constants';
 
 // Workouts table
 export const workouts = sqliteTable('workouts', {
     id: integer().primaryKey({ autoIncrement: true }),
-    name: text().notNull(),
-    date: text().notNull(), // Storing as ISO string
+    date: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`), 
     notes: text(),
     createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -21,7 +19,6 @@ export const exercises = sqliteTable('exercises', {
     type: text().notNull(), // "upper body", "lower body", "core", "cardio", etc.
     description: text(), // Optional fields that might be useful
     primaryMuscleGroup: text(),
-    secondaryMuscleGroups: text(),
     createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -48,6 +45,14 @@ export const updateWorkoutsSchema = createUpdateSchema(workouts);
 
 export const insertExercisesSchema = createInsertSchema(exercises, {
     name: (schema) => schema.min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
+    type: () => z.object({
+        value: z.string(),
+        label: z.string(),
+    }),
+    primaryMuscleGroup: () => z.object({
+        value: z.string(),
+        label: z.string(),
+    }),
     description: (schema) => schema.max(255, { message: "Description must be less than 255 characters" }),
 }).omit({
     id: true,
@@ -68,4 +73,13 @@ export type NewExercise = z.infer<typeof insertExercisesSchema>;
 export type Exercise = z.infer<typeof selectExercisesSchema>;
 
 
-
+// export const insertExercisesSchema = createInsertSchema(exercises, {
+//     name: (schema) => schema.min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
+//     description: (schema) => schema.max(255, { message: "Description must be less than 255 characters" }).transform(val => val === "" ? null : val).nullable(),
+//     primaryMuscleGroup: (schema) => schema.transform(val => val === "" ? null : val).nullable(),
+//     secondaryMuscleGroups: (schema) => schema.transform(val => val === "" ? null : val).nullable(),
+//   }).omit({
+//     id: true,
+//     createdAt: true,
+//     updatedAt: true,
+//   });

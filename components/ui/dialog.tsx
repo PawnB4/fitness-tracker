@@ -83,7 +83,7 @@ const DialogContent = React.forwardRef<
             }
           >
             <X
-              size={Platform.OS === 'web' ? 16 : 18}
+              size={Platform.OS === 'web' ? 16 : 22}
               className={cn('text-muted-foreground', open && 'text-accent-foreground')}
             />
           </DialogPrimitive.Close>

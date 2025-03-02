@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
 import { Info } from '~/lib/icons/Info';
@@ -22,24 +21,26 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { fitnessTrackerDb } from '~/db/drizzle';
 import migrations from '~/drizzle/migrations';
 import { db } from '~/db/drizzle';
+import { Dialog, DialogContent, DialogTrigger } from '~/components/ui/dialog';
+import { FlashList } from '@shopify/flash-list';
+import { ExerciseCard } from '~/components/exercises/exercise-card';
+import { ExerciseForm } from '~/components/exercises/exercise-form';
+import { useLiveQuery, drizzle } from 'drizzle-orm/expo-sqlite';
+import * as schema from '~/db/schema';
+import { useState } from 'react';
+import { router } from 'expo-router';
 
-
-const GITHUB_AVATAR_URI =
-  'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
 
 
 export default function Screen() {
   useDrizzleStudio(fitnessTrackerDb);
 
-  const { success, error } = useMigrations(db, migrations);
+  const { success, error: migrationsError } = useMigrations(db, migrations);
 
-  const [progress, setProgress] = React.useState(78);
+  const { data: workouts, error: workoutsError } = useLiveQuery(db.select().from(schema.workouts));
 
-  function updateProgressValue() {
-    setProgress(Math.floor(Math.random() * 100));
-  }
 
-  if (error) {
+  if (migrationsError || workoutsError) {
     return (
       <View>
         <Text>Something went wrong</Text>
@@ -56,71 +57,27 @@ export default function Screen() {
   }
 
   return (
-    <View className='flex-1 justify-center items-center gap-5 p-6 bg-secondary/30'>
-      <Card className='w-full max-w-sm p-6 rounded-2xl'>
-        <CardHeader className='items-center'>
-          <Avatar alt="Rick Sanchez's Avatar" className='w-24 h-24'>
-            <AvatarImage source={{ uri: GITHUB_AVATAR_URI }} />
-            <AvatarFallback>
-              <Text>RS</Text>
-            </AvatarFallback>
-          </Avatar>
-          <View className='p-3' />
-          <CardTitle className='pb-2 text-center'
-          >Rick Sanchez</CardTitle>
-          <View className='flex-row'>
-            <CardDescription className='text-base font-semibold'>Scientist</CardDescription>
-            <Tooltip delayDuration={150}>
-              <TooltipTrigger className='px-2 pb-0.5 active:opacity-50'>
-                <Info size={14} strokeWidth={2.5} className='w-4 h-4 text-foreground/70' />
-              </TooltipTrigger>
-              <TooltipContent className='py-2 px-4 shadow'>
-                <Text className='native:text-lg'>Freelance</Text>
-              </TooltipContent>
-            </Tooltip>
-          </View>
-        </CardHeader>
-        <CardContent>
-          <View className='flex-row justify-around gap-3'>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Dimension</Text>
-              <Text className='text-xl font-semibold'>C-137</Text>
-            </View>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Age</Text>
-              <Text className='text-xl font-semibold'>70</Text>
-            </View>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Species</Text>
-              <Text className='text-xl font-semibold'>Human</Text>
-            </View>
-          </View>
-        </CardContent>
-        <CardFooter className='flex-col gap-3 pb-0'>
-          <View className='flex-row items-center overflow-hidden'>
-            <Text className='text-sm text-muted-foreground'>Productivity:</Text>
-            <LayoutAnimationConfig skipEntering>
-              <Animated.View
-                key={progress}
-                entering={FadeInUp}
-                exiting={FadeOutDown}
-                className='w-11 items-center'
-              >
-                <Text className='text-sm font-bold text-sky-600'>{progress}%</Text>
-              </Animated.View>
-            </LayoutAnimationConfig>
-          </View>
-          <Progress value={progress} className='h-2' indicatorClassName='bg-sky-600' />
-          <View />
-          <Button
-            variant='outline'
-            className='shadow shadow-foreground/5'
-            onPress={updateProgressValue}
-          >
-            <Text>Update</Text>
-          </Button>
-        </CardFooter>
-      </Card>
+    <View className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'>
+      <Button className='shadow shadow-foreground/5'
+        onPress={async () => {
+          try {
+            const res = await db.insert(schema.workouts).values({}).returning();
+            router.push(`/workout/${res[0].id}`)
+          } catch (error) {
+            alert("Error creating workout")
+          }
+        }}
+      >
+        <Text>New workout</Text>
+      </Button>
+      <FlashList
+        data={workouts}
+        renderItem={({ item, index }) => <ExerciseCard {...item} key={index} />}
+        estimatedItemSize={50}
+        showsVerticalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View className='h-4' />}
+      />
+
     </View>
   );
 }

@@ -13,12 +13,25 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog';
 import { ExerciseForm } from '~/components/exercises/exercise-form';
+import { useState } from 'react';
 
 export default function Page() {
-  const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
+  const { data: exercises, error } = useLiveQuery(db.select().from(schema.exercises));
+  const [open, setOpen] = useState(false);
+
+  if (error) {
+    return (
+      <View>
+        <Text>Something went wrong</Text>
+      </View>
+    );
+  }
 
   return (
-    <Dialog className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'>
+    <Dialog className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'
+      open={open}
+      onOpenChange={setOpen}
+    >
       <DialogTrigger asChild>
         <Button className='shadow shadow-foreground/5'>
           <Text>Add exercise</Text>
@@ -31,8 +44,8 @@ export default function Page() {
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View className='h-4' />}
       />
-      <DialogContent className='max-w-[360px] px-2'>
-        <ExerciseForm />
+      <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
+        <ExerciseForm setOpen={setOpen} />
       </DialogContent>
     </Dialog>
   );

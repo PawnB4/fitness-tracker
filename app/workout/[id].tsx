@@ -1,0 +1,123 @@
+import { useLocalSearchParams } from 'expo-router';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import * as schema from '~/db/schema';
+import { eq } from 'drizzle-orm';
+import { ScrollView, View } from 'react-native';
+import { db } from '~/db/drizzle';
+import { Text } from '~/components/ui/text';
+import { formatDate, formatTime } from '~/utils/date';
+import { Button } from '~/components/ui/button';
+import { Clock, Calendar, Edit, Trash2, Award, Dumbbell, ChevronRight } from 'lucide-react-native';
+
+export default function Page() {
+    const { id } = useLocalSearchParams();
+
+    const { data: workout, error: workoutError } = useLiveQuery(db.select().from(schema.workouts).where(eq(schema.workouts.id, Number(id))));
+
+    if (workoutError) {
+        return <Text>Error: {workoutError.message}</Text>;
+    }
+
+    if (!workout || workout.length === 0) {
+        return <Text>Loading workout data...</Text>;
+    }
+    
+    const formattedDate = formatDate(workout[0].date)
+    const formattedTime = formatTime(workout[0].date)
+    
+    // Sample exercise data for UI purposes
+    const exercises = [
+        { id: 1, name: "Bench Press", sets: 3, reps: 10, weight: 135, completed: true },
+        { id: 2, name: "Squats", sets: 4, reps: 8, weight: 185, completed: true },
+        { id: 3, name: "Pull-ups", sets: 3, reps: 12, weight: 0, completed: false },
+        { id: 4, name: "Deadlift", sets: 3, reps: 6, weight: 225, completed: false },
+        { id: 5, name: "Shoulder Press", sets: 3, reps: 12, weight: 65, completed: false },
+    ];
+
+    return (
+        <ScrollView className="flex-1 bg-background">
+            {/* Header */}
+            <View className="bg-primary p-6 rounded-b-3xl">
+                <Text className="text-4xl text-primary-foreground mb-2">Workout Details</Text>
+                <View className="flex-row items-center mb-1">
+                    <Calendar size={18} color="white" className="mr-2" />
+                    <Text className="text-md text-primary-foreground">{formattedDate}</Text>
+                </View>
+                <View className="flex-row items-center">
+                    <Clock size={18} color="white" className="mr-2" />
+                    <Text className="text-md text-primary-foreground">{formattedTime}</Text>
+                </View>
+            </View>
+            
+            {/* Stats Summary */}
+            <View className="flex-row justify-between px-4 py-5 bg-card mx-4 my-4 rounded-xl shadow-sm">
+                <View className="items-center">
+                    <Text className="text-lg font-bold">{exercises.length}</Text>
+                    <Text className="text-muted-foreground text-sm">Exercises</Text>
+                </View>
+                <View className="items-center">
+                    <Text className="text-lg font-bold">
+                        {exercises.reduce((acc, ex) => acc + ex.sets, 0)}
+                    </Text>
+                    <Text className="text-muted-foreground text-sm">Sets</Text>
+                </View>
+                <View className="items-center">
+                    <Text className="text-lg font-bold">
+                        {Math.round(exercises.reduce((acc, ex) => acc + (ex.completed ? 1 : 0), 0) / exercises.length * 100)}%
+                    </Text>
+                    <Text className="text-muted-foreground text-sm">Completed</Text>
+                </View>
+            </View>
+            
+            {/* Exercises List */}
+            <View className="px-4 mb-4">
+                <View className="flex-row justify-between items-center mb-2">
+                    <Text className="text-xl font-semibold">Exercises</Text>
+                    <Button variant="ghost" size="sm">
+                        <Text className="text-primary">Add Exercise</Text>
+                    </Button>
+                </View>
+                <View className="bg-card rounded-xl overflow-hidden shadow-sm">
+                    {exercises.map((exercise, index) => (
+                        <View key={exercise.id} className={`p-4 flex-row items-center justify-between ${index < exercises.length - 1 ? 'border-b border-border' : ''}`}>
+                            <View className="flex-row items-center flex-1">
+                                <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${exercise.completed ? 'bg-green-100' : 'bg-gray-100'}`}>
+                                    <Dumbbell size={16} color={exercise.completed ? "#22c55e" : "#9ca3af"} />
+                                </View>
+                                <View className="flex-1">
+                                    <Text className="font-medium">{exercise.name}</Text>
+                                    <Text className="text-muted-foreground text-sm">
+                                        {exercise.sets} sets • {exercise.reps} reps {exercise.weight > 0 ? `• ${exercise.weight} lbs` : ''}
+                                    </Text>
+                                </View>
+                            </View>
+                            <ChevronRight size={18} color="#9ca3af" />
+                        </View>
+                    ))}
+                </View>
+            </View>
+            
+            {/* Notes */}
+            <View className="px-4 mb-4">
+                <Text className="text-xl font-semibold mb-2">Notes</Text>
+                <View className="bg-card p-4 rounded-xl shadow-sm">
+                    <Text className="text-muted-foreground">
+                        {workout[0].notes || "No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time."}
+                    </Text>
+                </View>
+            </View>
+            
+            {/* Action Buttons */}
+            <View className="px-4 mb-8 flex-row justify-between">
+                <Button variant="outline" className="flex-1 mr-2">
+                    <Edit size={16} className="mr-2" />
+                    <Text>Edit Workout</Text>
+                </Button>
+                <Button variant="destructive" className="flex-1 ml-2">
+                    <Trash2 size={16} className="mr-2" />
+                    <Text className="text-destructive-foreground">Delete</Text>
+                </Button>
+            </View>
+        </ScrollView>
+    );
+}

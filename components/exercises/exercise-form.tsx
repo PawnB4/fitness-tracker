@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { View } from 'react-native';
+import { Keyboard, ScrollView, TouchableWithoutFeedback, View } from 'react-native';
 import { Button } from '~/components/ui/button';
 import {
   DialogContent,
@@ -15,78 +15,170 @@ import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { db } from '~/db/drizzle';
 import * as schema from '~/db/schema';
-import { useEffect } from 'react';
 import { Textarea } from '../ui/textarea';
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { EXERCISES_TYPES, MUSCLE_GROUPS } from '~/lib/constants';
+import { Option } from '@rn-primitives/select';
 
-const createExercise = async (newExercise: schema.NewExercise) => {
-  const result = await db.insert(schema.exercises).values(newExercise).returning()
-  return result[0]
-}
+export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
+  const insets = useSafeAreaInsets();
+  const contentInsets = {
+    top: insets.top,
+    bottom: insets.bottom,
+    left: 12,
+    right: 12,
+  };
 
-export const ExerciseForm = () => {
   const form = useForm({
     onSubmit: async ({ value }) => {
-      console.log("onSubmit invoked")
-      console.log(value)
+      const parseResult = await schema.insertExercisesSchema.safeParseAsync(value)
+      if (!parseResult.success) {
+        alert('Invalid exercise data')
+      } else {
+        const newExercise = {
+          name: parseResult.data.name,
+          type: parseResult.data.type.value,
+          primaryMuscleGroup: parseResult.data.primaryMuscleGroup?.value,
+        }
+        try {
+          await db.insert(schema.exercises).values(newExercise)
+          setOpen(false)
+        } catch (error) {
+          console.log(error)
+          alert("Error: Exercise already exists")
+        }
+      }
     },
     validators: {
       onChange: schema.insertExercisesSchema
-    },
+    }
   })
 
   return (
-    <View className='p-2'>
-      <DialogHeader>
-        <DialogTitle
-          style={{ fontFamily: "ContrailOne_400Regular" }}
-        >New exercise</DialogTitle>
-        <DialogDescription
-          style={{ fontFamily: "ContrailOne_400Regular" }}
-        >
-          Create a new exercise to add to your workout.
-        </DialogDescription>
-      </DialogHeader>
-      <View className='py-3 flex flex-col gap-2'>
-        <form.Field
-          name="name"
-        >
-          {field => (
-            <>
-              <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Name:</Label>
-              <Input
-                value={field.state.value as string}
-                onChangeText={field.handleChange}
-                placeholder='Pushups' />
-              {
-                field.state.meta.errors
-                  ? <Text className='text-red-500'>{field.state.meta.errors[0]?.message}</Text>
-                  : null
-              }
-            </>
-          )
-          }
-        </form.Field>
-        <form.Field
-          name="type"
-        >
-          {field => (
-            <>
-              <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Type:</Label>
-              <Input
-                value={field.state.value as string}
-                onChangeText={field.handleChange}
-                placeholder='Pushups' />
-              {
-                field.state.meta.errors
-                  ? <Text className='text-red-500'>{field.state.meta.errors[0]?.message}</Text>
-                  : null
-              }
-            </>
-          )
-          }
-        </form.Field>
-        <form.Field
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View className='p-2'>
+        <DialogHeader>
+          <DialogTitle
+            style={{ fontFamily: "ContrailOne_400Regular" }}
+          >New exercise</DialogTitle>
+          <DialogDescription
+            style={{ fontFamily: "ContrailOne_400Regular" }}
+          >
+            Create a new exercise to add to your workout.
+          </DialogDescription>
+        </DialogHeader>
+        <View className='py-3 flex flex-col'>
+          <form.Field
+            name="name"
+          >
+            {field => (
+              <>
+                <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Name:</Label>
+                <Input
+                  value={field.state.value as string}
+                  onChangeText={field.handleChange}
+                  placeholder='Pushups' />
+                {
+                  field.state.meta.errors
+                    ? <Text className='text-red-500'>{field.state.meta.errors[0]?.message}</Text>
+                    : null
+                }
+              </>
+            )
+            }
+          </form.Field>
+          <form.Field
+            defaultValue={{ value: EXERCISES_TYPES[0], label: EXERCISES_TYPES[0] }}
+            name="type"
+          >
+            {field => (
+              <>
+                <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Type:</Label>
+                <Select
+                  value={field.state.value as Option}
+                  onValueChange={field.handleChange}>
+                  <SelectTrigger className='w-[250px]'
+                    onPressIn={() => {
+                      Keyboard.dismiss();
+                    }}
+                  >
+                    <SelectValue
+                      className='text-foreground text-sm native:text-lg'
+                      placeholder='Select the type of exercise'
+                    />
+                  </SelectTrigger>
+                  <SelectContent insets={contentInsets} className='w-[250px]'>
+                    {EXERCISES_TYPES.map((type) => (
+                      <SelectItem key={type} label={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {
+                  field.state.meta.errors
+                    ? <Text className='text-red-500 '>{field.state.meta.errors[0]?.message}</Text>
+                    : null
+                }
+              </>
+            )
+            }
+          </form.Field>
+
+          <form.Field
+            name="primaryMuscleGroup"
+          >
+            {field => (
+              <>
+                <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Primary muscle group:</Label>
+
+                <Select
+                  value={field.state.value as Option}
+                  onValueChange={field.handleChange}
+                >
+                  <SelectTrigger className='w-[250px]'
+                    onPressIn={() => {
+                      Keyboard.dismiss();
+                    }}
+                  >
+                    <SelectValue
+                      className='text-foreground text-sm native:text-lg'
+                      placeholder='Select muscle group'
+                    />
+                  </SelectTrigger>
+
+                  <SelectContent insets={contentInsets} className='w-[250px]'>
+                    <ScrollView className='max-h-56'>
+                      {MUSCLE_GROUPS.map((muscleGroup) => (
+                        <SelectItem key={muscleGroup} label={muscleGroup} value={muscleGroup}>
+                          {muscleGroup}
+                        </SelectItem>
+                      ))}
+                    </ScrollView>
+                  </SelectContent>
+
+                </Select>
+                {
+                  field.state.meta.errors
+                    ? <Text className='text-red-500'>{field.state.meta.errors[0]?.message}</Text>
+                    : null
+                }
+              </>
+            )
+            }
+          </form.Field>
+
+          {/* <form.Field
           name="description"
         >
           {field => (
@@ -101,20 +193,17 @@ export const ExerciseForm = () => {
             </>
           )
           }
-        </form.Field>
+        </form.Field> */}
 
-
+        </View>
+        <Button
+          onPress={async () => {
+            form.handleSubmit()
+          }}
+        >
+          <Text>Save</Text>
+        </Button>
       </View>
-      <Button
-        onPress={async () => {
-          console.log("SUBMITTING FORM")
-          console.log(form.state.values)
-          const result = await createExercise(form.state.values)
-          console.log(result)
-        }}
-      >
-        <Text>Save</Text>
-      </Button>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
