@@ -1,5 +1,5 @@
 {
-  "name": "fitness-tracker-nw",
+  "name": "fitness-tracker",
   "main": "index.js",
   "version": "1.0.0",
   "scripts": {
@@ -28,7 +28,7 @@
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
     "@shopify/flash-list": "1.7.3",
-    "@tanstack/react-form": "0.48.1",
+    "@tanstack/react-form": "1.0.0",
     "babel-plugin-inline-import": "^3.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
