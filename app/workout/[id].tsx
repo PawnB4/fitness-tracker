@@ -2,12 +2,18 @@ import { useLocalSearchParams } from 'expo-router';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import * as schema from '~/db/schema';
 import { eq } from 'drizzle-orm';
-import { ScrollView, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { db } from '~/db/drizzle';
 import { Text } from '~/components/ui/text';
 import { formatDate, formatTime } from '~/utils/date';
 import { Button } from '~/components/ui/button';
-import { Clock, Calendar, Edit, Trash2, Award, Dumbbell, ChevronRight } from 'lucide-react-native';
+import { Clock } from '~/lib/icons/Clock';
+import { Calendar } from '~/lib/icons/Calendar';
+import { Pencil } from '~/lib/icons/Pencil';
+import { Trash2 } from '~/lib/icons/Trash2';
+import { Dumbbell } from '~/lib/icons/Dumbbell';
+import { ChevronRight } from '~/lib/icons/ChevronRight';
+
 
 export default function Page() {
     const { id } = useLocalSearchParams();
@@ -19,12 +25,16 @@ export default function Page() {
     }
 
     if (!workout || workout.length === 0) {
-        return <Text>Loading workout data...</Text>;
+        return (
+            <View className='flex-1 justify-center items-center gap-5 p-6 bg-secondary/30'>
+                <ActivityIndicator size="large" color="##0284c7" />
+            </View>
+        )
     }
-    
+
     const formattedDate = formatDate(workout[0].date)
     const formattedTime = formatTime(workout[0].date)
-    
+
     // Sample exercise data for UI purposes
     const exercises = [
         { id: 1, name: "Bench Press", sets: 3, reps: 10, weight: 135, completed: true },
@@ -38,37 +48,40 @@ export default function Page() {
         <ScrollView className="flex-1 bg-background">
             {/* Header */}
             <View className="bg-primary p-6 rounded-b-3xl">
-                <Text className="text-4xl text-primary-foreground mb-2">Workout Details</Text>
-                <View className="flex-row items-center mb-1">
-                    <Calendar size={18} color="white" className="mr-2" />
-                    <Text className="text-md text-primary-foreground">{formattedDate}</Text>
-                </View>
-                <View className="flex-row items-center">
-                    <Clock size={18} color="white" className="mr-2" />
-                    <Text className="text-md text-primary-foreground">{formattedTime}</Text>
+                <Text className="text-4xl text-primary-foreground mb-4 text-center">Workout Details</Text>
+                <View className="flex-row justify-around">
+                    <View className="flex-row items-center">
+                        <Calendar size={18} className="mr-2 text-primary-foreground" />
+                        <Text className="text-md text-primary-foreground">{formattedDate}</Text>
+                    </View>
+                    <View className="flex-row items-center">
+                        <Clock size={18} className="mr-2 text-primary-foreground" />
+                        <Text className="text-md text-primary-foreground">{formattedTime}</Text>
+                    </View>
                 </View>
             </View>
-            
+
+
             {/* Stats Summary */}
             <View className="flex-row justify-between px-4 py-5 bg-card mx-4 my-4 rounded-xl shadow-sm">
-                <View className="items-center">
+                <View className="flex justify-center items-center">
                     <Text className="text-lg font-bold">{exercises.length}</Text>
                     <Text className="text-muted-foreground text-sm">Exercises</Text>
                 </View>
-                <View className="items-center">
+                <View className="flex justify-center items-center">
                     <Text className="text-lg font-bold">
                         {exercises.reduce((acc, ex) => acc + ex.sets, 0)}
                     </Text>
                     <Text className="text-muted-foreground text-sm">Sets</Text>
                 </View>
-                <View className="items-center">
+                <View className="flex justify-center items-center">
                     <Text className="text-lg font-bold">
                         {Math.round(exercises.reduce((acc, ex) => acc + (ex.completed ? 1 : 0), 0) / exercises.length * 100)}%
                     </Text>
                     <Text className="text-muted-foreground text-sm">Completed</Text>
                 </View>
             </View>
-            
+
             {/* Exercises List */}
             <View className="px-4 mb-4">
                 <View className="flex-row justify-between items-center mb-2">
@@ -96,7 +109,7 @@ export default function Page() {
                     ))}
                 </View>
             </View>
-            
+
             {/* Notes */}
             <View className="px-4 mb-4">
                 <Text className="text-xl font-semibold mb-2">Notes</Text>
@@ -106,11 +119,11 @@ export default function Page() {
                     </Text>
                 </View>
             </View>
-            
+
             {/* Action Buttons */}
             <View className="px-4 mb-8 flex-row justify-between">
                 <Button variant="outline" className="flex-1 mr-2">
-                    <Edit size={16} className="mr-2" />
+                    <Pencil size={16} className="mr-2" />
                     <Text>Edit Workout</Text>
                 </Button>
                 <Button variant="destructive" className="flex-1 ml-2">

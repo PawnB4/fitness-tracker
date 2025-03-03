@@ -9,6 +9,8 @@ import m0004 from './0004_lyrical_warbird.sql';
 import m0005 from './0005_parched_stephen_strange.sql';
 import m0006 from './0006_square_paibok.sql';
 import m0007 from './0007_bouncy_husk.sql';
+import m0008 from './0008_green_cerebro.sql';
+import m0009 from './0009_marvelous_joseph.sql';
 
   export default {
     journal,
@@ -20,7 +22,9 @@ m0003,
 m0004,
 m0005,
 m0006,
-m0007
+m0007,
+m0008,
+m0009
     }
   }
   
