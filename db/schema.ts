@@ -6,7 +6,7 @@ import { z } from 'zod';
 // Workouts table
 export const workouts = sqliteTable('workouts', {
     id: integer().primaryKey({ autoIncrement: true }),
-    date: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`), 
+    date: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
     notes: text(),
     createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -108,6 +108,10 @@ export const insertWorkoutPlanExercisesSchema = createInsertSchema(workoutPlanEx
     defaultSets: (schema) => schema.min(1, { message: "Sets must be at least 1" }),
     defaultReps: (schema) => schema.min(1, { message: "Reps must be at least 1" }),
     defaultWeight: (schema) => schema.nonnegative({ message: "Weight cannot be negative" }),
+    exerciseId: () => z.object({
+        value: z.string(),
+        label: z.string(),
+    }),
 }).omit({
     id: true,
     createdAt: true,

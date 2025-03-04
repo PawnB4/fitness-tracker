@@ -40,18 +40,18 @@ export const ExerciseCard = ({ id, name, type, primaryMuscleGroup }: Exercise) =
             <CardContent className='py-2 px-3'>
                 <View className='flex flex-row justify-start items-center py-1'>
                     <CardTitle className='leading-normal'
-                        style={{ fontFamily: "ContrailOne_400Regular" }}>
+                    >
                         {name}
                     </CardTitle>
                     <Text className='ml-auto text-foreground/70'>
                         {type}
                     </Text>
                 </View>
-                <View className='h-1 bg-sky-500 rounded'></View>
+                <View className='h-1 bg-sky-500/70 rounded'></View>
                 <View className='flex gap-1 py-2 '>
                     <View className='flex flex-row items-center gap-1 overflow-hidden'>
-                        <Text>Primary muscle group: </Text>
-                        <Text className='text-foreground/70'>{primaryMuscleGroup}</Text>
+                        <Text className='font-bold'>Primary muscle group: </Text>
+                        <Text className='text-foreground/70 mt-1'>{primaryMuscleGroup}</Text>
                         {!EXERCISES.includes(name) && (
                             <AlertDialog className='ml-auto'>
                                 <AlertDialogTrigger asChild >

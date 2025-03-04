@@ -18,7 +18,6 @@ import { router } from 'expo-router';
 
 export const WorkoutPlanForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
 
-
     const form = useForm({
         onSubmit: async ({ value }) => {
             const parseResult = await schema.insertWorkoutPlansSchema.safeParseAsync(value)
@@ -49,12 +48,12 @@ export const WorkoutPlanForm = ({ setOpen }: { setOpen: (open: boolean) => void 
             <View className='p-2'>
                 <DialogHeader>
                     <DialogTitle
-                        style={{ fontFamily: "ContrailOne_400Regular" }}
+                        className='text-xl font-bold'
                     >New workout plan</DialogTitle>
                     <DialogDescription
                         style={{ fontFamily: "ContrailOne_400Regular" }}
                     >
-                        Create a new workout plan to add to your catalog.
+                        Create a new workout plan to add to your catalog. Workout plans are a collection of exercises from which you can create workouts.
                     </DialogDescription>
                 </DialogHeader>
                 <View className='py-3 flex flex-col'>

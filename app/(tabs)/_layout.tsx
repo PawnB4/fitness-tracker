@@ -14,7 +14,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          headerTitleStyle: { fontFamily: "ContrailOne_400Regular", fontSize: 24, lineHeight: 32 },
+          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
           headerRight: () => <ThemeToggle />,
           tabBarLabel: ({ children, focused, }) => <Text
             style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -26,7 +26,7 @@ export default function TabLayout() {
         name="workout-plans"
         options={{
           title: 'Workout Plans',
-          headerTitleStyle: { fontFamily: "ContrailOne_400Regular", fontSize: 24, lineHeight: 32 },
+          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
           headerRight: () => <ThemeToggle />,
           tabBarLabel: ({ children, focused, }) => <Text
             style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -38,7 +38,7 @@ export default function TabLayout() {
         name="progress"
         options={{
           title: 'Progress',
-          headerTitleStyle: { fontFamily: "ContrailOne_400Regular", fontSize: 24, lineHeight: 32 },
+          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
           headerRight: () => <ThemeToggle />,
           tabBarLabel: ({ children, focused, }) => <Text
             style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -50,7 +50,7 @@ export default function TabLayout() {
         name="exercises"
         options={{
           title: 'Exercises',
-          headerTitleStyle: { fontFamily: "ContrailOne_400Regular", fontSize: 24, lineHeight: 32 },
+          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
           headerRight: () => <ThemeToggle />,
           tabBarLabel: ({ children, focused, }) => <Text
             style={{ fontFamily: "ContrailOne_400Regular" }}

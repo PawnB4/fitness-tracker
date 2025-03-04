@@ -66,12 +66,11 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
       <View className='p-2'>
         <DialogHeader>
           <DialogTitle
-            style={{ fontFamily: "ContrailOne_400Regular" }}
           >New exercise</DialogTitle>
           <DialogDescription
             style={{ fontFamily: "ContrailOne_400Regular" }}
           >
-            Create a new exercise to add to your workout.
+            Create a new exercise to add to your catalog.
           </DialogDescription>
         </DialogHeader>
         <View className='py-3 flex flex-col'>

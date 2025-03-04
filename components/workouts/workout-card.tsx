@@ -47,7 +47,7 @@ export const WorkoutCard = ({ id, name, type, primaryMuscleGroup }: Exercise) =>
                         {type}
                     </Text>
                 </View>
-                <View className='h-1 bg-sky-500 rounded'></View>
+                <View className='h-1 bg-sky-500/70 rounded'></View>
                 <View className='flex gap-1 py-2 '>
                     <View className='flex flex-row items-center gap-1 overflow-hidden'>
                         <Text>Primary muscle group: </Text>

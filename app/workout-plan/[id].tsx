@@ -7,21 +7,32 @@ import { db } from '~/db/drizzle';
 import { Text } from '~/components/ui/text';
 import { formatDate } from '~/utils/date';
 import { Button } from '~/components/ui/button';
-import { Clock } from '~/lib/icons/Clock';
 import { Calendar } from '~/lib/icons/Calendar';
 import { Pencil } from '~/lib/icons/Pencil';
 import { Trash2 } from '~/lib/icons/Trash2';
+import { Plus } from '~/lib/icons/Plus';
 import { Triangle } from '~/lib/icons/Triangle';
 import { Dumbbell } from '~/lib/icons/Dumbbell';
 import { ChevronRight } from '~/lib/icons/ChevronRight';
-import { Plus } from 'lucide-react-native';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
-import { Exercise, WorkoutPlanExercise } from '~/db/schema';
-
-
+import { useState } from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+} from '~/components/ui/dialog';
+import { WorkoutPlanExerciseForm } from '~/components/workout-plan/workout-plan-exercise-form';
+import { EXERCISES_TYPES } from '~/lib/constants';
 export default function Page() {
+    const [open, setOpen] = useState(false);
+
+    // TODO:
+    // - Add exercise to workout plan
+    // - Remove exercise from workout plan
+    // - Edit exercise in workout plan
+    // - Reorder exercises in workout plan
 
     const { id } = useLocalSearchParams();
 
@@ -43,8 +54,6 @@ export default function Page() {
     );
 
 
-    console.log(planExercises)
-
     if (workoutError || exercisesError) {
         return <Text>Error: {workoutError?.message || exercisesError?.message}</Text>;
     }
@@ -59,12 +68,15 @@ export default function Page() {
 
     const plan = workoutPlan[0];
 
+
+
     return (
-        <ScrollView className="flex-1 bg-secondary/30">
+        <ScrollView className="flex-1 bg-secondary/30"
+        >
             {/* Header Section */}
             <View className="bg-primary p-6 rounded-b-3xl shadow-md flex flex-col gap-2">
                 <View className="flex-row items-center">
-                    <Text className="text-4xl  text-primary-foreground"
+                    <Text className="text-4xl font-bold text-primary-foreground"
                     >{plan.name}</Text>
                     <View className="flex-row ml-auto">
                         <TouchableOpacity className="p-2.5 bg-primary-foreground/20 rounded-full">
@@ -72,28 +84,26 @@ export default function Page() {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {/* {plan.description && (
+                {plan.description && (
                     <Text className="text-lg text-primary-foreground/80">
                         {plan.description}
                     </Text>
-                )} */}
-                <Text className="text-lg text-primary-foreground/80">A comprehensive full-body workout focusing on compound movements and progressive overload for strength gains.
-                </Text>
-                <View className='h-1 bg-sky-500 rounded'></View>
-                <View className="flex-row items-center gap-2 mt-2">
-                    <Badge variant="outline" className="bg-primary-foreground/20 border-0">
-                        <Calendar className="size-3 mr-1 text-primary-foreground" />
-                        <Text className="text-xs text-primary-foreground">
-                            Created {formatDate(plan.createdAt)}
-                        </Text>
-                    </Badge>
+                )}
+                <View className='h-1 bg-sky-500/70 rounded'></View>
 
-                    <Badge variant="outline" className="bg-primary-foreground/20 border-0">
+                <View className="flex flex-row justify-around items-center gap-2 pt-2">
+                    <View className="flex-row items-center gap-2  border-0">
                         <Dumbbell className="size-3 mr-1 text-primary-foreground" />
-                        <Text className="text-xs text-primary-foreground">
+                        <Text className="text-sm text-primary-foreground">
                             {planExercises?.length || 0} Exercises
                         </Text>
-                    </Badge>
+                    </View>
+                    <View className="flex-row items-center gap-2  border-0">
+                        <Calendar className="size-3 mr-1 text-primary-foreground" />
+                        <Text className="text-sm text-primary-foreground">
+                            Created {formatDate(plan.createdAt)}
+                        </Text>
+                    </View>
                 </View>
             </View>
 
@@ -102,11 +112,7 @@ export default function Page() {
                 {/* Exercises Section */}
                 <View className="mb-6">
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-xl font-bold">Exercises</Text>
-                        <Button variant="outline" size="sm" className="flex-row items-center">
-                            <Plus className="size-4 mr-1" />
-                            <Text>Add Exercise</Text>
-                        </Button>
+                        <Text className="text-2xl font-bold">Exercises</Text>
                     </View>
 
                     {/* Exercise Cards */}
@@ -133,8 +139,28 @@ export default function Page() {
                                     workoutPlanExerciseDefaultReps={item.workoutPlanExerciseDefaultReps}
                                     workoutPlanExerciseDefaultWeight={item.workoutPlanExerciseDefaultWeight}
                                     workoutPlanExerciseSortOrder={item.workoutPlanExerciseSortOrder}
+                                    totalExercises={planExercises.length}
                                 />
                             ))}
+
+                            <Dialog className=''
+                                open={open}
+                                onOpenChange={setOpen}
+                            >
+                                <DialogTrigger asChild>
+                                    <Button
+                                        size="lg"
+                                        className='flex-row items-center justify-center gap-2 bg-sky-500/70'>
+                                        <Plus className='text-primary' />
+                                        <Text className='font-bold text-primary'>Add exercise</Text>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
+                                    <WorkoutPlanExerciseForm setOpen={setOpen} />
+                                </DialogContent>
+                            </Dialog>
+
+
                         </View>
                     )}
                 </View>
@@ -153,9 +179,10 @@ type WorkoutPlanExerciseListItemProps = {
     workoutPlanExerciseDefaultReps: number;
     workoutPlanExerciseDefaultWeight: number;
     workoutPlanExerciseSortOrder: number;
+    totalExercises: number;
 };
 
-const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exerciseType, exercisePrimaryMuscleGroup, workoutPlanExerciseDefaultSets, workoutPlanExerciseDefaultReps, workoutPlanExerciseDefaultWeight, workoutPlanExerciseSortOrder }: WorkoutPlanExerciseListItemProps) => {
+const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exerciseType, exercisePrimaryMuscleGroup, workoutPlanExerciseDefaultSets, workoutPlanExerciseDefaultReps, workoutPlanExerciseDefaultWeight, workoutPlanExerciseSortOrder, totalExercises }: WorkoutPlanExerciseListItemProps) => {
     return (
         <View className='flex flex-row gap-2'>
             <Pressable className='flex-1'>
@@ -165,10 +192,11 @@ const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exer
                             <View
                                 className="w-2"
                                 style={{
-                                    backgroundColor: exerciseType === 'upper body' ? '#0284c7' :
-                                        exerciseType === 'lower body' ? '#16a34a' :
-                                            exerciseType === 'core' ? '#eab308' :
-                                                exerciseType === 'cardio' ? '#ef4444' : '#8b5cf6'
+                                    backgroundColor: exerciseType === EXERCISES_TYPES[0] ? '#16a34a' :
+                                        exerciseType === EXERCISES_TYPES[1] ? '#8b5cf6' :
+                                            exerciseType === EXERCISES_TYPES[2] ? '#eab308' :
+                                                exerciseType === EXERCISES_TYPES[3] ? '#ef4444' :
+                                                    '#0284c7'
                                 }}
                             />
 
@@ -208,9 +236,23 @@ const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exer
                 </Card>
             </Pressable>
             <View className='flex justify-center items-center gap-2 px-2'>
-                <Triangle className='text-muted-foreground fill-muted-foreground' size={30} />
-                <Text>#{workoutPlanExerciseSortOrder}</Text>
-                <Triangle className='text-muted-foreground fill-muted-foreground rotate-180' size={30} />
+                {workoutPlanExerciseSortOrder !== 1 && (
+                    <TouchableOpacity onPress={() => {
+                        console.log('up')
+                    }}>
+                        <Triangle className='text-muted-foreground fill-muted-foreground' size={30} />
+                    </TouchableOpacity>
+                )}
+                <Text
+                >#{workoutPlanExerciseSortOrder}</Text>
+
+                {workoutPlanExerciseSortOrder !== totalExercises && (
+                    <TouchableOpacity onPress={() => {
+                        console.log('down')
+                    }}>
+                        <Triangle className='text-muted-foreground fill-muted-foreground rotate-180' size={30} />
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );

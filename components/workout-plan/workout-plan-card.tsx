@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native'
+import { Pressable, TouchableOpacity, View } from 'react-native'
 import {
     Card,
     CardContent,
@@ -11,6 +11,7 @@ import { db } from '~/db/drizzle';
 import { eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Link, router } from 'expo-router';
+import { cn } from '~/lib/utils';
 
 export const WorkoutPlanCard = ({ id, name, description }: WorkoutPlan) => {
 
@@ -21,12 +22,11 @@ export const WorkoutPlanCard = ({ id, name, description }: WorkoutPlan) => {
     }
 
     return (
-        <Pressable onPress={() => router.push(`/workout-plan/${id}`)}>
+        <TouchableOpacity onPress={() => router.push(`/workout-plan/${id}`)} activeOpacity={0.5}>
             <Card className='flex-1 rounded-2xl shadow'>
                 <CardContent className='py-4 px-3'>
                     <View className='flex flex-row justify-around items-center'>
-                        <CardTitle className='leading-normal'
-                            style={{ fontFamily: "ContrailOne_400Regular" }}>
+                        <CardTitle className='leading-normal'>
                             {name}
                         </CardTitle>
                         <Text className=' text-foreground/70'>
@@ -35,7 +35,7 @@ export const WorkoutPlanCard = ({ id, name, description }: WorkoutPlan) => {
                     </View>
                 </CardContent>
             </Card>
-        </Pressable>
+        </TouchableOpacity>
     )
 }
 
