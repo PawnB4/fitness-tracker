@@ -28,14 +28,16 @@ import { ExerciseForm } from '~/components/exercises/exercise-form';
 import { useLiveQuery, drizzle } from 'drizzle-orm/expo-sqlite';
 import * as schema from '~/db/schema';
 import { router } from 'expo-router';
-
-
+import { WorkoutPlanCard } from '~/components/workout-plan/workout-plan-card';
+import { WorkoutPlanForm } from '~/components/workout-plan/workout-plan-form';
+import { useState } from 'react';
 
 export default function Page() {
 
+    const [open, setOpen] = useState(false);
     const { data: workoutPlans, error: workoutPlansError } = useLiveQuery(db.select().from(schema.workoutPlans));
 
-    if ( workoutPlansError) {
+    if (workoutPlansError) {
         return (
             <View>
                 <Text>Something went wrong</Text>
@@ -43,35 +45,43 @@ export default function Page() {
         );
     }
 
+    if (!workoutPlans) {
+        return (
+            <View className='flex-1 justify-center items-center'>
+                <ActivityIndicator size="large" color="##0284c7" />
+            </View>
+        );
+    }
+
+    if (workoutPlans.length === 0) {
+        return (
+            <View className='flex-1 justify-center items-center'>
+                <Text>No workout plans found</Text>
+            </View>
+        );
+    }
+
     return (
-        <View className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'>
-            <Button className='shadow shadow-foreground/5'
-                onPress={async () => {
-                    try {
-                        const res = await db.insert(schema.workouts).values({}).returning();
-                        router.push(`/workout/${res[0].id}`)
-                    } catch (error) {
-                        alert("Error creating workout")
-                    }
-                }}
-            >
-                <Text>New workout</Text>
-            </Button>
-            {/* <FlashList
-        data={workouts}
-        renderItem={({ item, index }) => <ExerciseCard {...item} key={index} />}
-        estimatedItemSize={50}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View className='h-4' />}
-      /> */}
-            {workoutPlans.map((plan) => (
-                <Card key={plan.id}>
-                    <CardHeader>
-                        <CardTitle>{plan.name}</CardTitle>
-                        <CardDescription>{} exercises</CardDescription>
-                    </CardHeader>
-                </Card>
-            ))}
-        </View>
+        <Dialog className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'
+            open={open}
+            onOpenChange={setOpen}
+        >
+            <DialogTrigger asChild>
+                <Button className='shadow shadow-foreground/5'>
+                    <Text>Add a workout plan</Text>
+                </Button>
+            </DialogTrigger>
+            <FlashList
+                data={workoutPlans}
+                renderItem={({ item, index }) => <WorkoutPlanCard {...item} key={index} />}
+                estimatedItemSize={50}
+                showsVerticalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View className='h-4' />}
+            />
+            <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
+                <WorkoutPlanForm setOpen={setOpen} />
+            </DialogContent>
+        </Dialog>
+
     );
 }

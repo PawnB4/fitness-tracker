@@ -54,7 +54,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen
           name='(tabs)'
-          options={{ headerShown: false }} 
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name='workout/[id]'
@@ -62,6 +62,13 @@ export default function RootLayout() {
             headerTitle: "",
             headerRight: () => <ThemeToggle />,
             // headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name='workout-plan/[id]'
+          options={{
+            headerTitle: "",
+            headerRight: () => <ThemeToggle />,
           }}
         />
       </Stack>

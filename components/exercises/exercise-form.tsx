@@ -10,19 +10,16 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Text } from '~/components/ui/text';
-import { formOptions, useForm } from '@tanstack/react-form'
+import {  useForm } from '@tanstack/react-form'
 import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { db } from '~/db/drizzle';
 import * as schema from '~/db/schema';
-import { Textarea } from '../ui/textarea';
 
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
@@ -87,7 +84,7 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
                 <Input
                   value={field.state.value as string}
                   onChangeText={field.handleChange}
-                  placeholder='Pushups' />
+                  placeholder='Pushups, Split Squats, etc.' />
                 {
                   field.state.meta.errors
                     ? <Text className='text-red-500'>{field.state.meta.errors[0]?.message}</Text>
@@ -107,7 +104,7 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
                 <Select
                   value={field.state.value as Option}
                   onValueChange={field.handleChange}>
-                  <SelectTrigger className='w-[250px]'
+                  <SelectTrigger className='w-[275px]'
                     onPressIn={() => {
                       Keyboard.dismiss();
                     }}
@@ -117,7 +114,7 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
                       placeholder='Select the type of exercise'
                     />
                   </SelectTrigger>
-                  <SelectContent insets={contentInsets} className='w-[250px]'>
+                  <SelectContent insets={contentInsets} className='w-[275px]'>
                     {EXERCISES_TYPES.map((type) => (
                       <SelectItem key={type} label={type} value={type}>
                         {type}
@@ -146,18 +143,18 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
                   value={field.state.value as Option}
                   onValueChange={field.handleChange}
                 >
-                  <SelectTrigger className='w-[250px]'
+                  <SelectTrigger className='w-[275px]'
                     onPressIn={() => {
                       Keyboard.dismiss();
                     }}
                   >
                     <SelectValue
                       className='text-foreground text-sm native:text-lg'
-                      placeholder='Select muscle group'
+                      placeholder='(Optional) Select muscle group'
                     />
                   </SelectTrigger>
 
-                  <SelectContent insets={contentInsets} className='w-[250px]'>
+                  <SelectContent insets={contentInsets} className='w-[275px]'>
                     <ScrollView className='max-h-56'>
                       {MUSCLE_GROUPS.map((muscleGroup) => (
                         <SelectItem key={muscleGroup} label={muscleGroup} value={muscleGroup}>
@@ -177,24 +174,6 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
             )
             }
           </form.Field>
-
-          {/* <form.Field
-          name="description"
-        >
-          {field => (
-            <>
-              <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Description:</Label>
-              <Textarea aria-labelledby='textareaLabel' value={field.state.value as string} onChangeText={field.handleChange} placeholder='Pushups are a great exercise for the chest and triceps' />
-              {
-                field.state.meta.errors
-                  ? <Text className='text-red-500'>{field.state.meta.errors[0]?.message}</Text>
-                  : null
-              }
-            </>
-          )
-          }
-        </form.Field> */}
-
         </View>
         <Button
           onPress={async () => {

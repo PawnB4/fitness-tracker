@@ -15,6 +15,7 @@
   "dependencies": {
     "@expo-google-fonts/contrail-one": "^0.2.3",
     "@expo-google-fonts/preahvihear": "^0.2.3",
+    "@react-native-community/datetimepicker": "8.2.0",
     "@react-navigation/native": "^7.0.0",
     "@rn-primitives/alert-dialog": "^1.1.0",
     "@rn-primitives/avatar": "~1.1.0",
@@ -24,6 +25,7 @@
     "@rn-primitives/progress": "~1.1.0",
     "@rn-primitives/radio-group": "^1.1.0",
     "@rn-primitives/select": "^1.1.0",
+    "@rn-primitives/separator": "^1.1.0",
     "@rn-primitives/slot": "~1.1.0",
     "@rn-primitives/tooltip": "~1.1.0",
     "@rn-primitives/types": "~1.1.0",
@@ -59,8 +61,7 @@
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2",
-    "zustand": "^4.4.7",
-    "@react-native-community/datetimepicker": "8.2.0"
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

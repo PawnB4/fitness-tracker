@@ -1,0 +1,217 @@
+import { useLocalSearchParams } from 'expo-router';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import * as schema from '~/db/schema';
+import { eq } from 'drizzle-orm';
+import { ActivityIndicator, ScrollView, View, TouchableOpacity, Image, Pressable } from 'react-native';
+import { db } from '~/db/drizzle';
+import { Text } from '~/components/ui/text';
+import { formatDate } from '~/utils/date';
+import { Button } from '~/components/ui/button';
+import { Clock } from '~/lib/icons/Clock';
+import { Calendar } from '~/lib/icons/Calendar';
+import { Pencil } from '~/lib/icons/Pencil';
+import { Trash2 } from '~/lib/icons/Trash2';
+import { Triangle } from '~/lib/icons/Triangle';
+import { Dumbbell } from '~/lib/icons/Dumbbell';
+import { ChevronRight } from '~/lib/icons/ChevronRight';
+import { Plus } from 'lucide-react-native';
+import { Card, CardContent } from '~/components/ui/card';
+import { Badge } from '~/components/ui/badge';
+import { Separator } from '~/components/ui/separator';
+import { Exercise, WorkoutPlanExercise } from '~/db/schema';
+
+
+export default function Page() {
+
+    const { id } = useLocalSearchParams();
+
+    const { data: workoutPlan, error: workoutError } = useLiveQuery(
+        db.select().from(schema.workoutPlans).where(eq(schema.workoutPlans.id, Number(id)))
+    );
+
+    // Fetch exercises for this workout plan
+    const { data: planExercises, error: exercisesError } = useLiveQuery(db.select({
+        workoutPlanExerciseId: schema.workoutPlanExercises.id,
+        exerciseName: schema.exercises.name,
+        exerciseType: schema.exercises.type,
+        exercisePrimaryMuscleGroup: schema.exercises.primaryMuscleGroup,
+        workoutPlanExerciseDefaultSets: schema.workoutPlanExercises.defaultSets,
+        workoutPlanExerciseDefaultReps: schema.workoutPlanExercises.defaultReps,
+        workoutPlanExerciseDefaultWeight: schema.workoutPlanExercises.defaultWeight,
+        workoutPlanExerciseSortOrder: schema.workoutPlanExercises.sortOrder,
+    }).from(schema.workoutPlans).innerJoin(schema.workoutPlanExercises, eq(schema.workoutPlans.id, schema.workoutPlanExercises.planId)).innerJoin(schema.exercises, eq(schema.workoutPlanExercises.exerciseId, schema.exercises.id)).where(eq(schema.workoutPlans.id, Number(id))).orderBy(schema.workoutPlanExercises.sortOrder)
+    );
+
+
+    console.log(planExercises)
+
+    if (workoutError || exercisesError) {
+        return <Text>Error: {workoutError?.message || exercisesError?.message}</Text>;
+    }
+
+    if (!workoutPlan || workoutPlan.length === 0) {
+        return (
+            <View className='flex-1 justify-center items-center gap-5 p-6 bg-secondary/30'>
+                <ActivityIndicator size="large" color="#0284c7" />
+            </View>
+        )
+    }
+
+    const plan = workoutPlan[0];
+
+    return (
+        <ScrollView className="flex-1 bg-secondary/30">
+            {/* Header Section */}
+            <View className="bg-primary p-6 rounded-b-3xl shadow-md flex flex-col gap-2">
+                <View className="flex-row items-center">
+                    <Text className="text-4xl  text-primary-foreground"
+                    >{plan.name}</Text>
+                    <View className="flex-row ml-auto">
+                        <TouchableOpacity className="p-2.5 bg-primary-foreground/20 rounded-full">
+                            <Pencil className="size-5 text-primary-foreground" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                {/* {plan.description && (
+                    <Text className="text-lg text-primary-foreground/80">
+                        {plan.description}
+                    </Text>
+                )} */}
+                <Text className="text-lg text-primary-foreground/80">A comprehensive full-body workout focusing on compound movements and progressive overload for strength gains.
+                </Text>
+                <View className='h-1 bg-sky-500 rounded'></View>
+                <View className="flex-row items-center gap-2 mt-2">
+                    <Badge variant="outline" className="bg-primary-foreground/20 border-0">
+                        <Calendar className="size-3 mr-1 text-primary-foreground" />
+                        <Text className="text-xs text-primary-foreground">
+                            Created {formatDate(plan.createdAt)}
+                        </Text>
+                    </Badge>
+
+                    <Badge variant="outline" className="bg-primary-foreground/20 border-0">
+                        <Dumbbell className="size-3 mr-1 text-primary-foreground" />
+                        <Text className="text-xs text-primary-foreground">
+                            {planExercises?.length || 0} Exercises
+                        </Text>
+                    </Badge>
+                </View>
+            </View>
+
+            {/* Main Content */}
+            <View className="px-4 pt-6">
+                {/* Exercises Section */}
+                <View className="mb-6">
+                    <View className="flex-row justify-between items-center mb-4">
+                        <Text className="text-xl font-bold">Exercises</Text>
+                        <Button variant="outline" size="sm" className="flex-row items-center">
+                            <Plus className="size-4 mr-1" />
+                            <Text>Add Exercise</Text>
+                        </Button>
+                    </View>
+
+                    {/* Exercise Cards */}
+                    {!planExercises || planExercises.length === 0 ? (
+                        <View className="bg-card p-6 rounded-lg items-center">
+                            <Dumbbell className="size-10 text-muted-foreground mb-4" />
+                            <Text className="text-center text-muted-foreground">
+                                No exercises added to this plan yet.
+                            </Text>
+                            <Text className="text-center text-muted-foreground">
+                                Tap "Add Exercise" to get started!
+                            </Text>
+                        </View>
+                    ) : (
+                        <View className="flex-1 flex flex-col gap-3">
+                            {planExercises.map((item, index) => (
+                                <WorkoutPlanExerciseListItem
+                                    key={index}
+                                    workoutPlanExerciseId={item.workoutPlanExerciseId}
+                                    exerciseName={item.exerciseName}
+                                    exerciseType={item.exerciseType}
+                                    exercisePrimaryMuscleGroup={item.exercisePrimaryMuscleGroup}
+                                    workoutPlanExerciseDefaultSets={item.workoutPlanExerciseDefaultSets}
+                                    workoutPlanExerciseDefaultReps={item.workoutPlanExerciseDefaultReps}
+                                    workoutPlanExerciseDefaultWeight={item.workoutPlanExerciseDefaultWeight}
+                                    workoutPlanExerciseSortOrder={item.workoutPlanExerciseSortOrder}
+                                />
+                            ))}
+                        </View>
+                    )}
+                </View>
+            </View>
+        </ScrollView>
+    );
+}
+
+// Exercise list item component for plan exercises
+type WorkoutPlanExerciseListItemProps = {
+    workoutPlanExerciseId: number;
+    exerciseName: string;
+    exerciseType: string;
+    exercisePrimaryMuscleGroup: string | null;
+    workoutPlanExerciseDefaultSets: number;
+    workoutPlanExerciseDefaultReps: number;
+    workoutPlanExerciseDefaultWeight: number;
+    workoutPlanExerciseSortOrder: number;
+};
+
+const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exerciseType, exercisePrimaryMuscleGroup, workoutPlanExerciseDefaultSets, workoutPlanExerciseDefaultReps, workoutPlanExerciseDefaultWeight, workoutPlanExerciseSortOrder }: WorkoutPlanExerciseListItemProps) => {
+    return (
+        <View className='flex flex-row gap-2'>
+            <Pressable className='flex-1'>
+                <Card className="overflow-hidden">
+                    <CardContent className="p-0">
+                        <View className="flex-row">
+                            <View
+                                className="w-2"
+                                style={{
+                                    backgroundColor: exerciseType === 'upper body' ? '#0284c7' :
+                                        exerciseType === 'lower body' ? '#16a34a' :
+                                            exerciseType === 'core' ? '#eab308' :
+                                                exerciseType === 'cardio' ? '#ef4444' : '#8b5cf6'
+                                }}
+                            />
+
+                            <View className="flex-1 p-4">
+                                <View className="flex-row justify-between items-center">
+                                    <Text className="text-lg font-bold">{exerciseName}</Text>
+                                    <Badge variant="outline" className="bg-muted">
+                                        <Text className="text-xs">{exerciseType}</Text>
+                                    </Badge>
+                                </View>
+
+                                <Text className="text-muted-foreground text-sm mb-2">
+                                    {exercisePrimaryMuscleGroup}
+                                </Text>
+
+                                <Separator className="my-2" />
+
+                                <View className="flex-row justify-between mt-1">
+                                    <View className="flex-row items-center">
+                                        <Badge variant="secondary" className="mr-1">
+                                            <Text className="text-xs">{workoutPlanExerciseDefaultSets} sets</Text>
+                                        </Badge>
+                                        <Badge variant="secondary" className="mr-1">
+                                            <Text className="text-xs">{workoutPlanExerciseDefaultReps} reps</Text>
+                                        </Badge>
+                                        <Badge variant="secondary">
+                                            <Text className="text-xs">{workoutPlanExerciseDefaultWeight} kg</Text>
+                                        </Badge>
+                                    </View>
+                                    <View>
+                                        <ChevronRight className="size-5 text-muted-foreground" />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </CardContent>
+                </Card>
+            </Pressable>
+            <View className='flex justify-center items-center gap-2 px-2'>
+                <Triangle className='text-muted-foreground fill-muted-foreground' size={30} />
+                <Text>#{workoutPlanExerciseSortOrder}</Text>
+                <Triangle className='text-muted-foreground fill-muted-foreground rotate-180' size={30} />
+            </View>
+        </View>
+    );
+};

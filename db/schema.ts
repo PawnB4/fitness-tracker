@@ -40,7 +40,7 @@ export const workoutExercises = sqliteTable('workout_exercises', {
 // Workout plans table
 export const workoutPlans = sqliteTable('workout_plans', {
     id: integer().primaryKey({ autoIncrement: true }),
-    name: text().notNull(),
+    name: text().notNull().unique(),
     description: text(),
     createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -60,10 +60,13 @@ export const workoutPlanExercises = sqliteTable('workout_plan_exercises', {
 });
 
 // Zod schemas
+
+// Workouts
 export const insertWorkoutsSchema = createInsertSchema(workouts);
 export const selectWorkoutsSchema = createSelectSchema(workouts);
 export const updateWorkoutsSchema = createUpdateSchema(workouts);
 
+// Exercises
 export const insertExercisesSchema = createInsertSchema(exercises, {
     name: (schema) => schema.min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
     type: () => z.object({
@@ -83,10 +86,12 @@ export const insertExercisesSchema = createInsertSchema(exercises, {
 export const selectExercisesSchema = createSelectSchema(exercises);
 export const updateExercisesSchema = createUpdateSchema(exercises);
 
+// Workout exercises
 export const selectWorkoutExercisesSchema = createSelectSchema(workoutExercises);
 export const insertWorkoutExercisesSchema = createInsertSchema(workoutExercises);
 export const updateWorkoutExercisesSchema = createUpdateSchema(workoutExercises);
 
+// Workout plans
 export const insertWorkoutPlansSchema = createInsertSchema(workoutPlans, {
     name: (schema) => schema.min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
     description: (schema) => schema.max(255, { message: "Description must be less than 255 characters" }),
@@ -98,6 +103,7 @@ export const insertWorkoutPlansSchema = createInsertSchema(workoutPlans, {
 export const selectWorkoutPlansSchema = createSelectSchema(workoutPlans);
 export const updateWorkoutPlansSchema = createUpdateSchema(workoutPlans);
 
+// Workout plan exercises
 export const insertWorkoutPlanExercisesSchema = createInsertSchema(workoutPlanExercises, {
     defaultSets: (schema) => schema.min(1, { message: "Sets must be at least 1" }),
     defaultReps: (schema) => schema.min(1, { message: "Reps must be at least 1" }),
