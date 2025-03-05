@@ -54,7 +54,7 @@ export const workoutPlanExercises = sqliteTable('workout_plan_exercises', {
     defaultSets: integer().notNull(),
     defaultReps: integer().notNull(),
     defaultWeight: real().notNull(),
-    sortOrder: integer().notNull().default(0), // To maintain exercise order in plan
+    sortOrder: integer().notNull(), // To maintain exercise order in plan
     createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -109,11 +109,13 @@ export const insertWorkoutPlanExercisesSchema = createInsertSchema(workoutPlanEx
     defaultReps: (schema) => schema.min(1, { message: "Reps must be at least 1" }),
     defaultWeight: (schema) => schema.nonnegative({ message: "Weight cannot be negative" }),
     exerciseId: () => z.object({
-        value: z.string(),
+        value: z.number(),
         label: z.string(),
     }),
 }).omit({
     id: true,
+    planId: true,
+    sortOrder: true,
     createdAt: true,
     updatedAt: true,
 });

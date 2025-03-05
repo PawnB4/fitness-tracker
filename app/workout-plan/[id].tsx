@@ -23,13 +23,13 @@ import {
     DialogContent,
     DialogTrigger,
 } from '~/components/ui/dialog';
-import { WorkoutPlanExerciseForm } from '~/components/workout-plan/workout-plan-exercise-form';
+import { WorkoutPlanExerciseFormCreate } from '~/components/workout-plan/workout-plan-exercise-form-create';
 import { EXERCISES_TYPES } from '~/lib/constants';
+
 export default function Page() {
     const [open, setOpen] = useState(false);
 
     // TODO:
-    // - Add exercise to workout plan
     // - Remove exercise from workout plan
     // - Edit exercise in workout plan
     // - Reorder exercises in workout plan
@@ -50,7 +50,7 @@ export default function Page() {
         workoutPlanExerciseDefaultReps: schema.workoutPlanExercises.defaultReps,
         workoutPlanExerciseDefaultWeight: schema.workoutPlanExercises.defaultWeight,
         workoutPlanExerciseSortOrder: schema.workoutPlanExercises.sortOrder,
-    }).from(schema.workoutPlans).innerJoin(schema.workoutPlanExercises, eq(schema.workoutPlans.id, schema.workoutPlanExercises.planId)).innerJoin(schema.exercises, eq(schema.workoutPlanExercises.exerciseId, schema.exercises.id)).where(eq(schema.workoutPlans.id, Number(id))).orderBy(schema.workoutPlanExercises.sortOrder)
+    }).from(schema.workoutPlanExercises).innerJoin(schema.exercises, eq(schema.workoutPlanExercises.exerciseId, schema.exercises.id)).where(eq(schema.workoutPlanExercises.planId, Number(id))).orderBy(schema.workoutPlanExercises.sortOrder)
     );
 
 
@@ -143,7 +143,7 @@ export default function Page() {
                                 />
                             ))}
 
-                            <Dialog className=''
+                            <Dialog
                                 open={open}
                                 onOpenChange={setOpen}
                             >
@@ -156,11 +156,9 @@ export default function Page() {
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
-                                    <WorkoutPlanExerciseForm setOpen={setOpen} />
+                                    <WorkoutPlanExerciseFormCreate setOpen={setOpen} planId={Number(id)} currentExercisesAmount={planExercises.length}/>
                                 </DialogContent>
                             </Dialog>
-
-
                         </View>
                     )}
                 </View>
