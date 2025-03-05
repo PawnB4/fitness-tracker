@@ -23,15 +23,15 @@ import {
     DialogContent,
     DialogTrigger,
 } from '~/components/ui/dialog';
-import { WorkoutPlanExerciseFormCreate } from '~/components/workout-plan/workout-plan-exercise-form-create';
+import { WorkoutPlanExerciseInsertForm } from '~/components/workout-plan/workout-plan-exercise-insert-form';
 import { EXERCISES_TYPES } from '~/lib/constants';
 
 export default function Page() {
     const [open, setOpen] = useState(false);
 
     // TODO:
-    // - Remove exercise from workout plan
     // - Edit exercise in workout plan
+    // - Remove exercise from workout plan
     // - Reorder exercises in workout plan
 
     const { id } = useLocalSearchParams();
@@ -68,8 +68,6 @@ export default function Page() {
 
     const plan = workoutPlan[0];
 
-
-
     return (
         <ScrollView className="flex-1 bg-secondary/30"
         >
@@ -95,7 +93,7 @@ export default function Page() {
                     <View className="flex-row items-center gap-2  border-0">
                         <Dumbbell className="size-3 mr-1 text-primary-foreground" />
                         <Text className="text-sm text-primary-foreground">
-                            {planExercises?.length || 0} Exercises
+                            {planExercises?.length || 0} Exercise{planExercises?.length === 1 ? "" : "s"}
                         </Text>
                     </View>
                     <View className="flex-row items-center gap-2  border-0">
@@ -116,19 +114,22 @@ export default function Page() {
                     </View>
 
                     {/* Exercise Cards */}
-                    {!planExercises || planExercises.length === 0 ? (
-                        <View className="bg-card p-6 rounded-lg items-center">
-                            <Dumbbell className="size-10 text-muted-foreground mb-4" />
-                            <Text className="text-center text-muted-foreground">
-                                No exercises added to this plan yet.
-                            </Text>
-                            <Text className="text-center text-muted-foreground">
-                                Tap "Add Exercise" to get started!
-                            </Text>
-                        </View>
-                    ) : (
-                        <View className="flex-1 flex flex-col gap-3">
-                            {planExercises.map((item, index) => (
+
+                    <View className="flex-1 flex flex-col gap-3">
+
+                        {!planExercises || planExercises.length === 0 ? (
+                            <View className="bg-card p-6 rounded-lg items-center">
+                                <Dumbbell className="size-10 text-muted-foreground mb-4" />
+                                <Text className="text-center text-muted-foreground">
+                                    No exercises added to this plan yet.
+                                </Text>
+                                <Text className="text-center text-muted-foreground">
+                                    Tap "Add Exercise" to get started!
+                                </Text>
+                            </View>
+                        ) : (
+
+                            planExercises.map((item, index) => (
                                 <WorkoutPlanExerciseListItem
                                     key={index}
                                     workoutPlanExerciseId={item.workoutPlanExerciseId}
@@ -141,26 +142,28 @@ export default function Page() {
                                     workoutPlanExerciseSortOrder={item.workoutPlanExerciseSortOrder}
                                     totalExercises={planExercises.length}
                                 />
-                            ))}
+                            ))
+                        )}
 
-                            <Dialog
-                                open={open}
-                                onOpenChange={setOpen}
-                            >
-                                <DialogTrigger asChild>
-                                    <Button
-                                        size="lg"
-                                        className='flex-row items-center justify-center gap-2 bg-sky-500/70'>
-                                        <Plus className='text-primary' />
-                                        <Text className='font-bold text-primary'>Add exercise</Text>
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
-                                    <WorkoutPlanExerciseFormCreate setOpen={setOpen} planId={Number(id)} currentExercisesAmount={planExercises.length}/>
-                                </DialogContent>
-                            </Dialog>
-                        </View>
-                    )}
+
+                        <Dialog
+                            open={open}
+                            onOpenChange={setOpen}
+                        >
+                            <DialogTrigger asChild>
+                                <Button
+                                    size="lg"
+                                    className='flex-row items-center justify-center gap-2 bg-sky-500/70'>
+                                    <Plus className='text-primary' />
+                                    <Text className='font-bold text-primary'>Add exercise</Text>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
+                                <WorkoutPlanExerciseInsertForm setOpen={setOpen} planId={Number(id)} currentExercisesAmount={planExercises?.length || 0} />
+                            </DialogContent>
+                        </Dialog>
+
+                    </View>
                 </View>
             </View>
         </ScrollView>

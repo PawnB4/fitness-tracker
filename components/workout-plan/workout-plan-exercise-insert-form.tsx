@@ -30,7 +30,7 @@ import { Option } from '@rn-primitives/select';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useState } from 'react';
 
-export const WorkoutPlanExerciseFormCreate = ({ setOpen, planId, currentExercisesAmount }: { setOpen: (open: boolean) => void, planId: number, currentExercisesAmount: number }) => {
+export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercisesAmount }: { setOpen: (open: boolean) => void, planId: number, currentExercisesAmount: number }) => {
 
     const [setsError, setSetsError] = useState<string | undefined>(undefined)
     const [repsError, setRepsError] = useState<string | undefined>(undefined)
