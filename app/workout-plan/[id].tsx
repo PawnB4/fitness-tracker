@@ -17,7 +17,7 @@ import { ChevronRight } from '~/lib/icons/ChevronRight';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -27,13 +27,70 @@ import { WorkoutPlanExerciseInsertForm } from '~/components/workout-plan/workout
 import { WorkoutPlanExerciseUpdateForm } from '~/components/workout-plan/workout-plan-exercise-update-form';
 import { EXERCISES_TYPES } from '~/lib/constants';
 
+// Function to update exercise order in database - this is the direct implementation
+const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
+    try {
+        await db.update(schema.workoutPlanExercises)
+            .set({ 
+                sortOrder: newOrder,
+                updatedAt: new Date() // Force update to ensure change is recognized
+            })
+            .where(eq(schema.workoutPlanExercises.id, exerciseId));
+        return true;
+    } catch (error) {
+        alert(`Error updating exercise order: ${error}`);
+        return false;
+    }
+};
+
+// Function to swap the order of two exercises
+const swapExerciseOrder = async (exercise1Id: number, exercise1Order: number, exercise2Id: number, exercise2Order: number) => {    
+    try {
+        // Use a transaction to ensure both updates succeed or both fail
+        await db.transaction(async (tx) => {
+            // First update exercise1 to a temporary order (to avoid unique constraint issues)
+            await tx.update(schema.workoutPlanExercises)
+                .set({ 
+                    sortOrder: -1, 
+                    updatedAt: new Date()
+                })
+                .where(eq(schema.workoutPlanExercises.id, exercise1Id));
+            
+            // Update exercise2 to exercise1's old order
+            await tx.update(schema.workoutPlanExercises)
+                .set({ 
+                    sortOrder: exercise1Order,
+                    updatedAt: new Date() 
+                })
+                .where(eq(schema.workoutPlanExercises.id, exercise2Id));
+            
+            // Finally update exercise1 to exercise2's old order
+            await tx.update(schema.workoutPlanExercises)
+                .set({ 
+                    sortOrder: exercise2Order,
+                    updatedAt: new Date() 
+                })
+                .where(eq(schema.workoutPlanExercises.id, exercise1Id));
+        });
+        
+        return true;
+    } catch (error) {
+        alert(`Error updating exercise order: ${error}`);
+        return false;
+    }
+};
+
+const deleteWorkoutPlanExercise = async (id: number) => {
+    try {
+        await db.delete(schema.workoutPlanExercises).where(eq(schema.workoutPlanExercises.id, id))
+    } catch (error) {
+        alert("Error deleting exercise")
+    }
+}
+
 export default function Page() {
     const [open, setOpen] = useState(false);
-
-    // TODO:
-    // - Edit exercise in workout plan
-    // - Remove exercise from workout plan
-    // - Reorder exercises in workout plan
+    const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
 
     const { id } = useLocalSearchParams();
 
@@ -54,6 +111,82 @@ export default function Page() {
     }).from(schema.workoutPlanExercises).innerJoin(schema.exercises, eq(schema.workoutPlanExercises.exerciseId, schema.exercises.id)).where(eq(schema.workoutPlanExercises.planId, Number(id))).orderBy(schema.workoutPlanExercises.sortOrder)
     );
 
+    // Function to move an exercise up
+    const moveExerciseUp = async (index: number) => {
+        if (!planExercises || index <= 0 || isUpdating) return;
+        
+        setIsUpdating(true);
+        
+        const currentExercise = planExercises[index];
+        const prevExercise = planExercises[index - 1];
+        
+        try {
+            await swapExerciseOrder(
+                currentExercise.workoutPlanExerciseId, 
+                currentExercise.workoutPlanExerciseSortOrder,
+                prevExercise.workoutPlanExerciseId,
+                prevExercise.workoutPlanExerciseSortOrder
+            );
+        } catch (error) {
+            alert(`Error updating exercise order: ${error}`);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    // Function to move an exercise down
+    const moveExerciseDown = async (index: number) => {
+        if (!planExercises || index >= planExercises.length - 1 || isUpdating) return;
+        
+        setIsUpdating(true);
+        
+        const currentExercise = planExercises[index];
+        const nextExercise = planExercises[index + 1];
+        
+        try {
+            await swapExerciseOrder(
+                currentExercise.workoutPlanExerciseId,
+                currentExercise.workoutPlanExerciseSortOrder,
+                nextExercise.workoutPlanExerciseId,
+                nextExercise.workoutPlanExerciseSortOrder
+            );
+        } catch (error) {
+            alert(`Error updating exercise order: ${error}`);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    // Function to handle exercise deletion with proper sort order updating
+    const handleDeleteExercise = async (exerciseId: number, sortOrder: number) => {
+        if (isUpdating) return;
+        
+        setIsUpdating(true);
+        
+        try {
+            // First delete the exercise
+            await deleteWorkoutPlanExercise(exerciseId);
+            
+            // Then update the sort order of all exercises that came after the deleted one
+            if (planExercises) {
+                const exercisesToUpdate = planExercises.filter(ex => 
+                    ex.workoutPlanExerciseSortOrder > sortOrder
+                );
+                
+                // Update each exercise's sort order in sequence
+                for (const ex of exercisesToUpdate) {
+                    await updateExerciseOrder(
+                        ex.workoutPlanExerciseId,
+                        ex.workoutPlanExerciseSortOrder - 1
+                    );
+                }
+            }
+        } catch (error) {
+            alert(`Error deleting exercise: ${error}`);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
     if (workoutError || exercisesError) {
         return <Text>Error: {workoutError?.message || exercisesError?.message}</Text>;
@@ -132,7 +265,7 @@ export default function Page() {
 
                             planExercises.map((item, index) => (
                                 <WorkoutPlanExerciseListItem
-                                    key={index}
+                                    key={item.workoutPlanExerciseId}
                                     workoutPlanExerciseId={item.workoutPlanExerciseId}
                                     exerciseName={item.exerciseName}
                                     exerciseType={item.exerciseType}
@@ -142,6 +275,10 @@ export default function Page() {
                                     workoutPlanExerciseDefaultWeight={item.workoutPlanExerciseDefaultWeight}
                                     workoutPlanExerciseSortOrder={item.workoutPlanExerciseSortOrder}
                                     totalExercises={planExercises.length}
+                                    onMoveUp={() => moveExerciseUp(index)}
+                                    onMoveDown={() => moveExerciseDown(index)}
+                                    onDelete={() => handleDeleteExercise(item.workoutPlanExerciseId, item.workoutPlanExerciseSortOrder)}
+                                    isUpdating={isUpdating}
                                 />
                             ))
                         )}
@@ -182,14 +319,32 @@ type WorkoutPlanExerciseListItemProps = {
     workoutPlanExerciseDefaultWeight: number;
     workoutPlanExerciseSortOrder: number;
     totalExercises: number;
+    onMoveUp: () => void;
+    onMoveDown: () => void;
+    onDelete: () => void;
+    isUpdating: boolean;
 };
 
-const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exerciseType, exercisePrimaryMuscleGroup, workoutPlanExerciseDefaultSets, workoutPlanExerciseDefaultReps, workoutPlanExerciseDefaultWeight, workoutPlanExerciseSortOrder, totalExercises }: WorkoutPlanExerciseListItemProps) => {
+const WorkoutPlanExerciseListItem = ({
+    workoutPlanExerciseId,
+    exerciseName,
+    exerciseType,
+    exercisePrimaryMuscleGroup,
+    workoutPlanExerciseDefaultSets,
+    workoutPlanExerciseDefaultReps,
+    workoutPlanExerciseDefaultWeight,
+    workoutPlanExerciseSortOrder,
+    totalExercises,
+    onMoveUp,
+    onMoveDown,
+    onDelete,
+    isUpdating
+}: WorkoutPlanExerciseListItemProps) => {
 
     const [openUpdateForm, setOpenUpdateForm] = useState(false);
 
     return (
-        <View className='flex flex-row gap-2'>
+        <View className='flex flex-row gap-3 items-center justify-between'>
             <Dialog
                 open={openUpdateForm}
                 onOpenChange={setOpenUpdateForm}
@@ -237,7 +392,7 @@ const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exer
                                                     <Text className="text-xs">{workoutPlanExerciseDefaultWeight} kg</Text>
                                                 </Badge>
                                             </View>
-                                            <View>
+                                            <View className="flex-row items-center">
                                                 <ChevronRight className="size-5 text-muted-foreground" />
                                             </View>
                                         </View>
@@ -252,11 +407,12 @@ const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exer
                 </DialogContent>
             </Dialog>
 
-            <View className='flex justify-center items-center gap-2 px-2'>
+            <View className='flex justify-center items-center gap-2'>
+                
                 {workoutPlanExerciseSortOrder !== 1 && (
-                    <TouchableOpacity onPress={() => {
-                        console.log('up')
-                    }}>
+                    <TouchableOpacity onPress={onMoveUp}
+                    disabled={isUpdating}
+                    >
                         <Triangle className='text-muted-foreground fill-muted-foreground' size={30} />
                     </TouchableOpacity>
                 )}
@@ -264,14 +420,26 @@ const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exer
                 >#{workoutPlanExerciseSortOrder}</Text>
 
                 {workoutPlanExerciseSortOrder !== totalExercises && (
-                    <TouchableOpacity onPress={() => {
-                        console.log('down')
-                    }}>
+                    <TouchableOpacity 
+                        onPress={onMoveDown} 
+                        disabled={isUpdating}
+                        className='hidden'
+                    >
                         <Triangle className='text-muted-foreground fill-muted-foreground rotate-180' size={30} />
                     </TouchableOpacity>
                 )}
-            </View>
 
+            </View>
+            <View className='flex justify-center items-center gap-2'>
+
+                <TouchableOpacity
+                    className="bg-red-100 rounded-full p-1.5"
+                    onPress={onDelete}
+                    disabled={isUpdating}
+                >
+                    <Trash2 size={22} className="text-red-500" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
