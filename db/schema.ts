@@ -92,16 +92,13 @@ export const insertWorkoutExercisesSchema = createInsertSchema(workoutExercises)
 export const updateWorkoutExercisesSchema = createUpdateSchema(workoutExercises);
 
 // Workout plans
-export const insertWorkoutPlansSchema = createInsertSchema(workoutPlans, {
-    name: (schema) => schema.min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
-    description: (schema) => schema.max(255, { message: "Description must be less than 255 characters" }),
-}).omit({
-    id: true,
-    createdAt: true,
-    updatedAt: true,
+
+export const insertWorkoutPlansFormSchema = z.object({
+    name: z.string().min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
+    description: z.string().max(255, { message: "Description must be less than 255 characters" }),
 });
+
 export const selectWorkoutPlansSchema = createSelectSchema(workoutPlans);
-export const updateWorkoutPlansSchema = createUpdateSchema(workoutPlans);
 
 // Workout plan exercises
 export const insertWorkoutPlanExercisesFormSchema = z.object({
@@ -135,13 +132,10 @@ export const selectWorkoutPlanExercisesSchema = createSelectSchema(workoutPlanEx
 
 // Types
 
-export type NewExercise = z.infer<typeof insertExercisesSchema>;
 export type Exercise = z.infer<typeof selectExercisesSchema>;
 
-export type NewWorkoutPlan = z.infer<typeof insertWorkoutPlansSchema>;
 export type WorkoutPlan = z.infer<typeof selectWorkoutPlansSchema>;
 
-export type NewWorkoutPlanExercise = z.infer<typeof insertWorkoutPlanExercisesFormSchema>;
 export type WorkoutPlanExercise = z.infer<typeof selectWorkoutPlanExercisesSchema>;
 
 

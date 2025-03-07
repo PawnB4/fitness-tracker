@@ -17,7 +17,7 @@ import { ChevronRight } from '~/lib/icons/ChevronRight';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -26,12 +26,13 @@ import {
 import { WorkoutPlanExerciseInsertForm } from '~/components/workout-plan/workout-plan-exercise-insert-form';
 import { WorkoutPlanExerciseUpdateForm } from '~/components/workout-plan/workout-plan-exercise-update-form';
 import { EXERCISES_TYPES } from '~/lib/constants';
+import { WorkoutPlanForm } from '~/components/workout-plan/workout-plan-form';
 
 // Function to update exercise order in database - this is the direct implementation
 const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
     try {
         await db.update(schema.workoutPlanExercises)
-            .set({ 
+            .set({
                 sortOrder: newOrder,
                 updatedAt: new Date() // Force update to ensure change is recognized
             })
@@ -44,35 +45,35 @@ const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
 };
 
 // Function to swap the order of two exercises
-const swapExerciseOrder = async (exercise1Id: number, exercise1Order: number, exercise2Id: number, exercise2Order: number) => {    
+const swapExerciseOrder = async (exercise1Id: number, exercise1Order: number, exercise2Id: number, exercise2Order: number) => {
     try {
         // Use a transaction to ensure both updates succeed or both fail
         await db.transaction(async (tx) => {
             // First update exercise1 to a temporary order (to avoid unique constraint issues)
             await tx.update(schema.workoutPlanExercises)
-                .set({ 
-                    sortOrder: -1, 
+                .set({
+                    sortOrder: -1,
                     updatedAt: new Date()
                 })
                 .where(eq(schema.workoutPlanExercises.id, exercise1Id));
-            
+
             // Update exercise2 to exercise1's old order
             await tx.update(schema.workoutPlanExercises)
-                .set({ 
+                .set({
                     sortOrder: exercise1Order,
-                    updatedAt: new Date() 
+                    updatedAt: new Date()
                 })
                 .where(eq(schema.workoutPlanExercises.id, exercise2Id));
-            
+
             // Finally update exercise1 to exercise2's old order
             await tx.update(schema.workoutPlanExercises)
-                .set({ 
+                .set({
                     sortOrder: exercise2Order,
-                    updatedAt: new Date() 
+                    updatedAt: new Date()
                 })
                 .where(eq(schema.workoutPlanExercises.id, exercise1Id));
         });
-        
+
         return true;
     } catch (error) {
         alert(`Error updating exercise order: ${error}`);
@@ -89,7 +90,14 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 }
 
 export default function Page() {
-    const [open, setOpen] = useState(false);
+
+    // TODO: Fix dates
+    // Combine both forms into one - workout plan form and exercise form
+    // improve exercise card
+    // improve workout plan card
+
+    const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
+    const [openUpdateForm, setOpenUpdateForm] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
 
     const { id } = useLocalSearchParams();
@@ -114,15 +122,15 @@ export default function Page() {
     // Function to move an exercise up
     const moveExerciseUp = async (index: number) => {
         if (!planExercises || index <= 0 || isUpdating) return;
-        
+
         setIsUpdating(true);
-        
+
         const currentExercise = planExercises[index];
         const prevExercise = planExercises[index - 1];
-        
+
         try {
             await swapExerciseOrder(
-                currentExercise.workoutPlanExerciseId, 
+                currentExercise.workoutPlanExerciseId,
                 currentExercise.workoutPlanExerciseSortOrder,
                 prevExercise.workoutPlanExerciseId,
                 prevExercise.workoutPlanExerciseSortOrder
@@ -137,12 +145,12 @@ export default function Page() {
     // Function to move an exercise down
     const moveExerciseDown = async (index: number) => {
         if (!planExercises || index >= planExercises.length - 1 || isUpdating) return;
-        
+
         setIsUpdating(true);
-        
+
         const currentExercise = planExercises[index];
         const nextExercise = planExercises[index + 1];
-        
+
         try {
             await swapExerciseOrder(
                 currentExercise.workoutPlanExerciseId,
@@ -160,19 +168,19 @@ export default function Page() {
     // Function to handle exercise deletion with proper sort order updating
     const handleDeleteExercise = async (exerciseId: number, sortOrder: number) => {
         if (isUpdating) return;
-        
+
         setIsUpdating(true);
-        
+
         try {
             // First delete the exercise
             await deleteWorkoutPlanExercise(exerciseId);
-            
+
             // Then update the sort order of all exercises that came after the deleted one
             if (planExercises) {
-                const exercisesToUpdate = planExercises.filter(ex => 
+                const exercisesToUpdate = planExercises.filter(ex =>
                     ex.workoutPlanExerciseSortOrder > sortOrder
                 );
-                
+
                 // Update each exercise's sort order in sequence
                 for (const ex of exercisesToUpdate) {
                     await updateExerciseOrder(
@@ -211,9 +219,16 @@ export default function Page() {
                     <Text className="text-4xl font-bold text-primary-foreground"
                     >{plan.name}</Text>
                     <View className="flex-row ml-auto">
-                        <TouchableOpacity className="p-2.5 bg-primary-foreground/20 rounded-full">
-                            <Pencil className="size-5 text-primary-foreground" />
-                        </TouchableOpacity>
+                        <Dialog open={openUpdateForm} onOpenChange={setOpenUpdateForm}>
+                            <DialogTrigger asChild>
+                                <TouchableOpacity className="p-2.5 bg-primary-foreground/20 rounded-full">
+                                    <Pencil className="size-5 text-primary-foreground" />
+                                </TouchableOpacity>
+                            </DialogTrigger>
+                            <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
+                                <WorkoutPlanForm setOpen={setOpenUpdateForm} isUpdate={true} planId={plan.id} currentName={plan.name} currentDescription={plan.description ?? undefined} />
+                            </DialogContent>
+                        </Dialog>
                     </View>
                 </View>
                 {plan.description && (
@@ -285,8 +300,8 @@ export default function Page() {
 
 
                         <Dialog
-                            open={open}
-                            onOpenChange={setOpen}
+                            open={openAddExerciseForm}
+                            onOpenChange={setOpenAddExerciseForm}
                         >
                             <DialogTrigger asChild>
                                 <Button
@@ -297,7 +312,7 @@ export default function Page() {
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
-                                <WorkoutPlanExerciseInsertForm setOpen={setOpen} planId={Number(id)} currentExercisesAmount={planExercises?.length || 0} />
+                                <WorkoutPlanExerciseInsertForm setOpen={setOpenAddExerciseForm} planId={Number(id)} currentExercisesAmount={planExercises?.length || 0} />
                             </DialogContent>
                         </Dialog>
 
@@ -408,22 +423,22 @@ const WorkoutPlanExerciseListItem = ({
             </Dialog>
 
             <View className='flex justify-center items-center gap-2'>
-                
+
                 {workoutPlanExerciseSortOrder !== 1 && (
                     <TouchableOpacity onPress={onMoveUp}
-                    disabled={isUpdating}
+                        disabled={isUpdating}
                     >
                         <Triangle className='text-muted-foreground fill-muted-foreground' size={30} />
                     </TouchableOpacity>
                 )}
+
                 <Text
                 >#{workoutPlanExerciseSortOrder}</Text>
 
                 {workoutPlanExerciseSortOrder !== totalExercises && (
-                    <TouchableOpacity 
-                        onPress={onMoveDown} 
+                    <TouchableOpacity
+                        onPress={onMoveDown}
                         disabled={isUpdating}
-                        className='hidden'
                     >
                         <Triangle className='text-muted-foreground fill-muted-foreground rotate-180' size={30} />
                     </TouchableOpacity>

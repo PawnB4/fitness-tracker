@@ -14,7 +14,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
+          headerTitleStyle: { fontSize: 24, lineHeight: 32 },
           headerRight: () => <ThemeToggle />,
           tabBarLabel: ({ children, focused, }) => <Text
             style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -23,22 +23,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="workout-plans"
-        options={{
-          title: 'Workout Plans',
-          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
-          headerRight: () => <ThemeToggle />,
-          tabBarLabel: ({ children, focused, }) => <Text
-            style={{ fontFamily: "ContrailOne_400Regular" }}
-            className={`text-sm  font-semibold ${focused ? "text-sky-600" : "text-foreground/80"}`}>{children}</Text>,
-          tabBarIcon: ({ focused }) => <BicepsFlexed className={focused ? "text-sky-600" : "text-foreground/80"} size={23} />,
-        }}
-      />
-      <Tabs.Screen
         name="progress"
         options={{
           title: 'Progress',
-          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
+          headerTitleStyle: { fontSize: 24, lineHeight: 32 },
           headerRight: () => <ThemeToggle />,
           tabBarLabel: ({ children, focused, }) => <Text
             style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -47,10 +35,22 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="workout-plans"
+        options={{
+          title: 'Workout Plans',
+          headerTitleStyle: { fontSize: 24, lineHeight: 32 },
+          headerRight: () => <ThemeToggle />,
+          tabBarLabel: ({ children, focused, }) => <Text
+            style={{ fontFamily: "ContrailOne_400Regular" }}
+            className={`text-sm  font-semibold ${focused ? "text-sky-600" : "text-foreground/80"}`}>{children}</Text>,
+          tabBarIcon: ({ focused }) => <BicepsFlexed className={focused ? "text-sky-600" : "text-foreground/80"} size={23} />,
+        }}
+      />
+      <Tabs.Screen
         name="exercises"
         options={{
           title: 'Exercises',
-          headerTitleStyle: {  fontSize: 24, lineHeight: 32 },
+          headerTitleStyle: { fontSize: 24, lineHeight: 32 },
           headerRight: () => <ThemeToggle />,
           tabBarLabel: ({ children, focused, }) => <Text
             style={{ fontFamily: "ContrailOne_400Regular" }}

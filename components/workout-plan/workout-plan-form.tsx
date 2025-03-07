@@ -15,31 +15,57 @@ import { db } from '~/db/drizzle';
 import * as schema from '~/db/schema';
 import { Textarea } from '../ui/textarea';
 import { router } from 'expo-router';
+import { eq } from 'drizzle-orm';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '~/components/ui/alert-dialog';
 
-export const WorkoutPlanForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
+const deleteWorkoutPlan = async (planId: number) => {
+    try {
+        await db.delete(schema.workoutPlans).where(eq(schema.workoutPlans.id, planId))
+        router.replace("/(tabs)/workout-plans")
+    } catch (error) {
+        console.log(error)
+        alert("Error: Workout plan not found")
+    }
+}
+
+export const WorkoutPlanForm = ({ setOpen, isUpdate = false, planId, currentName, currentDescription }: { setOpen: (open: boolean) => void, isUpdate?: boolean, planId?: number, currentName?: string, currentDescription?: string }) => {
 
     const form = useForm({
+        defaultValues: {
+            name: currentName ?? '',
+            description: currentDescription ?? '',
+        },
         onSubmit: async ({ value }) => {
-            const parseResult = await schema.insertWorkoutPlansSchema.safeParseAsync(value)
-            if (!parseResult.success) {
-                alert('Invalid workout plan data')
-            } else {
-                const newWorkoutPlan = {
-                    name: parseResult.data.name,
-                    description: parseResult.data.description,
-                }
-                try {
+            const newWorkoutPlan = {
+                name: value.name,
+                description: value.description ? value.description : null,
+            }
+            try {
+                if (isUpdate && planId) {
+                    await db.update(schema.workoutPlans).set(newWorkoutPlan).where(eq(schema.workoutPlans.id, planId))
+                    setOpen(false)
+                } else {
                     const res = await db.insert(schema.workoutPlans).values(newWorkoutPlan).returning()
                     setOpen(false)
                     router.push(`/workout-plan/${res[0].id}`)
-                } catch (error) {
-                    console.log(error)
-                    alert("Error: Workout plan already exists")
                 }
+            } catch (error) {
+                console.log(error)
+                alert("Error: Workout plan already exists")
             }
         },
         validators: {
-            onChange: schema.insertWorkoutPlansSchema
+            onChange: schema.insertWorkoutPlansFormSchema
         }
     })
 
@@ -49,11 +75,11 @@ export const WorkoutPlanForm = ({ setOpen }: { setOpen: (open: boolean) => void 
                 <DialogHeader>
                     <DialogTitle
                         className='text-xl font-bold'
-                    >New workout plan</DialogTitle>
+                    >{isUpdate ? "Update workout plan" : "New workout plan"}</DialogTitle>
                     <DialogDescription
                         style={{ fontFamily: "ContrailOne_400Regular" }}
                     >
-                        Create a new workout plan to add to your catalog. Workout plans are a collection of exercises from which you can create workouts.
+                        {isUpdate ? "Update your workout plan" : "Create a new workout plan to add to your catalog. Workout plans are a collection of exercises from which you can create workouts."}
                     </DialogDescription>
                 </DialogHeader>
                 <View className='py-3 flex flex-col'>
@@ -97,13 +123,39 @@ export const WorkoutPlanForm = ({ setOpen }: { setOpen: (open: boolean) => void 
                     </form.Field>
 
                 </View>
-                <Button
-                    onPress={async () => {
-                        form.handleSubmit()
-                    }}
-                >
-                    <Text>Save</Text>
-                </Button>
+                <View className='flex grow gap-2'>
+                    <Button
+                        onPress={() => form.handleSubmit()}>
+                        <Text>Save</Text>
+                    </Button>
+                    {isUpdate && planId && (
+                        <AlertDialog className=''>
+                            <AlertDialogTrigger asChild >
+                                <Button className='bg-destructive'>
+                                    <Text className='text-destructive-foreground'>Delete</Text>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to delete this workout plan? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                        <Text>Cancel</Text>
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction className='bg-destructive text-destructive-foreground'
+                                        onPress={() => deleteWorkoutPlan(planId)}
+                                    >
+                                        <Text>Continue</Text>
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
+                </View>
             </View>
         </TouchableWithoutFeedback>
     );
