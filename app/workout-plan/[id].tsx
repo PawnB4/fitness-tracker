@@ -24,6 +24,7 @@ import {
     DialogTrigger,
 } from '~/components/ui/dialog';
 import { WorkoutPlanExerciseInsertForm } from '~/components/workout-plan/workout-plan-exercise-insert-form';
+import { WorkoutPlanExerciseUpdateForm } from '~/components/workout-plan/workout-plan-exercise-update-form';
 import { EXERCISES_TYPES } from '~/lib/constants';
 
 export default function Page() {
@@ -184,58 +185,73 @@ type WorkoutPlanExerciseListItemProps = {
 };
 
 const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exerciseType, exercisePrimaryMuscleGroup, workoutPlanExerciseDefaultSets, workoutPlanExerciseDefaultReps, workoutPlanExerciseDefaultWeight, workoutPlanExerciseSortOrder, totalExercises }: WorkoutPlanExerciseListItemProps) => {
+
+    const [openUpdateForm, setOpenUpdateForm] = useState(false);
+
     return (
         <View className='flex flex-row gap-2'>
-            <Pressable className='flex-1'>
-                <Card className="overflow-hidden">
-                    <CardContent className="p-0">
-                        <View className="flex-row">
-                            <View
-                                className="w-2"
-                                style={{
-                                    backgroundColor: exerciseType === EXERCISES_TYPES[0] ? '#16a34a' :
-                                        exerciseType === EXERCISES_TYPES[1] ? '#8b5cf6' :
-                                            exerciseType === EXERCISES_TYPES[2] ? '#eab308' :
-                                                exerciseType === EXERCISES_TYPES[3] ? '#ef4444' :
-                                                    '#0284c7'
-                                }}
-                            />
+            <Dialog
+                open={openUpdateForm}
+                onOpenChange={setOpenUpdateForm}
+                className='flex-1'
+            >
+                <DialogTrigger asChild>
+                    <Pressable>
+                        <Card className="overflow-hidden">
+                            <CardContent className="p-0">
+                                <View className="flex-row">
+                                    <View
+                                        className="w-2"
+                                        style={{
+                                            backgroundColor: exerciseType === EXERCISES_TYPES[0] ? '#16a34a' :
+                                                exerciseType === EXERCISES_TYPES[1] ? '#8b5cf6' :
+                                                    exerciseType === EXERCISES_TYPES[2] ? '#eab308' :
+                                                        exerciseType === EXERCISES_TYPES[3] ? '#ef4444' :
+                                                            '#0284c7'
+                                        }}
+                                    />
 
-                            <View className="flex-1 p-4">
-                                <View className="flex-row justify-between items-center">
-                                    <Text className="text-lg font-bold">{exerciseName}</Text>
-                                    <Badge variant="outline" className="bg-muted">
-                                        <Text className="text-xs">{exerciseType}</Text>
-                                    </Badge>
-                                </View>
+                                    <View className="flex-1 p-4">
+                                        <View className="flex-row justify-between items-center">
+                                            <Text className="text-lg font-bold">{exerciseName}</Text>
+                                            <Badge variant="outline" className="bg-muted">
+                                                <Text className="text-xs">{exerciseType}</Text>
+                                            </Badge>
+                                        </View>
 
-                                <Text className="text-muted-foreground text-sm mb-2">
-                                    {exercisePrimaryMuscleGroup}
-                                </Text>
+                                        <Text className="text-muted-foreground text-sm mb-2">
+                                            {exercisePrimaryMuscleGroup}
+                                        </Text>
 
-                                <Separator className="my-2" />
+                                        <Separator className="my-2" />
 
-                                <View className="flex-row justify-between mt-1">
-                                    <View className="flex-row items-center">
-                                        <Badge variant="secondary" className="mr-1">
-                                            <Text className="text-xs">{workoutPlanExerciseDefaultSets} sets</Text>
-                                        </Badge>
-                                        <Badge variant="secondary" className="mr-1">
-                                            <Text className="text-xs">{workoutPlanExerciseDefaultReps} reps</Text>
-                                        </Badge>
-                                        <Badge variant="secondary">
-                                            <Text className="text-xs">{workoutPlanExerciseDefaultWeight} kg</Text>
-                                        </Badge>
+                                        <View className="flex-row justify-between mt-1">
+                                            <View className="flex-row items-center">
+                                                <Badge variant="secondary" className="mr-1">
+                                                    <Text className="text-xs">{workoutPlanExerciseDefaultSets} sets</Text>
+                                                </Badge>
+                                                <Badge variant="secondary" className="mr-1">
+                                                    <Text className="text-xs">{workoutPlanExerciseDefaultReps} reps</Text>
+                                                </Badge>
+                                                <Badge variant="secondary">
+                                                    <Text className="text-xs">{workoutPlanExerciseDefaultWeight} kg</Text>
+                                                </Badge>
+                                            </View>
+                                            <View>
+                                                <ChevronRight className="size-5 text-muted-foreground" />
+                                            </View>
+                                        </View>
                                     </View>
-                                    <View>
-                                        <ChevronRight className="size-5 text-muted-foreground" />
-                                    </View>
                                 </View>
-                            </View>
-                        </View>
-                    </CardContent>
-                </Card>
-            </Pressable>
+                            </CardContent>
+                        </Card>
+                    </Pressable>
+                </DialogTrigger>
+                <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
+                    <WorkoutPlanExerciseUpdateForm setOpen={setOpenUpdateForm} workoutPlanExerciseId={workoutPlanExerciseId} exerciseName={exerciseName} defaultSets={workoutPlanExerciseDefaultSets} defaultReps={workoutPlanExerciseDefaultReps} defaultWeight={workoutPlanExerciseDefaultWeight} />
+                </DialogContent>
+            </Dialog>
+
             <View className='flex justify-center items-center gap-2 px-2'>
                 {workoutPlanExerciseSortOrder !== 1 && (
                     <TouchableOpacity onPress={() => {
@@ -255,6 +271,7 @@ const WorkoutPlanExerciseListItem = ({ workoutPlanExerciseId, exerciseName, exer
                     </TouchableOpacity>
                 )}
             </View>
+
         </View>
     );
 };

@@ -9,10 +9,9 @@ import {
     DialogTitle,
 } from '~/components/ui/dialog';
 import { Text } from '~/components/ui/text';
-import { useForm } from '@tanstack/react-form'
+import { useForm, useStore } from '@tanstack/react-form'
 import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
-import { db } from '~/db/drizzle';
 import * as schema from '~/db/schema';
 
 import {
@@ -29,127 +28,72 @@ import { EXERCISES_TYPES, MUSCLE_GROUPS } from '~/lib/constants';
 import { Option } from '@rn-primitives/select';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useState } from 'react';
-
-export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercisesAmount }: { setOpen: (open: boolean) => void, planId: number, currentExercisesAmount: number }) => {
-
-    const [setsError, setSetsError] = useState<string | undefined>(undefined)
-    const [repsError, setRepsError] = useState<string | undefined>(undefined)
-    const [weightError, setWeightError] = useState<string | undefined>(undefined)
-
-    const { data: exercises } = useLiveQuery(db.select().from(schema.exercises))
+import { eq } from 'drizzle-orm';
+import { db } from '~/db/drizzle';
 
 
-    const insets = useSafeAreaInsets();
-    const contentInsets = {
-        top: insets.top,
-        bottom: insets.bottom,
-        left: 12,
-        right: 12,
-    };
+export const WorkoutPlanExerciseUpdateForm = ({ setOpen, workoutPlanExerciseId, exerciseName, defaultSets, defaultReps, defaultWeight }: { setOpen: (open: boolean) => void, workoutPlanExerciseId: number, exerciseName: string, defaultSets: number, defaultReps: number, defaultWeight: number }) => {
 
     const form = useForm({
-        onSubmit: async ({ value }) => {
-            console.log("form submitted", value)
-            const parseResult = await schema.insertWorkoutPlanExercisesSchema.safeParseAsync(value)
-            if (!parseResult.success) {
-                alert('Invalid exercise data')
-            } else {
-                const newExercise = {
-                    planId: planId,
-                    exerciseId: parseResult.data.exerciseId.value,
-                    defaultSets: parseResult.data.defaultSets,
-                    defaultReps: parseResult.data.defaultReps,
-                    defaultWeight: parseResult.data.defaultWeight,
-                    sortOrder: ++currentExercisesAmount,
-                }
-                try {
-                      await db.insert(schema.workoutPlanExercises).values(newExercise)
-                    setOpen(false)
-                } catch (error) {
-                    console.log(error)
-                    alert("Error: Exercise already exists")
-                }
+        defaultValues: {
+            defaultSets: defaultSets.toString(),
+            defaultReps: defaultReps.toString(),
+            defaultWeight: defaultWeight.toString(),
+        },
+        onSubmit: async ({value}) => {
+            const updatedExercise = {
+                defaultSets: Number(value.defaultSets),
+                defaultReps: Number(value.defaultReps),
+                defaultWeight: Number(value.defaultWeight),
             }
+            try {
+                await db.update(schema.workoutPlanExercises).set(updatedExercise).where(eq(schema.workoutPlanExercises.id, workoutPlanExerciseId))
+                setOpen(false)
+            } catch (error) {
+                alert(`Error: ${error}`)
+            }
+
         },
         validators: {
-            onChange: schema.insertWorkoutPlanExercisesSchema
+            onChange: schema.updateWorkoutPlanExercisesFormSchema
         }
     })
 
-
+    const defaultSetsObject = useStore(form.store, (state) => state.fieldMeta.defaultSets)
+    const defaultRepsObject = useStore(form.store, (state) => state.fieldMeta.defaultReps)
+    const defaultWeightObject = useStore(form.store, (state) => state.fieldMeta.defaultWeight)
 
     return (
         <TouchableWithoutFeedback >
             <View className='p-2'>
                 <DialogHeader>
                     <DialogTitle
-                    >Add exercise</DialogTitle>
+                    >Update exercise</DialogTitle>
                     <DialogDescription
                         style={{ fontFamily: "ContrailOne_400Regular" }}
                     >
-                        Add an exercise to your workout plan.
+                        Update the exercise in your workout plan.
                     </DialogDescription>
                 </DialogHeader>
                 <View className='py-3 flex flex-col'>
 
-                    <form.Field
-                        name="exerciseId"
-                    >
-                        {field => (
-                            <View className='pb-2'>
-                                <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Exercise:</Label>
-                                <Select
-                                    value={field.state.value as Option}
-                                    // @ts-ignore
-                                    onValueChange={(e) => field.handleChange({ value: Number(e.value), label: e.label })}>
-                                    <SelectTrigger className='w-[275px]'
-                                        onPressIn={() => {
-                                            Keyboard.dismiss();
-                                        }}
-                                    >
-                                        <SelectValue
-                                            className='text-foreground text-sm native:text-lg'
-                                            placeholder='Select an exercise'
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent insets={contentInsets} className='w-[275px]'>
-                                        <ScrollView className='max-h-72'>
-                                            <>
-                                                {EXERCISES_TYPES.map(type => (
-                                                    exercises.filter(exercise => exercise.type === type).length > 0 && (
-                                                        <SelectGroup key={type}>
-                                                            <SelectLabel
-                                                                className='-ml-4 font-extrabold'
-                                                            >{type}</SelectLabel>
-                                                            {exercises.filter(exercise => exercise.type === type).map((exercise) => (
-                                                                <SelectItem key={exercise.id} label={exercise.name} value={exercise.id.toString()}>
-                                                                    {exercise.name}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectGroup>
-                                                    )
-                                                ))}
-                                            </>
 
-                                        </ScrollView>
-                                    </SelectContent>
-
-                                </Select>
-                                {
-                                    field.state.meta.errors
-                                        ? <Text className='text-red-500 mt-1'>
-                                            {field.state.meta.errors[0]?.message}</Text>
-                                        : null
-                                }
-                            </View>
-
-                        )
-                        }
-                    </form.Field>
-
-                    <Text
-                        className='text-muted-foreground text-sm'
-                    >Specify the number of sets, reps and weight for the exercise. This can all be changed later.</Text>
+                    <View className='pb-2'>
+                        <Label style={{ fontFamily: "ContrailOne_400Regular" }} >Exercise:</Label>
+                        <Select
+                            value={{
+                                value: exerciseName,
+                                label: exerciseName
+                            }}
+                        >
+                            <SelectTrigger className='w-[275px] opacity-50 cursor-not-allowed'>
+                                <SelectValue
+                                    className='text-foreground/50 text-sm native:text-lg'
+                                    placeholder='Select an exercise'
+                                />
+                            </SelectTrigger>
+                        </Select>
+                    </View>
 
                     <View className='flex flex-row justify-around gap-3 py-4'>
                         <form.Field
@@ -161,13 +105,10 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                                         nativeID={field.name}>Sets</Label>
                                     <Input
                                         value={field.state.value as string}
-                                        onChangeText={(e) => {
-                                            field.handleChange(Number(e))
-                                            setSetsError(field.state.meta.errors[0]?.message)
-                                        }}
+                                        onChangeText={field.handleChange}
                                         inputMode='numeric'
                                         className='w-[60px]'
-                                        placeholder='4' />
+                                        placeholder={defaultSets.toString()} />
 
                                 </View>
                             )
@@ -183,13 +124,10 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                                         nativeID={field.name}>Reps</Label>
                                     <Input
                                         value={field.state.value as string}
-                                        onChangeText={(e) => {
-                                            field.handleChange(Number(e))
-                                            setRepsError(field.state.meta.errors[0]?.message)
-                                        }}
+                                        onChangeText={field.handleChange}
                                         inputMode='numeric'
                                         className='w-[60px]'
-                                        placeholder='12' />
+                                        placeholder={defaultReps.toString()} />
 
                                 </View>
                             )
@@ -205,13 +143,10 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                                         nativeID={field.name}>Weight (kg)</Label>
                                     <Input
                                         value={field.state.value as string}
-                                        onChangeText={(e) => {
-                                            field.handleChange(Number(e))
-                                            setWeightError(field.state.meta.errors[0]?.message)
-                                        }}
+                                        onChangeText={field.handleChange}
                                         inputMode='numeric'
                                         className='w-[60px]'
-                                        placeholder='25' />
+                                        placeholder={defaultWeight.toString()} />
 
                                 </View>
                             )
@@ -221,19 +156,19 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
 
                     {/* Centralized error display */}
                     <View className='flex  justify-around gap-1 py-2'>
-                        {setsError && (
+                        {defaultSetsObject?.errors?.length > 0 && (
                             <Text className='text-red-500 text-sm'>
-                                <Text className='font-bold'>{"Sets"}: </Text> {setsError}
+                                <Text className='font-bold'>{"Sets"}: </Text> {defaultSetsObject.errors[0]?.message}
                             </Text>
                         )}
-                        {repsError && (
+                        {defaultRepsObject?.errors?.length > 0 && (
                             <Text className='text-red-500 text-sm'>
-                                <Text className='font-bold'>{"Reps"}: </Text> {repsError}
+                                <Text className='font-bold'>{"Reps"}: </Text> {defaultRepsObject.errors[0]?.message}
                             </Text>
                         )}
-                        {weightError && (
+                        {defaultWeightObject?.errors?.length > 0 && (
                             <Text className='text-red-500 text-sm'>
-                                <Text className='font-bold'>{"Weight"}: </Text> {weightError}
+                                <Text className='font-bold'>{"Weight"}: </Text> {defaultWeightObject.errors[0]?.message}
                             </Text>
                         )}
                     </View>
@@ -242,13 +177,7 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
 
                 </View>
                 <Button
-                    onPressIn={() => {
-                        setSetsError(form.fieldInfo.defaultSets?.instance?.state.meta.errors[0]?.message)
-                        setRepsError(form.fieldInfo.defaultReps?.instance?.state.meta.errors[0]?.message)
-                        setWeightError(form.fieldInfo.defaultWeight?.instance?.state.meta.errors[0]?.message)
-                    }}
-
-                    onPress={() => {
+                     onPress={() => {
                         form.handleSubmit()
                     }}
                 >

@@ -9,7 +9,7 @@ import {
     DialogTitle,
 } from '~/components/ui/dialog';
 import { Text } from '~/components/ui/text';
-import { useForm } from '@tanstack/react-form'
+import { useForm, useStore } from '@tanstack/react-form'
 import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { db } from '~/db/drizzle';
@@ -28,16 +28,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EXERCISES_TYPES, MUSCLE_GROUPS } from '~/lib/constants';
 import { Option } from '@rn-primitives/select';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercisesAmount }: { setOpen: (open: boolean) => void, planId: number, currentExercisesAmount: number }) => {
 
-    const [setsError, setSetsError] = useState<string | undefined>(undefined)
-    const [repsError, setRepsError] = useState<string | undefined>(undefined)
-    const [weightError, setWeightError] = useState<string | undefined>(undefined)
-
     const { data: exercises } = useLiveQuery(db.select().from(schema.exercises))
-
 
     const insets = useSafeAreaInsets();
     const contentInsets = {
@@ -48,35 +43,38 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
     };
 
     const form = useForm({
+        defaultValues: {
+            exerciseId: { value: "1", label: "Abductor Machine" },
+            defaultSets: '',
+            defaultReps: '',
+            defaultWeight: '',
+        },
         onSubmit: async ({ value }) => {
-            console.log("form submitted", value)
-            const parseResult = await schema.insertWorkoutPlanExercisesSchema.safeParseAsync(value)
-            if (!parseResult.success) {
-                alert('Invalid exercise data')
-            } else {
-                const newExercise = {
-                    planId: planId,
-                    exerciseId: parseResult.data.exerciseId.value,
-                    defaultSets: parseResult.data.defaultSets,
-                    defaultReps: parseResult.data.defaultReps,
-                    defaultWeight: parseResult.data.defaultWeight,
-                    sortOrder: ++currentExercisesAmount,
-                }
-                try {
-                      await db.insert(schema.workoutPlanExercises).values(newExercise)
-                    setOpen(false)
-                } catch (error) {
-                    console.log(error)
-                    alert("Error: Exercise already exists")
-                }
+
+            const newExercise = {
+                planId: planId,
+                exerciseId: Number(value.exerciseId.value),
+                defaultSets: Number(value.defaultSets),
+                defaultReps: Number(value.defaultReps),
+                defaultWeight: Number(value.defaultWeight),
+                sortOrder: ++currentExercisesAmount,
             }
+            try {
+                await db.insert(schema.workoutPlanExercises).values(newExercise)
+                setOpen(false)
+            } catch (error) {
+                alert(`Error: ${error}`)
+            }
+
         },
         validators: {
-            onChange: schema.insertWorkoutPlanExercisesSchema
+            onChange: schema.insertWorkoutPlanExercisesFormSchema
         }
     })
 
-
+    const defaultSetsObject = useStore(form.store, (state) => state.fieldMeta.defaultSets)
+    const defaultRepsObject = useStore(form.store, (state) => state.fieldMeta.defaultReps)
+    const defaultWeightObject = useStore(form.store, (state) => state.fieldMeta.defaultWeight)
 
     return (
         <TouchableWithoutFeedback >
@@ -96,12 +94,12 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                         name="exerciseId"
                     >
                         {field => (
-                            <View className='pb-2'>
-                                <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Exercise:</Label>
+                            <View className=''>
+                                <Label style={{ fontFamily: "ContrailOne_400Regular" }} className='mb-1' nativeID={field.name}>Exercise:</Label>
                                 <Select
-                                    value={field.state.value as Option}
+                                    value={field.state.value}
                                     // @ts-ignore
-                                    onValueChange={(e) => field.handleChange({ value: Number(e.value), label: e.label })}>
+                                    onValueChange={field.handleChange}>
                                     <SelectTrigger className='w-[275px]'
                                         onPressIn={() => {
                                             Keyboard.dismiss();
@@ -161,10 +159,7 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                                         nativeID={field.name}>Sets</Label>
                                     <Input
                                         value={field.state.value as string}
-                                        onChangeText={(e) => {
-                                            field.handleChange(Number(e))
-                                            setSetsError(field.state.meta.errors[0]?.message)
-                                        }}
+                                        onChangeText={field.handleChange}
                                         inputMode='numeric'
                                         className='w-[60px]'
                                         placeholder='4' />
@@ -183,10 +178,7 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                                         nativeID={field.name}>Reps</Label>
                                     <Input
                                         value={field.state.value as string}
-                                        onChangeText={(e) => {
-                                            field.handleChange(Number(e))
-                                            setRepsError(field.state.meta.errors[0]?.message)
-                                        }}
+                                        onChangeText={field.handleChange}
                                         inputMode='numeric'
                                         className='w-[60px]'
                                         placeholder='12' />
@@ -205,10 +197,7 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                                         nativeID={field.name}>Weight (kg)</Label>
                                     <Input
                                         value={field.state.value as string}
-                                        onChangeText={(e) => {
-                                            field.handleChange(Number(e))
-                                            setWeightError(field.state.meta.errors[0]?.message)
-                                        }}
+                                        onChangeText={field.handleChange}
                                         inputMode='numeric'
                                         className='w-[60px]'
                                         placeholder='25' />
@@ -218,36 +207,26 @@ export const WorkoutPlanExerciseInsertForm = ({ setOpen, planId, currentExercise
                             }
                         </form.Field>
                     </View>
-
                     {/* Centralized error display */}
                     <View className='flex  justify-around gap-1 py-2'>
-                        {setsError && (
+                        {defaultSetsObject?.errors?.length > 0 && (
                             <Text className='text-red-500 text-sm'>
-                                <Text className='font-bold'>{"Sets"}: </Text> {setsError}
+                                <Text className='font-bold'>{"Sets"}: </Text> {defaultSetsObject.errors[0]?.message}
                             </Text>
                         )}
-                        {repsError && (
+                        {defaultRepsObject?.errors?.length > 0 && (
                             <Text className='text-red-500 text-sm'>
-                                <Text className='font-bold'>{"Reps"}: </Text> {repsError}
+                                <Text className='font-bold'>{"Reps"}: </Text> {defaultRepsObject.errors[0]?.message}
                             </Text>
                         )}
-                        {weightError && (
+                        {defaultWeightObject?.errors?.length > 0 && (
                             <Text className='text-red-500 text-sm'>
-                                <Text className='font-bold'>{"Weight"}: </Text> {weightError}
+                                <Text className='font-bold'>{"Weight"}: </Text> {defaultWeightObject.errors[0]?.message}
                             </Text>
                         )}
                     </View>
-
-
-
                 </View>
                 <Button
-                    onPressIn={() => {
-                        setSetsError(form.fieldInfo.defaultSets?.instance?.state.meta.errors[0]?.message)
-                        setRepsError(form.fieldInfo.defaultReps?.instance?.state.meta.errors[0]?.message)
-                        setWeightError(form.fieldInfo.defaultWeight?.instance?.state.meta.errors[0]?.message)
-                    }}
-
                     onPress={() => {
                         form.handleSubmit()
                     }}
