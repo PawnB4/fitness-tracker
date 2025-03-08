@@ -13,6 +13,9 @@ import m0008 from './0008_green_cerebro.sql';
 import m0009 from './0009_marvelous_joseph.sql';
 import m0010 from './0010_milky_power_pack.sql';
 import m0011 from './0011_condemned_spirit.sql';
+import m0012 from './0012_optimal_archangel.sql';
+import m0013 from './0013_organic_norman_osborn.sql';
+import m0014 from './0014_rich_pestilence.sql';
 
   export default {
     journal,
@@ -28,7 +31,10 @@ m0007,
 m0008,
 m0009,
 m0010,
-m0011
+m0011,
+m0012,
+m0013,
+m0014
     }
   }
   

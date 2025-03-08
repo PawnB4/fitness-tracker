@@ -6,10 +6,10 @@ import { z } from 'zod';
 // Workouts table
 export const workouts = sqliteTable('workouts', {
     id: integer().primaryKey({ autoIncrement: true }),
-    date: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    name: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
     notes: text(),
-    createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
 
 // Exercise definitions table (reusable exercises)
@@ -17,10 +17,9 @@ export const exercises = sqliteTable('exercises', {
     id: integer().primaryKey({ autoIncrement: true }),
     name: text().notNull().unique(),
     type: text().notNull(), // "upper body", "lower body", "core", "cardio", etc.
-    description: text(), // Optional fields that might be useful
     primaryMuscleGroup: text(),
-    createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
 
 // Workout-specific exercises (junction table with additional data)
@@ -32,9 +31,9 @@ export const workoutExercises = sqliteTable('workout_exercises', {
     reps: integer().notNull(),
     weight: real().notNull(), // Using real for decimal weights
     notes: text(), // For workout-specific notes about this exercise
-    order: integer(), // For ordering exercises within a workout
-    createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    sortOrder: integer().notNull(), // For ordering exercises within a workout
+    createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
 
 // Workout plans table
@@ -42,8 +41,8 @@ export const workoutPlans = sqliteTable('workout_plans', {
     id: integer().primaryKey({ autoIncrement: true }),
     name: text().notNull().unique(),
     description: text(),
-    createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
 
 // Plan exercises (exercises in a plan with their default values)
@@ -55,8 +54,8 @@ export const workoutPlanExercises = sqliteTable('workout_plan_exercises', {
     defaultReps: integer().notNull(),
     defaultWeight: real().notNull(),
     sortOrder: integer().notNull(), // To maintain exercise order in plan
-    createdAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer({ mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
 
 // Zod schemas
