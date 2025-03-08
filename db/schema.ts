@@ -3,15 +3,6 @@ import { sql } from 'drizzle-orm';
 import { createSelectSchema, createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-// Workouts table
-export const workouts = sqliteTable('workouts', {
-    id: integer().primaryKey({ autoIncrement: true }),
-    name: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-    notes: text(),
-    createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
-});
-
 // Exercise definitions table (reusable exercises)
 export const exercises = sqliteTable('exercises', {
     id: integer().primaryKey({ autoIncrement: true }),
@@ -22,11 +13,20 @@ export const exercises = sqliteTable('exercises', {
     updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
 
+// Workouts table
+export const workouts = sqliteTable('workouts', {
+    id: integer().primaryKey({ autoIncrement: true }),
+    name: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+    notes: text(),
+    createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+});
+
 // Workout-specific exercises (junction table with additional data)
 export const workoutExercises = sqliteTable('workout_exercises', {
     id: integer().primaryKey({ autoIncrement: true }),
     workoutId: integer().notNull().references(() => workouts.id, { onDelete: 'cascade' }),
-    exerciseId: integer().notNull().references(() => exercises.id, { onDelete: 'restrict' }),
+    exerciseId: integer().notNull().references(() => exercises.id, { onDelete: 'cascade' }),
     sets: integer().notNull(),
     reps: integer().notNull(),
     weight: real().notNull(), // Using real for decimal weights
@@ -49,7 +49,7 @@ export const workoutPlans = sqliteTable('workout_plans', {
 export const workoutPlanExercises = sqliteTable('workout_plan_exercises', {
     id: integer().primaryKey({ autoIncrement: true }),
     planId: integer().notNull().references(() => workoutPlans.id, { onDelete: 'cascade' }),
-    exerciseId: integer().notNull().references(() => exercises.id, { onDelete: 'restrict' }),
+    exerciseId: integer().notNull().references(() => exercises.id, { onDelete: 'cascade' }),
     defaultSets: integer().notNull(),
     defaultReps: integer().notNull(),
     defaultWeight: real().notNull(),
