@@ -89,7 +89,7 @@ export default function Page() {
 
     // TODO: Fix dates
     // Combine both forms into one - workout plan form and exercise form
-    // improve workout plan card
+
 
     const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
     const [openUpdateForm, setOpenUpdateForm] = useState(false);

@@ -10,7 +10,7 @@ import { EXERCISES } from '~/lib/constants';
 import { Trash2 } from '~/lib/icons/Trash2';
 import * as schema from '~/db/schema';
 import { db } from '~/db/drizzle';
-import { eq } from 'drizzle-orm';
+import { eq, gt, sql } from 'drizzle-orm';
 
 import {
     AlertDialog,
@@ -26,9 +26,51 @@ import {
 
 const deleteExercise = async (id: number) => {
     try {
-        await db.delete(schema.exercises).where(eq(schema.exercises.id, id))
+        // First, get all workout plan exercises that will be affected
+        const affectedPlans = await db.select({
+            planId: schema.workoutPlanExercises.planId,
+            sortOrder: schema.workoutPlanExercises.sortOrder,
+        })
+        .from(schema.workoutPlanExercises)
+        .where(eq(schema.workoutPlanExercises.exerciseId, id));
+
+        // Group by planId to handle multiple workout plans
+        const planGroups = new Map();
+        affectedPlans.forEach(item => {
+            if (!planGroups.has(item.planId)) {
+                planGroups.set(item.planId, []);
+            }
+            planGroups.get(item.planId).push(item.sortOrder);
+        });
+
+        // Delete the exercise (this will cascade delete all related workout plan exercises)
+        await db.delete(schema.exercises).where(eq(schema.exercises.id, id));
+
+        // For each affected plan, update the sort order of remaining exercises
+        for (const [planId, sortOrders] of planGroups.entries()) {
+            // Sort the orders to process lowest first
+            sortOrders.sort((a: number, b: number) => a - b);
+            
+            // Process each deleted sort order in sequence, adjusting for previously deleted items
+            let offset = 0;
+            for (const deletedSortOrder of sortOrders) {
+                const adjustedSortOrder = deletedSortOrder - offset;
+                
+                // Update all exercises with higher sort order than the deleted one
+                await db.update(schema.workoutPlanExercises)
+                    .set({
+                        sortOrder: sql`${schema.workoutPlanExercises.sortOrder} - 1`
+                    })
+                    .where(
+                        sql`${schema.workoutPlanExercises.planId} = ${planId} AND ${schema.workoutPlanExercises.sortOrder} > ${adjustedSortOrder}`
+                    );
+                
+                // Increment offset for each processed deletion
+                offset++;
+            }
+        }
     } catch (error) {
-        alert("Error deleting exercise")
+        alert("Error deleting exercise: " + error);
     }
 }
 
