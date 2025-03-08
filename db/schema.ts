@@ -75,13 +75,14 @@ export const insertExercisesSchema = createInsertSchema(exercises, {
     primaryMuscleGroup: () => z.object({
         value: z.string(),
         label: z.string(),
-    }),
-    description: (schema) => schema.max(255, { message: "Description must be less than 255 characters" }),
+    }).nullish(),
 }).omit({
     id: true,
     createdAt: true,
     updatedAt: true,
 });
+
+
 export const selectExercisesSchema = createSelectSchema(exercises);
 export const updateExercisesSchema = createUpdateSchema(exercises);
 
@@ -132,6 +133,7 @@ export const selectWorkoutPlanExercisesSchema = createSelectSchema(workoutPlanEx
 // Types
 
 export type Exercise = z.infer<typeof selectExercisesSchema>;
+export type NewExercise = z.infer<typeof insertExercisesSchema>;
 
 export type WorkoutPlan = z.infer<typeof selectWorkoutPlansSchema>;
 

@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import { ActivityIndicator, ScrollView, View, TouchableOpacity, Image, Pressable } from 'react-native';
 import { db } from '~/db/drizzle';
 import { Text } from '~/components/ui/text';
-import { formatDate } from '~/utils/date';
 import { Button } from '~/components/ui/button';
 import { Calendar } from '~/lib/icons/Calendar';
 import { Pencil } from '~/lib/icons/Pencil';
@@ -34,7 +33,6 @@ const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
         await db.update(schema.workoutPlanExercises)
             .set({
                 sortOrder: newOrder,
-                updatedAt: new Date() // Force update to ensure change is recognized
             })
             .where(eq(schema.workoutPlanExercises.id, exerciseId));
         return true;
@@ -53,7 +51,6 @@ const swapExerciseOrder = async (exercise1Id: number, exercise1Order: number, ex
             await tx.update(schema.workoutPlanExercises)
                 .set({
                     sortOrder: -1,
-                    updatedAt: new Date()
                 })
                 .where(eq(schema.workoutPlanExercises.id, exercise1Id));
 
@@ -61,7 +58,6 @@ const swapExerciseOrder = async (exercise1Id: number, exercise1Order: number, ex
             await tx.update(schema.workoutPlanExercises)
                 .set({
                     sortOrder: exercise1Order,
-                    updatedAt: new Date()
                 })
                 .where(eq(schema.workoutPlanExercises.id, exercise2Id));
 
@@ -69,7 +65,6 @@ const swapExerciseOrder = async (exercise1Id: number, exercise1Order: number, ex
             await tx.update(schema.workoutPlanExercises)
                 .set({
                     sortOrder: exercise2Order,
-                    updatedAt: new Date()
                 })
                 .where(eq(schema.workoutPlanExercises.id, exercise1Id));
         });
@@ -93,7 +88,6 @@ export default function Page() {
 
     // TODO: Fix dates
     // Combine both forms into one - workout plan form and exercise form
-    // improve exercise card
     // improve workout plan card
 
     const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
@@ -209,6 +203,7 @@ export default function Page() {
     }
 
     const plan = workoutPlan[0];
+    console.log(plan)
 
     return (
         <ScrollView className="flex-1 bg-secondary/30"
@@ -248,7 +243,7 @@ export default function Page() {
                     <View className="flex-row items-center gap-2  border-0">
                         <Calendar className="size-3 mr-1 text-primary-foreground" />
                         <Text className="text-sm text-primary-foreground">
-                            Created {formatDate(plan.createdAt)}
+                            Created {plan.createdAt?.split(" ")[0]}
                         </Text>
                     </View>
                 </View>
@@ -452,7 +447,7 @@ const WorkoutPlanExerciseListItem = ({
                     onPress={onDelete}
                     disabled={isUpdating}
                 >
-                    <Trash2 size={22} className="text-red-500" />
+                    <Trash2 size={22} className="text-destructive" />
                 </TouchableOpacity>
             </View>
         </View>

@@ -31,6 +31,7 @@ import { router } from 'expo-router';
 import { WorkoutPlanCard } from '~/components/workout-plan/workout-plan-card';
 import { WorkoutPlanForm } from '~/components/workout-plan/workout-plan-form';
 import { useState } from 'react';
+import { Dumbbell } from 'lucide-react-native';
 
 export default function Page() {
 
@@ -53,13 +54,6 @@ export default function Page() {
         );
     }
 
-    if (workoutPlans.length === 0) {
-        return (
-            <View className='flex-1 justify-center items-center'>
-                <Text>No workout plans found</Text>
-            </View>
-        );
-    }
 
     return (
         <Dialog className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'
@@ -71,13 +65,25 @@ export default function Page() {
                     <Text>Add a workout plan</Text>
                 </Button>
             </DialogTrigger>
-            <FlashList
-                data={workoutPlans}
-                renderItem={({ item, index }) => <WorkoutPlanCard {...item} key={index} />}
-                estimatedItemSize={50}
-                showsVerticalScrollIndicator={false}
-                ItemSeparatorComponent={() => <View className='h-4' />}
-            />
+            {workoutPlans.length === 0 ? (
+                <View className="bg-card p-6 rounded-lg items-center">
+                    <Dumbbell className="size-10 text-muted-foreground mb-4" />
+                    <Text className="text-center text-muted-foreground">
+                        No workout plans created yet.
+                    </Text>
+                    <Text className="text-center text-muted-foreground">
+                        Tap "Add Workout Plan" to get started!
+                    </Text>
+                </View>
+            ) : (
+                <FlashList
+                    data={workoutPlans}
+                    renderItem={({ item, index }) => <WorkoutPlanCard {...item} key={index} />}
+                    estimatedItemSize={50}
+                    showsVerticalScrollIndicator={false}
+                    ItemSeparatorComponent={() => <View className='h-4' />}
+                />
+            )}
             <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
                 <WorkoutPlanForm setOpen={setOpen} />
             </DialogContent>

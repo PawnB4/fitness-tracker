@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { db } from '~/db/drizzle';
 import { Text } from '~/components/ui/text';
-import { formatDate, formatTime } from '~/utils/date';
 import { Button } from '~/components/ui/button';
 import { Clock } from '~/lib/icons/Clock';
 import { Calendar } from '~/lib/icons/Calendar';
@@ -13,7 +12,7 @@ import { Pencil } from '~/lib/icons/Pencil';
 import { Trash2 } from '~/lib/icons/Trash2';
 import { Dumbbell } from '~/lib/icons/Dumbbell';
 import { ChevronRight } from '~/lib/icons/ChevronRight';
-
+import { formatDate, formatTime } from '~/utils/date';
 
 export default function Page() {
     const { id } = useLocalSearchParams();
@@ -32,8 +31,6 @@ export default function Page() {
         )
     }
 
-    const formattedDate = formatDate(workout[0].date)
-    const formattedTime = formatTime(workout[0].date)
 
     // Sample exercise data for UI purposes
     const exercises = [
@@ -44,6 +41,9 @@ export default function Page() {
         { id: 5, name: "Shoulder Press", sets: 3, reps: 12, weight: 65, completed: false },
     ];
 
+
+
+
     return (
         <ScrollView className="flex-1 bg-background">
             {/* Header */}
@@ -52,11 +52,11 @@ export default function Page() {
                 <View className="flex-row justify-around">
                     <View className="flex-row items-center">
                         <Calendar size={18} className="mr-2 text-primary-foreground" />
-                        <Text className="text-md text-primary-foreground">{formattedDate}</Text>
+                        <Text className="text-md text-primary-foreground">{workout[0].createdAt ? formatDate(workout[0].createdAt) : "No date"}</Text>
                     </View>
                     <View className="flex-row items-center">
                         <Clock size={18} className="mr-2 text-primary-foreground" />
-                        <Text className="text-md text-primary-foreground">{formattedTime}</Text>
+                        <Text className="text-md text-primary-foreground">{workout[0].createdAt ? formatTime(workout[0].createdAt) : "No time"}</Text>
                     </View>
                 </View>
             </View>

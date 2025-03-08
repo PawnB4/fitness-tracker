@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Text } from '~/components/ui/text';
-import {  useForm } from '@tanstack/react-form'
+import { useForm } from '@tanstack/react-form'
 import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { db } from '~/db/drizzle';
@@ -26,6 +26,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EXERCISES_TYPES, MUSCLE_GROUPS } from '~/lib/constants';
 import { Option } from '@rn-primitives/select';
+import { NewExercise } from '~/db/schema';
 
 export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
   const insets = useSafeAreaInsets();
@@ -37,23 +38,19 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
   };
 
   const form = useForm({
-    onSubmit: async ({ value }) => {
-      const parseResult = await schema.insertExercisesSchema.safeParseAsync(value)
-      if (!parseResult.success) {
-        alert('Invalid exercise data')
-      } else {
-        const newExercise = {
-          name: parseResult.data.name,
-          type: parseResult.data.type.value,
-          primaryMuscleGroup: parseResult.data.primaryMuscleGroup?.value,
-        }
-        try {
-          await db.insert(schema.exercises).values(newExercise)
-          setOpen(false)
-        } catch (error) {
-          console.log(error)
-          alert("Error: Exercise already exists")
-        }
+    onSubmit: async ({ value }: { value: NewExercise }) => {
+      const newExercise = {
+        name: value.name,
+        type: value.type.value,
+        primaryMuscleGroup: value.primaryMuscleGroup?.value ?? null,
+      }
+      console.log(newExercise)
+      try {
+        await db.insert(schema.exercises).values(newExercise)
+        setOpen(false)
+      } catch (error) {
+        console.log(error)
+        alert("Error: Exercise already exists")
       }
     },
     validators: {
@@ -94,14 +91,15 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
             }
           </form.Field>
           <form.Field
-            defaultValue={{ value: EXERCISES_TYPES[0], label: EXERCISES_TYPES[0] }}
             name="type"
+            defaultValue={{ value: EXERCISES_TYPES[0], label: EXERCISES_TYPES[0] }}
           >
             {field => (
               <>
                 <Label style={{ fontFamily: "ContrailOne_400Regular" }} nativeID={field.name}>Type:</Label>
                 <Select
-                  value={field.state.value as Option}
+                  value={field.state.value}
+                  // @ts-ignore
                   onValueChange={field.handleChange}>
                   <SelectTrigger className='w-[275px]'
                     onPressIn={() => {
@@ -140,6 +138,7 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
 
                 <Select
                   value={field.state.value as Option}
+                  // @ts-ignore
                   onValueChange={field.handleChange}
                 >
                   <SelectTrigger className='w-[275px]'
@@ -174,11 +173,7 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
             }
           </form.Field>
         </View>
-        <Button
-          onPress={async () => {
-            form.handleSubmit()
-          }}
-        >
+        <Button onPress={() => form.handleSubmit()}>
           <Text>Save</Text>
         </Button>
       </View>

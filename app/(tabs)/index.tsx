@@ -58,19 +58,6 @@ export default function Page() {
 
   return (
     <View className='flex-1 items-stretch p-4 gap-4 bg-secondary/30'>
-      <Button 
-      onPress={async () => {
-        try {
-          const [res] = await db.insert(schema.dateTableTest).values({}).returning();
-          console.log(res.currentDateColumn);
-          console.log(typeof res.currentDateColumn);
-        } catch (error) {
-          alert("Error creating time record")
-        }
-      }}
-      >
-        <Text>Add time record</Text>
-      </Button>
       <Button className='shadow shadow-foreground/5'
         onPress={async () => {
           try {

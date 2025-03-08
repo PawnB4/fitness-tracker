@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import {
     Card,
     CardContent,
@@ -35,27 +35,37 @@ const deleteExercise = async (id: number) => {
 
 export const ExerciseCard = ({ id, name, type, primaryMuscleGroup }: Exercise) => {
     return (
-
-        <Card className='flex-1rounded-2xl shadow'>
-            <CardContent className='py-2 px-3'>
+        <Card className='flex-1 rounded-2xl overflow-hidden border-t-2 border-sky-500/70'>
+            <CardContent className='py-3 px-4 bg-gradient-to-br from-background to-background/80'>
                 <View className='flex flex-row justify-start items-center py-1'>
-                    <CardTitle className='leading-normal'
-                    >
+                    <CardTitle className='leading-normal text-lg font-semibold'>
                         {name}
                     </CardTitle>
-                    <Text className='ml-auto text-foreground/70'>
-                        {type}
-                    </Text>
+                    <View className='ml-auto px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/30'>
+                        <Text className='text-foreground/80 text-sm font-medium'>
+                            {type}
+                        </Text>
+                    </View>
                 </View>
-                <View className='h-1 bg-sky-500/70 rounded'></View>
-                <View className='flex gap-1 py-2 '>
-                    <View className='flex flex-row items-center gap-1 overflow-hidden'>
-                        <Text className='font-bold'>Primary muscle group: </Text>
-                        <Text className='text-foreground/70 mt-1'>{primaryMuscleGroup}</Text>
-                        {!EXERCISES.includes(name) && (
-                            <AlertDialog className='ml-auto'>
-                                <AlertDialogTrigger asChild >
-                                    <Trash2 className='size-3 text-destructive/70 ' />
+
+                <View className='my-2 flex flex-row items-center gap-2'>
+                    <View className='w-1.5 h-6 bg-sky-500/70 rounded-full'></View>
+                    <View className='flex flex-row items-center flex-wrap gap-1'>
+                        <Text className='font-semibold text-sm'>Primary muscle:</Text>
+                        {primaryMuscleGroup && (
+                            <Text className='text-foreground/80 font-medium text-sm bg-muted/50 px-2 py-0.5 rounded'>
+                                {primaryMuscleGroup}
+                            </Text>
+                        )}
+                    </View>
+
+                    {!EXERCISES.includes(name) && (
+                        <View className='ml-auto'>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <TouchableOpacity className="bg-red-100 rounded-full p-1.5">
+                                        <Trash2 className='size-3 text-destructive ' />
+                                    </TouchableOpacity>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
@@ -76,9 +86,8 @@ export const ExerciseCard = ({ id, name, type, primaryMuscleGroup }: Exercise) =
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-                        )}
-
-                    </View>
+                        </View>
+                    )}
                 </View>
             </CardContent>
         </Card>
