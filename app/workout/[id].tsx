@@ -41,9 +41,6 @@ export default function Page() {
         { id: 5, name: "Shoulder Press", sets: 3, reps: 12, weight: 65, completed: false },
     ];
 
-
-
-
     return (
         <ScrollView className="flex-1 bg-background">
             {/* Header */}

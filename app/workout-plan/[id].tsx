@@ -26,6 +26,7 @@ import { WorkoutPlanExerciseInsertForm } from '~/components/workout-plan/workout
 import { WorkoutPlanExerciseUpdateForm } from '~/components/workout-plan/workout-plan-exercise-update-form';
 import { EXERCISES_TYPES } from '~/lib/constants';
 import { WorkoutPlanForm } from '~/components/workout-plan/workout-plan-form';
+import { formatDate } from '~/utils/date';
 
 // Function to update exercise order in database - this is the direct implementation
 const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
@@ -203,7 +204,6 @@ export default function Page() {
     }
 
     const plan = workoutPlan[0];
-    console.log(plan)
 
     return (
         <ScrollView className="flex-1 bg-secondary/30"
@@ -243,7 +243,7 @@ export default function Page() {
                     <View className="flex-row items-center gap-2  border-0">
                         <Calendar className="size-3 mr-1 text-primary-foreground" />
                         <Text className="text-sm text-primary-foreground">
-                            Created {plan.createdAt?.split(" ")[0]}
+                            Created {plan.createdAt ? formatDate(plan.createdAt) : "No date"}
                         </Text>
                     </View>
                 </View>
