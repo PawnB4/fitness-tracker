@@ -16,6 +16,7 @@ import m0011 from './0011_condemned_spirit.sql';
 import m0012 from './0012_optimal_archangel.sql';
 import m0013 from './0013_organic_norman_osborn.sql';
 import m0014 from './0014_rich_pestilence.sql';
+import m0015 from './0015_clear_tag.sql';
 
   export default {
     journal,
@@ -34,7 +35,8 @@ m0010,
 m0011,
 m0012,
 m0013,
-m0014
+m0014,
+m0015
     }
   }
   

@@ -41,6 +41,7 @@ export default function Page() {
 
 
   if (migrationsError || workoutsError) {
+    console.log("migrationsError", migrationsError)
     return (
       <View>
         <Text>Something went wrong</Text>
