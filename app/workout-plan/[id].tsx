@@ -13,6 +13,7 @@ import { Plus } from '~/lib/icons/Plus';
 import { Triangle } from '~/lib/icons/Triangle';
 import { Dumbbell } from '~/lib/icons/Dumbbell';
 import { ChevronRight } from '~/lib/icons/ChevronRight';
+import { Menu } from '~/lib/icons/Menu';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
@@ -85,11 +86,12 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 }
 
 export default function Page() {
-    
+
     const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
     const [openUpdateForm, setOpenUpdateForm] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
 
+  
     const { id } = useLocalSearchParams();
 
     const { data: workoutPlan, error: workoutError } = useLiveQuery(
@@ -212,7 +214,7 @@ export default function Page() {
                         <Dialog open={openUpdateForm} onOpenChange={setOpenUpdateForm}>
                             <DialogTrigger asChild>
                                 <TouchableOpacity className="p-2.5 bg-primary-foreground/20 rounded-full">
-                                    <Pencil className="size-5 text-primary-foreground" />
+                                    <Menu className="size-5 text-primary-foreground" />
                                 </TouchableOpacity>
                             </DialogTrigger>
                             <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
@@ -305,7 +307,6 @@ export default function Page() {
                                 <WorkoutPlanExerciseForm setOpen={setOpenAddExerciseForm} planId={Number(id)} currentExercisesAmount={planExercises?.length || 0} />
                             </DialogContent>
                         </Dialog>
-
                     </View>
                 </View>
             </View>
