@@ -6,7 +6,7 @@ import {
 } from '~/components/ui/card';
 import { Text } from '~/components/ui/text';
 import { Exercise } from '~/db/schema';
-import { EXERCISES } from '~/lib/constants';
+import { EXERCISES, EXERCISES_TYPES } from '~/lib/constants';
 import { Trash2 } from '~/lib/icons/Trash2';
 import * as schema from '~/db/schema';
 import { db } from '~/db/drizzle';
@@ -91,7 +91,15 @@ export const ExerciseCard = ({ id, name, type, primaryMuscleGroup }: Exercise) =
                 </View>
 
                 <View className='my-2 flex flex-row items-center gap-2'>
-                    <View className='w-1.5 h-6 bg-sky-500/70 rounded-full'></View>
+                    <View className='w-1.5 h-6 rounded-full'
+                    style={{
+                        backgroundColor: type === EXERCISES_TYPES[0] ? '#16a34a' :
+                            type === EXERCISES_TYPES[1] ? '#8b5cf6' :
+                                type === EXERCISES_TYPES[2] ? '#eab308' :
+                                    type === EXERCISES_TYPES[3] ? '#ef4444' :
+                                        '#0284c7'
+                    }}
+                    ></View>
                     <View className='flex flex-row items-center flex-wrap gap-1'>
                         <Text className='font-semibold text-sm'>Primary muscle:</Text>
                         {primaryMuscleGroup && (

@@ -23,13 +23,13 @@ export const WorkoutPlanCard = ({ id, name }: WorkoutPlan) => {
 
     return (
         <TouchableOpacity onPress={() => router.push(`/workout-plan/${id}`)} activeOpacity={0.7}>
-            <Card className='flex-1 rounded-2xl border-t-2 border-sky-500/70'>
+            <Card className='flex-1 rounded-2xl '>
                 <CardContent className='py-4 px-3 '>
-                    <View className='flex flex-row justify-around items-center'>
+                    <View className='flex flex-row  items-center gap-2 pl-8'>
                         <CardTitle className='leading-normal'>
                             {name}
                         </CardTitle>
-                        <Text className=' text-foreground/70 font-bold'>
+                        <Text className=' text-foreground/70 font-bold ml-auto pr-8 '>
                             {workoutPlanExercises?.length} {workoutPlanExercises?.length === 1 ? "exercise" : "exercises"}
                         </Text>
                     </View>

@@ -19,6 +19,20 @@ export default function Page() {
 
     const { data: workout, error: workoutError } = useLiveQuery(db.select().from(schema.workouts).where(eq(schema.workouts.id, Number(id))));
 
+    // Fetch exercises for this workout
+    const { data: workoutExercises, error: exercisesError } = useLiveQuery(db.select({
+        workoutExerciseId: schema.workoutExercises.id,
+        exerciseName: schema.exercises.name,
+        exerciseType: schema.exercises.type,
+        exercisePrimaryMuscleGroup: schema.exercises.primaryMuscleGroup,
+        workoutExerciseSets: schema.workoutExercises.sets,
+        workoutExerciseReps: schema.workoutExercises.reps,
+        workoutExerciseWeight: schema.workoutExercises.weight,
+        workoutExerciseSortOrder: schema.workoutExercises.sortOrder,
+    }).from(schema.workoutExercises).innerJoin(schema.exercises, eq(schema.workoutExercises.exerciseId, schema.exercises.id)).where(eq(schema.workoutExercises.workoutId, Number(id))).orderBy(schema.workoutExercises.sortOrder)
+    );
+    console.log(workoutExercises);
+
     if (workoutError) {
         return <Text>Error: {workoutError.message}</Text>;
     }
@@ -33,13 +47,7 @@ export default function Page() {
 
 
     // Sample exercise data for UI purposes
-    const exercises = [
-        { id: 1, name: "Bench Press", sets: 3, reps: 10, weight: 135, completed: true },
-        { id: 2, name: "Squats", sets: 4, reps: 8, weight: 185, completed: true },
-        { id: 3, name: "Pull-ups", sets: 3, reps: 12, weight: 0, completed: false },
-        { id: 4, name: "Deadlift", sets: 3, reps: 6, weight: 225, completed: false },
-        { id: 5, name: "Shoulder Press", sets: 3, reps: 12, weight: 65, completed: false },
-    ];
+
 
     return (
         <ScrollView className="flex-1 bg-background">
@@ -62,18 +70,18 @@ export default function Page() {
             {/* Stats Summary */}
             <View className="flex-row justify-between px-4 py-5 bg-card mx-4 my-4 rounded-xl shadow-sm">
                 <View className="flex justify-center items-center">
-                    <Text className="text-lg font-bold">{exercises.length}</Text>
+                    <Text className="text-lg font-bold">{workoutExercises?.length}</Text>
                     <Text className="text-muted-foreground text-sm">Exercises</Text>
                 </View>
                 <View className="flex justify-center items-center">
                     <Text className="text-lg font-bold">
-                        {exercises.reduce((acc, ex) => acc + ex.sets, 0)}
+                        {workoutExercises?.reduce((acc, ex) => acc + ex.workoutExerciseSets, 0)}
                     </Text>
                     <Text className="text-muted-foreground text-sm">Sets</Text>
                 </View>
                 <View className="flex justify-center items-center">
                     <Text className="text-lg font-bold">
-                        {Math.round(exercises.reduce((acc, ex) => acc + (ex.completed ? 1 : 0), 0) / exercises.length * 100)}%
+                        {Math.round(workoutExercises?.reduce((acc, ex) => acc + (ex.completed ? 1 : 0), 0) / workoutExercises?.length * 100)}%
                     </Text>
                     <Text className="text-muted-foreground text-sm">Completed</Text>
                 </View>
@@ -88,16 +96,16 @@ export default function Page() {
                     </Button>
                 </View>
                 <View className="bg-card rounded-xl overflow-hidden shadow-sm">
-                    {exercises.map((exercise, index) => (
-                        <View key={exercise.id} className={`p-4 flex-row items-center justify-between ${index < exercises.length - 1 ? 'border-b border-border' : ''}`}>
+                    {workoutExercises?.map((exercise, index) => (
+                        <View key={exercise.workoutExerciseId} className={`p-4 flex-row items-center justify-between ${index < workoutExercises?.length - 1 ? 'border-b border-border' : ''}`}>
                             <View className="flex-row items-center flex-1">
                                 <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${exercise.completed ? 'bg-green-100' : 'bg-gray-100'}`}>
                                     <Dumbbell size={16} color={exercise.completed ? "#22c55e" : "#9ca3af"} />
                                 </View>
                                 <View className="flex-1">
-                                    <Text className="font-medium">{exercise.name}</Text>
+                                    <Text className="font-medium">{exercise.exerciseName}</Text>
                                     <Text className="text-muted-foreground text-sm">
-                                        {exercise.sets} sets • {exercise.reps} reps {exercise.weight > 0 ? `• ${exercise.weight} lbs` : ''}
+                                        {exercise.workoutExerciseSets} sets • {exercise.workoutExerciseReps} reps {exercise.workoutExerciseWeight > 0 ? `• ${exercise.workoutExerciseWeight} lbs` : ''}
                                     </Text>
                                 </View>
                             </View>
