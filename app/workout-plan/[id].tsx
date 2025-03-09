@@ -22,8 +22,7 @@ import {
     DialogContent,
     DialogTrigger,
 } from '~/components/ui/dialog';
-import { WorkoutPlanExerciseInsertForm } from '~/components/workout-plan/workout-plan-exercise-insert-form';
-import { WorkoutPlanExerciseUpdateForm } from '~/components/workout-plan/workout-plan-exercise-update-form';
+import { WorkoutPlanExerciseForm } from '~/components/workout-plan/workout-plan-exercise-form';
 import { EXERCISES_TYPES } from '~/lib/constants';
 import { WorkoutPlanForm } from '~/components/workout-plan/workout-plan-form';
 import { formatDate } from '~/utils/date';
@@ -86,11 +85,7 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 }
 
 export default function Page() {
-
-    // TODO: Fix dates
-    // Combine both forms into one - workout plan form and exercise form
-
-
+    
     const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
     const [openUpdateForm, setOpenUpdateForm] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
@@ -307,7 +302,7 @@ export default function Page() {
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
-                                <WorkoutPlanExerciseInsertForm setOpen={setOpenAddExerciseForm} planId={Number(id)} currentExercisesAmount={planExercises?.length || 0} />
+                                <WorkoutPlanExerciseForm setOpen={setOpenAddExerciseForm} planId={Number(id)} currentExercisesAmount={planExercises?.length || 0} />
                             </DialogContent>
                         </Dialog>
 
@@ -413,7 +408,7 @@ const WorkoutPlanExerciseListItem = ({
                     </Pressable>
                 </DialogTrigger>
                 <DialogContent className='w-[90vw] max-w-[360px] min-w-[300px] self-center px-2'>
-                    <WorkoutPlanExerciseUpdateForm setOpen={setOpenUpdateForm} workoutPlanExerciseId={workoutPlanExerciseId} exerciseName={exerciseName} defaultSets={workoutPlanExerciseDefaultSets} defaultReps={workoutPlanExerciseDefaultReps} defaultWeight={workoutPlanExerciseDefaultWeight} />
+                    <WorkoutPlanExerciseForm isUpdate={true} setOpen={setOpenUpdateForm} workoutPlanExerciseId={workoutPlanExerciseId} exerciseName={exerciseName} currentExercisesAmount={totalExercises} currentSets={workoutPlanExerciseDefaultSets} currentReps={workoutPlanExerciseDefaultReps} currentWeight={workoutPlanExerciseDefaultWeight} />
                 </DialogContent>
             </Dialog>
 

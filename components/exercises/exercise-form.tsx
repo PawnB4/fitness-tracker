@@ -54,7 +54,7 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
       }
     },
     validators: {
-      onChange: schema.insertExercisesSchema
+      onChange: schema.exercisesFormSchema
     }
   })
 
@@ -174,7 +174,7 @@ export const ExerciseForm = ({ setOpen }: { setOpen: (open: boolean) => void }) 
           </form.Field>
         </View>
         <Button onPress={() => form.handleSubmit()}>
-          <Text>Save</Text>
+          <Text>Create</Text>
         </Button>
       </View>
     </TouchableWithoutFeedback>

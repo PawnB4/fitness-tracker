@@ -60,13 +60,8 @@ export const workoutPlanExercises = sqliteTable('workout_plan_exercises', {
 
 // Zod schemas
 
-// Workouts
-export const insertWorkoutsSchema = createInsertSchema(workouts);
-export const selectWorkoutsSchema = createSelectSchema(workouts);
-export const updateWorkoutsSchema = createUpdateSchema(workouts);
-
 // Exercises
-export const insertExercisesSchema = createInsertSchema(exercises, {
+export const exercisesFormSchema = createInsertSchema(exercises, {
     name: (schema) => schema.min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
     type: () => z.object({
         value: z.string(),
@@ -75,16 +70,21 @@ export const insertExercisesSchema = createInsertSchema(exercises, {
     primaryMuscleGroup: () => z.object({
         value: z.string(),
         label: z.string(),
-    }).nullish(),
+    }),
 }).omit({
     id: true,
     createdAt: true,
     updatedAt: true,
 });
-
-
 export const selectExercisesSchema = createSelectSchema(exercises);
 export const updateExercisesSchema = createUpdateSchema(exercises);
+
+
+// Workouts
+export const insertWorkoutsSchema = createInsertSchema(workouts);
+export const selectWorkoutsSchema = createSelectSchema(workouts);
+export const updateWorkoutsSchema = createUpdateSchema(workouts);
+
 
 // Workout exercises
 export const selectWorkoutExercisesSchema = createSelectSchema(workoutExercises);
@@ -92,40 +92,41 @@ export const insertWorkoutExercisesSchema = createInsertSchema(workoutExercises)
 export const updateWorkoutExercisesSchema = createUpdateSchema(workoutExercises);
 
 // Workout plans
-
-export const insertWorkoutPlansFormSchema = z.object({
-    name: z.string().min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
-    description: z.string().max(255, { message: "Description must be less than 255 characters" }),
+export const workoutPlansFormSchema = createInsertSchema(workoutPlans, {
+    name: (schema) => schema.min(1, { message: "Name is required" }).max(40, { message: "Name must be less than 40 characters" }),
+    description: (schema) => schema.max(255, { message: "Description must be less than 255 characters" }),
+}).omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
 });
-
 export const selectWorkoutPlansSchema = createSelectSchema(workoutPlans);
 
+
 // Workout plan exercises
-export const insertWorkoutPlanExercisesFormSchema = z.object({
-    exerciseId: z.object({
+export const workoutPlanExercisesFormSchema = createInsertSchema(workoutPlanExercises, {
+    exerciseId: () => z.object({
         value: z.string(),
         label: z.string(),
     }),
-    defaultSets: z.string()
-        .min(1, { message: "Sets is required" })
+    defaultSets: z.string().min(1, { message: "Sets is required" })
         .refine(val => !isNaN(Number(val)), { message: "Sets must be a number" })
         .refine(val => Number(val) >= 1, { message: "Sets must be at least 1" })
         .refine(val => Number.isInteger(Number(val)), { message: "Sets must be a whole number" }),
-    defaultReps: z.string()
-        .min(1, { message: "Reps is required" })
+    defaultReps: z.string().min(1, { message: "Reps is required" })
         .refine(val => !isNaN(Number(val)), { message: "Reps must be a number" })
         .refine(val => Number(val) >= 1, { message: "Reps must be at least 1" })
         .refine(val => Number.isInteger(Number(val)), { message: "Reps must be a whole number" }),
-    defaultWeight: z.string()
-        .min(1, { message: "Weight is required" })
+    defaultWeight: z.string().min(0, { message: "Weight is required" })
         .refine(val => !isNaN(Number(val)), { message: "Weight must be a number" })
         .refine(val => Number(val) >= 0, { message: "Weight cannot be negative" }),
+}).omit({
+    id: true,
+    planId: true,
+    sortOrder: true,
+    createdAt: true,
+    updatedAt: true,
 });
-
-export const updateWorkoutPlanExercisesFormSchema = insertWorkoutPlanExercisesFormSchema.omit({
-    exerciseId: true,
-});
-
 export const selectWorkoutPlanExercisesSchema = createSelectSchema(workoutPlanExercises);
 
 // Form-specific schema that handles string inputs from React Native TextInput
@@ -133,10 +134,11 @@ export const selectWorkoutPlanExercisesSchema = createSelectSchema(workoutPlanEx
 // Types
 
 export type Exercise = z.infer<typeof selectExercisesSchema>;
-export type NewExercise = z.infer<typeof insertExercisesSchema>;
+export type NewExercise = z.infer<typeof exercisesFormSchema>;
 
 export type WorkoutPlan = z.infer<typeof selectWorkoutPlansSchema>;
+export type NewWorkoutPlan = z.infer<typeof workoutPlansFormSchema>;
 
 export type WorkoutPlanExercise = z.infer<typeof selectWorkoutPlanExercisesSchema>;
-
+export type NewWorkoutPlanExercise = z.infer<typeof workoutPlanExercisesFormSchema>;
 

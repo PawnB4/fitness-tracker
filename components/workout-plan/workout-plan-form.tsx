@@ -27,6 +27,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '~/components/ui/alert-dialog';
+import { NewWorkoutPlan } from '~/db/schema';
 
 const deleteWorkoutPlan = async (planId: number) => {
     try {
@@ -41,21 +42,17 @@ const deleteWorkoutPlan = async (planId: number) => {
 export const WorkoutPlanForm = ({ setOpen, isUpdate = false, planId, currentName, currentDescription }: { setOpen: (open: boolean) => void, isUpdate?: boolean, planId?: number, currentName?: string, currentDescription?: string }) => {
 
     const form = useForm({
-        defaultValues: {
-            name: currentName ?? '',
-            description: currentDescription ?? '',
-        },
-        onSubmit: async ({ value }) => {
-            const newWorkoutPlan = {
+        onSubmit: async ({ value }: { value: NewWorkoutPlan }) => {
+            const workoutPlan = {
                 name: value.name,
                 description: value.description ? value.description : null,
             }
             try {
                 if (isUpdate && planId) {
-                    await db.update(schema.workoutPlans).set(newWorkoutPlan).where(eq(schema.workoutPlans.id, planId))
+                    await db.update(schema.workoutPlans).set(workoutPlan).where(eq(schema.workoutPlans.id, planId))
                     setOpen(false)
                 } else {
-                    const res = await db.insert(schema.workoutPlans).values(newWorkoutPlan).returning()
+                    const res = await db.insert(schema.workoutPlans).values(workoutPlan).returning()
                     setOpen(false)
                     router.push(`/workout-plan/${res[0].id}`)
                 }
@@ -65,7 +62,7 @@ export const WorkoutPlanForm = ({ setOpen, isUpdate = false, planId, currentName
             }
         },
         validators: {
-            onChange: schema.insertWorkoutPlansFormSchema
+            onChange: schema.workoutPlansFormSchema
         }
     })
 
@@ -86,6 +83,7 @@ export const WorkoutPlanForm = ({ setOpen, isUpdate = false, planId, currentName
 
                     <form.Field
                         name="name"
+                        defaultValue={currentName ?? ''}
                     >
                         {field => (
                             <>
@@ -107,6 +105,7 @@ export const WorkoutPlanForm = ({ setOpen, isUpdate = false, planId, currentName
 
                     <form.Field
                         name="description"
+                        defaultValue={currentDescription ?? ''}
                     >
                         {field => (
                             <>
@@ -126,13 +125,13 @@ export const WorkoutPlanForm = ({ setOpen, isUpdate = false, planId, currentName
                 <View className='flex grow gap-2'>
                     <Button
                         onPress={() => form.handleSubmit()}>
-                        <Text>Save</Text>
+                        <Text>{isUpdate ? "Save" : "Create"}</Text>
                     </Button>
                     {isUpdate && planId && (
                         <AlertDialog className=''>
                             <AlertDialogTrigger asChild >
                                 <Button className='bg-destructive'>
-                                    <Text className='text-destructive-foreground'>Delete</Text>
+                                    <Text className='text-destructive-foreground'>Delete workout plan</Text>
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
