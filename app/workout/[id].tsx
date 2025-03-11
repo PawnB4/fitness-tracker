@@ -29,6 +29,7 @@ export default function Page() {
         workoutExerciseReps: schema.workoutExercises.reps,
         workoutExerciseWeight: schema.workoutExercises.weight,
         workoutExerciseSortOrder: schema.workoutExercises.sortOrder,
+        workoutExerciseCompleted: schema.workoutExercises.completed,
     }).from(schema.workoutExercises).innerJoin(schema.exercises, eq(schema.workoutExercises.exerciseId, schema.exercises.id)).where(eq(schema.workoutExercises.workoutId, Number(id))).orderBy(schema.workoutExercises.sortOrder)
     );
     console.log(workoutExercises);
@@ -81,7 +82,7 @@ export default function Page() {
                 </View>
                 <View className="flex justify-center items-center">
                     <Text className="text-lg font-bold">
-                        {Math.round(workoutExercises?.reduce((acc, ex) => acc + (ex.completed ? 1 : 0), 0) / workoutExercises?.length * 100)}%
+                        {Math.round(workoutExercises?.reduce((acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0), 0) / workoutExercises?.length * 100)}%
                     </Text>
                     <Text className="text-muted-foreground text-sm">Completed</Text>
                 </View>
@@ -99,8 +100,8 @@ export default function Page() {
                     {workoutExercises?.map((exercise, index) => (
                         <View key={exercise.workoutExerciseId} className={`p-4 flex-row items-center justify-between ${index < workoutExercises?.length - 1 ? 'border-b border-border' : ''}`}>
                             <View className="flex-row items-center flex-1">
-                                <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${exercise.completed ? 'bg-green-100' : 'bg-gray-100'}`}>
-                                    <Dumbbell size={16} color={exercise.completed ? "#22c55e" : "#9ca3af"} />
+                                <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${exercise.workoutExerciseCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
+                                    <Dumbbell size={16} color={exercise.workoutExerciseCompleted ? "#22c55e" : "#9ca3af"} />
                                 </View>
                                 <View className="flex-1">
                                     <Text className="font-medium">{exercise.exerciseName}</Text>

@@ -1,4 +1,5 @@
-import { View } from 'react-native'
+import { router } from 'expo-router';
+import { Pressable, View } from 'react-native'
 import {
     Card,
     CardContent,
@@ -17,9 +18,10 @@ type WorkoutListCardProps = {
 
 export const WorkoutListCard = ({ id, name, notes, createdAt }: WorkoutListCardProps) => {
     return (
-        <Card className='flex-1 rounded-2xl shadow'>
-            <CardContent className='py-2 px-3'>
-                <View className='flex flex-row justify-between items-center py-1'>
+        <Pressable onPress={() => router.push(`/workout/${id}`)}>
+            <Card className='flex-1 rounded-2xl shadow'>
+                <CardContent className='py-2 px-3'>
+                    <View className='flex flex-row justify-between items-center py-1'>
                     <CardTitle className='leading-normal text-base'
                         style={{ fontFamily: "ContrailOne_400Regular" }}>
                         {name || "Workout"}
@@ -35,8 +37,9 @@ export const WorkoutListCard = ({ id, name, notes, createdAt }: WorkoutListCardP
                         {notes}
                     </Text>
                 )}
-                <View className='h-1 bg-sky-500/70 rounded mt-2'></View>
-            </CardContent>
-        </Card>
+                    <View className='h-1 bg-sky-500/70 rounded mt-2'></View>
+                </CardContent>
+            </Card>
+        </Pressable>
     )
 } 
