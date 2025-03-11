@@ -32,6 +32,7 @@ export const workoutExercises = sqliteTable('workout_exercises', {
     weight: real().notNull(), // Using real for decimal weights
     notes: text(), // For workout-specific notes about this exercise
     sortOrder: integer().notNull(), // For ordering exercises within a workout
+    completed: integer({ mode: 'boolean' }).default(false),
     createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
     updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
