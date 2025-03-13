@@ -137,6 +137,9 @@ export const selectWorkoutPlanExercisesSchema = createSelectSchema(workoutPlanEx
 export type Exercise = z.infer<typeof selectExercisesSchema>;
 export type NewExercise = z.infer<typeof exercisesFormSchema>;
 
+export type Workout = z.infer<typeof selectWorkoutsSchema>;
+export type NewWorkout = z.infer<typeof insertWorkoutsSchema>;
+
 export type WorkoutPlan = z.infer<typeof selectWorkoutPlansSchema>;
 export type NewWorkoutPlan = z.infer<typeof workoutPlansFormSchema>;
 

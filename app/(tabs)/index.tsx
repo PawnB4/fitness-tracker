@@ -1,31 +1,14 @@
-import { ActivityIndicator, Pressable, View } from 'react-native';
-import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
-import { Info } from '~/lib/icons/Info';
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
+import { ActivityIndicator, View } from 'react-native';
 import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
-import { Progress } from '~/components/ui/progress';
 import { Text } from '~/components/ui/text';
-import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
-import { Link } from 'expo-router';
-
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { fitnessTrackerDb } from '~/db/drizzle';
 import migrations from '~/drizzle/migrations';
 import { db } from '~/db/drizzle';
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '~/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '~/components/ui/dialog';
 import { FlashList } from '@shopify/flash-list';
-import { ExerciseCard } from '~/components/exercises/exercise-card';
-import { ExerciseForm } from '~/components/exercises/exercise-form';
-import { useLiveQuery, drizzle } from 'drizzle-orm/expo-sqlite';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import * as schema from '~/db/schema';
 import { useState } from 'react';
 import { router } from 'expo-router';
@@ -41,7 +24,7 @@ import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Separator } from '~/components/ui/separator';
 import { eq } from 'drizzle-orm';
-import { WorkoutListCard } from '~/components/workouts/workout-list-card';
+import { WorkoutCard } from '~/components/workouts/workout-card';
 
 
 
@@ -218,7 +201,7 @@ export default function Page() {
       </Dialog>
       <FlashList
         data={workouts}
-        renderItem={({ item }) => <WorkoutListCard id={item.id} name={item.name || ""} notes={item.notes} createdAt={item.createdAt} updatedAt={item.updatedAt} />}
+        renderItem={({ item }) => <WorkoutCard id={item.id} name={item.name || ""} notes={item.notes} createdAt={item.createdAt} updatedAt={item.updatedAt} />}
         estimatedItemSize={50}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View className='h-4' />}

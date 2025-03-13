@@ -7,7 +7,6 @@ import { db } from '~/db/drizzle';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import { Calendar } from '~/lib/icons/Calendar';
-import { Pencil } from '~/lib/icons/Pencil';
 import { Trash2 } from '~/lib/icons/Trash2';
 import { Plus } from '~/lib/icons/Plus';
 import { Triangle } from '~/lib/icons/Triangle';
