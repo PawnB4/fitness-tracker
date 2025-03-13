@@ -10,7 +10,9 @@
     "ios": "expo start -c --ios",
     "web": "expo start -c --web",
     "clean": "rm -rf .expo node_modules",
-    "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
+    "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css",
+    "lint": "biome check app/ components/ db/ utils/ lib/",
+    "format": "biome check --write app/ components/ db/ utils/ lib/"
   },
   "dependencies": {
     "@expo-google-fonts/contrail-one": "^0.2.3",
@@ -65,6 +67,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
+    "@biomejs/biome": "1.9.4",
     "@types/react": "~18.3.12",
     "drizzle-kit": "^0.30.5",
     "typescript": "^5.3.3"
