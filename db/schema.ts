@@ -105,8 +105,48 @@ export const updateWorkoutsSchema = createUpdateSchema(workouts);
 // Workout exercises
 export const selectWorkoutExercisesSchema =
 	createSelectSchema(workoutExercises);
-export const insertWorkoutExercisesSchema =
-	createInsertSchema(workoutExercises);
+
+export const workoutExerciseFormSchema =
+	createInsertSchema(workoutExercises, {
+		exerciseId: () =>
+			z.object({
+				value: z.string(),
+				label: z.string(),
+			}),
+		sets: z
+			.string()
+			.min(1, { message: "Sets is required" })
+			.refine((val) => !isNaN(Number(val)), {
+				message: "Sets must be a number",
+			})
+			.refine((val) => Number(val) >= 1, { message: "Sets must be at least 1" })
+			.refine((val) => Number.isInteger(Number(val)), {
+				message: "Sets must be a whole number",
+			}),
+		reps: z.string()
+			.min(1, { message: "Reps is required" })
+			.refine((val) => !isNaN(Number(val)), {
+				message: "Reps must be a number",
+			})
+			.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
+			.refine((val) => Number.isInteger(Number(val)), {
+				message: "Reps must be a whole number",
+			}),
+		weight: z.string().min(0, { message: "Weight is required" })
+			.refine((val) => !isNaN(Number(val)), {
+				message: "Weight must be a number",
+			})
+			.refine((val) => Number(val) >= 0, {
+				message: "Weight cannot be negative",
+			}),
+	}).omit({
+		id: true,
+		workoutId: true,
+		sortOrder: true,
+		createdAt: true,
+		updatedAt: true,
+		completed: true,
+	});
 export const updateWorkoutExercisesSchema =
 	createUpdateSchema(workoutExercises);
 
@@ -185,6 +225,9 @@ export type NewExercise = z.infer<typeof exercisesFormSchema>;
 
 export type Workout = z.infer<typeof selectWorkoutsSchema>;
 export type NewWorkout = z.infer<typeof insertWorkoutsSchema>;
+
+export type WorkoutExercise = z.infer<typeof selectWorkoutExercisesSchema>;
+export type NewWorkoutExercise = z.infer<typeof workoutExerciseFormSchema>;
 
 export type WorkoutPlan = z.infer<typeof selectWorkoutPlansSchema>;
 export type NewWorkoutPlan = z.infer<typeof workoutPlansFormSchema>;

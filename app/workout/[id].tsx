@@ -15,6 +15,9 @@ import { DialogContent } from "~/components/ui/dialog";
 import { DialogTrigger } from "~/components/ui/dialog";
 import { Dialog } from "~/components/ui/dialog";
 import { Text } from "~/components/ui/text";
+import { Textarea } from "~/components/ui/textarea";
+import { WorkoutPlanExerciseForm } from "~/components/workout-plan/workout-plan-exercise-form";
+import { WorkoutExerciseForm } from "~/components/workouts/workout-exercise-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import { Calendar } from "~/lib/icons/Calendar";
@@ -90,6 +93,17 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 			.where(eq(schema.workoutExercises.id, id));
 	} catch (error) {
 		alert("Error deleting exercise");
+	}
+};
+
+const completeWorkoutExercise = async (id: number) => {
+	try {
+		await db
+			.update(schema.workoutExercises)
+			.set({ completed: true })
+			.where(eq(schema.workoutExercises.id, id));
+	} catch (error) {
+		alert("Error completing exercise");
 	}
 };
 
@@ -256,6 +270,7 @@ export default function Page() {
 				</View>
 				<View className="flex items-center justify-center">
 					<Text className="font-bold text-lg">
+
 						{workoutExercises?.reduce(
 							(acc, ex) => acc + ex.workoutExerciseSets,
 							0,
@@ -265,14 +280,14 @@ export default function Page() {
 				</View>
 				<View className="flex items-center justify-center">
 					<Text className="font-bold text-lg">
-						{Math.round(
+						{workoutExercises?.length > 0 ? Math.round(
 							(workoutExercises?.reduce(
 								(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
 								0,
 							) /
 								workoutExercises?.length) *
-								100,
-						)}
+							100,
+						) : 0}
 						%
 					</Text>
 					<Text className="text-muted-foreground text-sm">Completed</Text>
@@ -313,6 +328,22 @@ export default function Page() {
 				<View className="mb-6">
 					<View className="mb-4 flex-row items-center justify-between">
 						<Text className="font-bold text-2xl">Exercises</Text>
+						<Dialog
+							open={openAddExerciseForm}
+							onOpenChange={setOpenAddExerciseForm}
+						>
+							<DialogTrigger asChild>
+								<Button
+									variant="outline"
+									className="flex-row items-center justify-center gap-2 "
+								>
+									<Text className="font-bold text-primary">Add exercise</Text>
+								</Button>
+							</DialogTrigger>
+							<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
+								<WorkoutExerciseForm setOpen={setOpenAddExerciseForm} workoutId={Number(id)} currentExercisesAmount={workoutExercises?.length || 0} />
+							</DialogContent>
+						</Dialog>
 					</View>
 
 					{/* Exercise Cards */}
@@ -322,7 +353,7 @@ export default function Page() {
 							<View className="items-center rounded-lg bg-card p-6">
 								<Dumbbell className="mb-4 size-10 text-muted-foreground" />
 								<Text className="text-center text-muted-foreground">
-									No exercises added to this plan yet.
+									No exercises added to this workout yet.
 								</Text>
 								<Text className="text-center text-muted-foreground">
 									Tap "Add Exercise" to get started!
@@ -355,23 +386,6 @@ export default function Page() {
 							))
 						)}
 
-						<Dialog
-							open={openAddExerciseForm}
-							onOpenChange={setOpenAddExerciseForm}
-						>
-							<DialogTrigger asChild>
-								<Button
-									size="lg"
-									className="flex-row items-center justify-center gap-2 bg-sky-500/70"
-								>
-									<Plus className="text-primary" />
-									<Text className="font-bold text-primary">Add exercise</Text>
-								</Button>
-							</DialogTrigger>
-							<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
-								{/* <WorkoutPlanExerciseForm setOpen={setOpenAddExerciseForm} planId={Number(id)} currentExercisesAmount={planExercises?.length || 0} /> */}
-							</DialogContent>
-						</Dialog>
 					</View>
 				</View>
 			</View>
@@ -380,10 +394,18 @@ export default function Page() {
 			<View className="mb-4 px-4">
 				<Text className="mb-2 font-semibold text-xl">Notes</Text>
 				<View className="rounded-xl bg-card p-4 shadow-sm">
-					<Text className="text-muted-foreground">
-						{workout.notes ||
-							"No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time."}
-					</Text>
+					
+					<Textarea
+					//TODO: Add a way to save the notes to the database
+						aria-labelledby="textareaLabel"
+						className="border-0 p-0"
+						value={workout.notes ?? undefined}
+						onChangeText={(text) => {
+							console.log(text)
+							db.update(schema.workouts).set({ notes: text }).where(eq(schema.workouts.id, Number(id)));
+						}}
+						placeholder="No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time"
+					/>
 				</View>
 			</View>
 
@@ -422,8 +444,6 @@ type WorkoutExerciseListItemProps = {
 const WorkoutExerciseListItem = ({
 	workoutExerciseId,
 	exerciseName,
-	exerciseType,
-	exercisePrimaryMuscleGroup,
 	workoutExerciseSets,
 	workoutExerciseReps,
 	workoutExerciseWeight,
@@ -446,54 +466,6 @@ const WorkoutExerciseListItem = ({
 			>
 				<DialogTrigger asChild>
 					<Pressable>
-						{/* <Card className="overflow-hidden">
-                            <CardContent className="p-0">
-                                <View className="flex-row">
-                                    <View
-                                        className="w-2"
-                                        style={{
-                                            backgroundColor: exerciseType === EXERCISES_TYPES[0] ? '#16a34a' :
-                                                exerciseType === EXERCISES_TYPES[1] ? '#8b5cf6' :
-                                                    exerciseType === EXERCISES_TYPES[2] ? '#eab308' :
-                                                        exerciseType === EXERCISES_TYPES[3] ? '#ef4444' :
-                                                            '#0284c7'
-                                        }}
-                                    />
-
-                                    <View className="flex-1 p-4">
-                                        <View className="flex-row justify-between items-center">
-                                            <Text className="text-lg font-bold">{exerciseName}</Text>
-                                            <Badge variant="outline" className="bg-muted">
-                                                <Text className="text-xs">{exerciseType}</Text>
-                                            </Badge>
-                                        </View>
-
-                                        <Text className="text-muted-foreground text-sm mb-2">
-                                            {exercisePrimaryMuscleGroup}
-                                        </Text>
-
-                                        <Separator className="my-2" />
-
-                                        <View className="flex-row justify-between mt-1">
-                                            <View className="flex-row items-center">
-                                                <Badge variant="secondary" className="mr-1">
-                                                    <Text className="text-xs">{workoutExerciseSets} sets</Text>
-                                                </Badge>
-                                                <Badge variant="secondary" className="mr-1">
-                                                    <Text className="text-xs">{workoutExerciseReps} reps</Text>
-                                                </Badge>
-                                                <Badge variant="secondary">
-                                                    <Text className="text-xs">{workoutExerciseWeight} kg</Text>
-                                                </Badge>
-                                            </View>
-                                            <View className="flex-row items-center">
-                                                <ChevronRight className="size-5 text-muted-foreground" />
-                                            </View>
-                                        </View>
-                                    </View>
-                                </View>
-                            </CardContent>
-                        </Card> */}
 
 						<View
 							key={workoutExerciseId}
@@ -503,17 +475,22 @@ const WorkoutExerciseListItem = ({
 								<View
 									className={`mr-3 h-8 w-8 items-center justify-center rounded-full ${completed ? "bg-green-100" : "bg-gray-100"}`}
 								>
-									<Dumbbell
-										size={16}
-										color={completed ? "#22c55e" : "#9ca3af"}
-									/>
+									<TouchableOpacity
+										className="p-4"
+										onPress={() => completeWorkoutExercise(workoutExerciseId)}
+									>
+										<Dumbbell
+											size={16}
+											color={completed ? "#22c55e" : "#9ca3af"}
+										/>
+									</TouchableOpacity>
 								</View>
 								<View className="flex-1">
-									<Text className="font-medium">{exerciseName}</Text>
+									<Text className="text-lg">{exerciseName}</Text>
 									<Text className="text-muted-foreground text-sm">
 										{workoutExerciseSets} sets • {workoutExerciseReps} reps{" "}
 										{workoutExerciseWeight > 0
-											? `• ${workoutExerciseWeight} lbs`
+											? `• ${workoutExerciseWeight} kg`
 											: ""}
 									</Text>
 								</View>
@@ -523,30 +500,26 @@ const WorkoutExerciseListItem = ({
 					</Pressable>
 				</DialogTrigger>
 				<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
-					{/* <WorkoutPlanExerciseForm isUpdate={true} setOpen={setOpenUpdateForm} workoutPlanExerciseId={workoutPlanExerciseId} exerciseName={exerciseName} currentExercisesAmount={totalExercises} currentSets={workoutPlanExerciseDefaultSets} currentReps={workoutPlanExerciseDefaultReps} currentWeight={workoutPlanExerciseDefaultWeight} /> */}
+					<WorkoutExerciseForm isUpdate={true} setOpen={setOpenUpdateForm} workoutExerciseId={workoutExerciseId} exerciseName={exerciseName} currentExercisesAmount={totalExercises} currentSets={workoutExerciseSets} currentReps={workoutExerciseReps} currentWeight={workoutExerciseWeight} />
 				</DialogContent>
 			</Dialog>
 
-			<View className="flex items-center justify-center gap-2">
-				{workoutExerciseSortOrder !== 1 && (
-					<TouchableOpacity onPress={onMoveUp} disabled={isUpdating}>
-						<Triangle
-							className="fill-muted-foreground text-muted-foreground"
-							size={30}
-						/>
-					</TouchableOpacity>
-				)}
+			<View className="flex flex-row items-center justify-center gap-2">
+				<TouchableOpacity onPress={onMoveUp} disabled={isUpdating || workoutExerciseSortOrder === 1}>
+					<Triangle
+						className="fill-muted-foreground text-muted-foreground"
+						size={25}
+					/>
+				</TouchableOpacity>
 
 				<Text>#{workoutExerciseSortOrder}</Text>
 
-				{workoutExerciseSortOrder !== totalExercises && (
-					<TouchableOpacity onPress={onMoveDown} disabled={isUpdating}>
-						<Triangle
-							className="rotate-180 fill-muted-foreground text-muted-foreground"
-							size={30}
-						/>
-					</TouchableOpacity>
-				)}
+				<TouchableOpacity onPress={onMoveDown} disabled={isUpdating || workoutExerciseSortOrder === totalExercises}>
+					<Triangle
+						className="rotate-180 fill-muted-foreground text-muted-foreground"
+						size={25}
+					/>
+				</TouchableOpacity>
 			</View>
 			<View className="flex items-center justify-center gap-2">
 				<TouchableOpacity

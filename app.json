@@ -8,11 +8,6 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -21,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.pawnb4.fitnesstrackernw"
@@ -41,6 +36,16 @@
             "node_modules/@expo-google-fonts/preahvihear/Preahvihear_400Regular.ttf",
             "node_modules/@expo-google-fonts/contrail-one/ContrailOne_400Regular.ttf"
           ]
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash_screen.png",
+          "resizeMode": "cover",
+          "dark": {
+            "image": "./assets/images/splash_screen_dark.png"
+          }
         }
       ]
     ],
