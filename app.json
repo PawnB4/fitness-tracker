@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "fitness-tracker",
-    "slug": "fitness-tracker",
+    "slug": "fitness-tracker-nw",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
