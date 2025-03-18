@@ -106,47 +106,49 @@ export const updateWorkoutsSchema = createUpdateSchema(workouts);
 export const selectWorkoutExercisesSchema =
 	createSelectSchema(workoutExercises);
 
-export const workoutExerciseFormSchema =
-	createInsertSchema(workoutExercises, {
-		exerciseId: () =>
-			z.object({
-				value: z.string(),
-				label: z.string(),
-			}),
-		sets: z
-			.string()
-			.min(1, { message: "Sets is required" })
-			.refine((val) => !isNaN(Number(val)), {
-				message: "Sets must be a number",
-			})
-			.refine((val) => Number(val) >= 1, { message: "Sets must be at least 1" })
-			.refine((val) => Number.isInteger(Number(val)), {
-				message: "Sets must be a whole number",
-			}),
-		reps: z.string()
-			.min(1, { message: "Reps is required" })
-			.refine((val) => !isNaN(Number(val)), {
-				message: "Reps must be a number",
-			})
-			.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
-			.refine((val) => Number.isInteger(Number(val)), {
-				message: "Reps must be a whole number",
-			}),
-		weight: z.string().min(0, { message: "Weight is required" })
-			.refine((val) => !isNaN(Number(val)), {
-				message: "Weight must be a number",
-			})
-			.refine((val) => Number(val) >= 0, {
-				message: "Weight cannot be negative",
-			}),
-	}).omit({
-		id: true,
-		workoutId: true,
-		sortOrder: true,
-		createdAt: true,
-		updatedAt: true,
-		completed: true,
-	});
+export const workoutExerciseFormSchema = createInsertSchema(workoutExercises, {
+	exerciseId: () =>
+		z.object({
+			value: z.string(),
+			label: z.string(),
+		}),
+	sets: z
+		.string()
+		.min(1, { message: "Sets is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Sets must be a number",
+		})
+		.refine((val) => Number(val) >= 1, { message: "Sets must be at least 1" })
+		.refine((val) => Number.isInteger(Number(val)), {
+			message: "Sets must be a whole number",
+		}),
+	reps: z
+		.string()
+		.min(1, { message: "Reps is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Reps must be a number",
+		})
+		.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
+		.refine((val) => Number.isInteger(Number(val)), {
+			message: "Reps must be a whole number",
+		}),
+	weight: z
+		.string()
+		.min(0, { message: "Weight is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Weight must be a number",
+		})
+		.refine((val) => Number(val) >= 0, {
+			message: "Weight cannot be negative",
+		}),
+}).omit({
+	id: true,
+	workoutId: true,
+	sortOrder: true,
+	createdAt: true,
+	updatedAt: true,
+	completed: true,
+});
 export const updateWorkoutExercisesSchema =
 	createUpdateSchema(workoutExercises);
 

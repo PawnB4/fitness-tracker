@@ -16,7 +16,6 @@ import { DialogTrigger } from "~/components/ui/dialog";
 import { Dialog } from "~/components/ui/dialog";
 import { Text } from "~/components/ui/text";
 import { Textarea } from "~/components/ui/textarea";
-import { WorkoutPlanExerciseForm } from "~/components/workout-plan/workout-plan-exercise-form";
 import { WorkoutExerciseForm } from "~/components/workouts/workout-exercise-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
@@ -25,7 +24,6 @@ import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Clock } from "~/lib/icons/Clock";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { Pencil } from "~/lib/icons/Pencil";
-import { Plus } from "~/lib/icons/Plus";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { formatDate, formatTime } from "~/utils/date";
 // Function to update exercise order in database - this is the direct implementation
@@ -270,7 +268,6 @@ export default function Page() {
 				</View>
 				<View className="flex items-center justify-center">
 					<Text className="font-bold text-lg">
-
 						{workoutExercises?.reduce(
 							(acc, ex) => acc + ex.workoutExerciseSets,
 							0,
@@ -280,14 +277,16 @@ export default function Page() {
 				</View>
 				<View className="flex items-center justify-center">
 					<Text className="font-bold text-lg">
-						{workoutExercises?.length > 0 ? Math.round(
-							(workoutExercises?.reduce(
-								(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
-								0,
-							) /
-								workoutExercises?.length) *
-							100,
-						) : 0}
+						{workoutExercises?.length > 0
+							? Math.round(
+									(workoutExercises?.reduce(
+										(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
+										0,
+									) /
+										workoutExercises?.length) *
+										100,
+								)
+							: 0}
 						%
 					</Text>
 					<Text className="text-muted-foreground text-sm">Completed</Text>
@@ -341,7 +340,11 @@ export default function Page() {
 								</Button>
 							</DialogTrigger>
 							<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
-								<WorkoutExerciseForm setOpen={setOpenAddExerciseForm} workoutId={Number(id)} currentExercisesAmount={workoutExercises?.length || 0} />
+								<WorkoutExerciseForm
+									setOpen={setOpenAddExerciseForm}
+									workoutId={Number(id)}
+									currentExercisesAmount={workoutExercises?.length || 0}
+								/>
 							</DialogContent>
 						</Dialog>
 					</View>
@@ -385,7 +388,6 @@ export default function Page() {
 								/>
 							))
 						)}
-
 					</View>
 				</View>
 			</View>
@@ -394,15 +396,16 @@ export default function Page() {
 			<View className="mb-4 px-4">
 				<Text className="mb-2 font-semibold text-xl">Notes</Text>
 				<View className="rounded-xl bg-card p-4 shadow-sm">
-					
 					<Textarea
-					//TODO: Add a way to save the notes to the database
+						//TODO: Add a way to save the notes to the database
 						aria-labelledby="textareaLabel"
 						className="border-0 p-0"
 						value={workout.notes ?? undefined}
 						onChangeText={(text) => {
-							console.log(text)
-							db.update(schema.workouts).set({ notes: text }).where(eq(schema.workouts.id, Number(id)));
+							console.log(text);
+							db.update(schema.workouts)
+								.set({ notes: text })
+								.where(eq(schema.workouts.id, Number(id)));
 						}}
 						placeholder="No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time"
 					/>
@@ -466,7 +469,6 @@ const WorkoutExerciseListItem = ({
 			>
 				<DialogTrigger asChild>
 					<Pressable>
-
 						<View
 							key={workoutExerciseId}
 							className={`flex-row items-center justify-between p-4 ${workoutExerciseSortOrder < totalExercises ? "border-border border-b" : ""}`}
@@ -500,12 +502,24 @@ const WorkoutExerciseListItem = ({
 					</Pressable>
 				</DialogTrigger>
 				<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
-					<WorkoutExerciseForm isUpdate={true} setOpen={setOpenUpdateForm} workoutExerciseId={workoutExerciseId} exerciseName={exerciseName} currentExercisesAmount={totalExercises} currentSets={workoutExerciseSets} currentReps={workoutExerciseReps} currentWeight={workoutExerciseWeight} />
+					<WorkoutExerciseForm
+						isUpdate={true}
+						setOpen={setOpenUpdateForm}
+						workoutExerciseId={workoutExerciseId}
+						exerciseName={exerciseName}
+						currentExercisesAmount={totalExercises}
+						currentSets={workoutExerciseSets}
+						currentReps={workoutExerciseReps}
+						currentWeight={workoutExerciseWeight}
+					/>
 				</DialogContent>
 			</Dialog>
 
 			<View className="flex flex-row items-center justify-center gap-2">
-				<TouchableOpacity onPress={onMoveUp} disabled={isUpdating || workoutExerciseSortOrder === 1}>
+				<TouchableOpacity
+					onPress={onMoveUp}
+					disabled={isUpdating || workoutExerciseSortOrder === 1}
+				>
 					<Triangle
 						className="fill-muted-foreground text-muted-foreground"
 						size={25}
@@ -514,7 +528,10 @@ const WorkoutExerciseListItem = ({
 
 				<Text>#{workoutExerciseSortOrder}</Text>
 
-				<TouchableOpacity onPress={onMoveDown} disabled={isUpdating || workoutExerciseSortOrder === totalExercises}>
+				<TouchableOpacity
+					onPress={onMoveDown}
+					disabled={isUpdating || workoutExerciseSortOrder === totalExercises}
+				>
 					<Triangle
 						className="rotate-180 fill-muted-foreground text-muted-foreground"
 						size={25}
