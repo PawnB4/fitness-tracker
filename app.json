@@ -4,14 +4,9 @@
     "slug": "fitness-tracker-nw",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons/adaptive-icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash_screen.png",
-      "resizeMode": "cover"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -20,7 +15,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icons/adaptive-icon.png"
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#000000"
       },
       "package": "com.pawnb4.fitnesstrackernw"
     },
@@ -39,6 +35,18 @@
             "node_modules/@expo-google-fonts/preahvihear/Preahvihear_400Regular.ttf",
             "node_modules/@expo-google-fonts/contrail-one/ContrailOne_400Regular.ttf"
           ]
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth":200,
+          "resizeMode":"contain",
+          "backgroundColor":"#FFFFFF",
+          "dark":{
+            "backgroundColor":"#000000"
+          }
         }
       ]
     ],
