@@ -15,6 +15,7 @@ import { ThemeToggle } from "~/components/ThemeToggle";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
+import { SplashScreen } from "~/components/splash-screen";
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -34,7 +35,9 @@ export default function RootLayout() {
 	const hasMounted = React.useRef(false);
 	const { colorScheme, isDarkColorScheme } = useColorScheme();
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+	const [isAppReady, setIsAppReady] = React.useState(false);
 
+	
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
 			return;
@@ -50,7 +53,7 @@ export default function RootLayout() {
 	}, []);
 
 	if (!isColorSchemeLoaded) {
-		return null;
+		return <SplashScreen />;
 	}
 
 	return (

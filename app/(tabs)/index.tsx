@@ -134,15 +134,7 @@ export default function Page() {
 			</View>
 		);
 	}
-
-	if (workoutPlansError || workoutsError) {
-		return (
-			<View>
-				<Text>Workouts failed</Text>
-			</View>
-		);
-	}
-
+	
 	return (
 		<View className="flex-1 items-stretch gap-4 bg-secondary/30 p-4">
 			<Dialog

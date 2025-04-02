@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Triangle } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -23,9 +23,21 @@ import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Clock } from "~/lib/icons/Clock";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
-import { Pencil } from "~/lib/icons/Pencil";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { formatDate, formatTime } from "~/utils/date";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+
+
 // Function to update exercise order in database - this is the direct implementation
 const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
 	try {
@@ -104,6 +116,7 @@ const completeWorkoutExercise = async (id: number) => {
 		alert("Error completing exercise");
 	}
 };
+
 
 export default function Page() {
 	const { id } = useLocalSearchParams();
@@ -189,6 +202,17 @@ export default function Page() {
 		}
 	};
 
+	const handleNotesChange = async (text: string) => {
+		try {
+			await db
+				.update(schema.workouts)
+				.set({ notes: text })
+				.where(eq(schema.workouts.id, Number(id)));
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	// Function to handle exercise deletion with proper sort order updating
 	const handleDeleteExercise = async (
 		exerciseId: number,
@@ -220,6 +244,15 @@ export default function Page() {
 			alert(`Error deleting exercise: ${error}`);
 		} finally {
 			setIsUpdating(false);
+		}
+	};
+
+	const deleteWorkout = async () => {
+		try {
+			await db.delete(schema.workouts).where(eq(schema.workouts.id, Number(id)));
+			router.replace("/");
+		} catch (error) {
+			alert("Error deleting workout");
 		}
 	};
 
@@ -279,48 +312,19 @@ export default function Page() {
 					<Text className="font-bold text-lg">
 						{workoutExercises?.length > 0
 							? Math.round(
-									(workoutExercises?.reduce(
-										(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
-										0,
-									) /
-										workoutExercises?.length) *
-										100,
-								)
+								(workoutExercises?.reduce(
+									(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
+									0,
+								) /
+									workoutExercises?.length) *
+								100,
+							)
 							: 0}
 						%
 					</Text>
 					<Text className="text-muted-foreground text-sm">Completed</Text>
 				</View>
 			</View>
-
-			{/* Exercises List */}
-
-			{/* <View className="px-4 mb-4">
-                <View className="flex-row justify-between items-center mb-2">
-                    <Text className="text-xl font-semibold">Exercises</Text>
-                    <Button variant="ghost" size="sm">
-                        <Text className="text-primary">Add Exercise</Text>
-                    </Button>
-                </View>
-                <View className="bg-card rounded-xl overflow-hidden shadow-sm">
-                    {workoutExercises?.map((exercise, index) => (
-                        <View key={exercise.workoutExerciseId} className={`p-4 flex-row items-center justify-between ${index < workoutExercises?.length - 1 ? 'border-b border-border' : ''}`}>
-                            <View className="flex-row items-center flex-1">
-                                <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${exercise.workoutExerciseCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
-                                    <Dumbbell size={16} color={exercise.workoutExerciseCompleted ? "#22c55e" : "#9ca3af"} />
-                                </View>
-                                <View className="flex-1">
-                                    <Text className="font-medium">{exercise.exerciseName}</Text>
-                                    <Text className="text-muted-foreground text-sm">
-                                        {exercise.workoutExerciseSets} sets • {exercise.workoutExerciseReps} reps {exercise.workoutExerciseWeight > 0 ? `• ${exercise.workoutExerciseWeight} lbs` : ''}
-                                    </Text>
-                                </View>
-                            </View>
-                            <ChevronRight size={18} color="#9ca3af" />
-                        </View>
-                    ))}
-                </View>
-            </View> */}
 
 			<View className="px-4 pt-6">
 				{/* Exercises Section */}
@@ -394,34 +398,46 @@ export default function Page() {
 
 			{/* Notes */}
 			<View className="mb-4 px-4">
-				<Text className="mb-2 font-semibold text-xl">Notes</Text>
+				<Text className="mb-2 font-bold text-xl">Notes</Text>
 				<View className="rounded-xl bg-card p-4 shadow-sm">
 					<Textarea
-						//TODO: Add a way to save the notes to the database
 						aria-labelledby="textareaLabel"
 						className="border-0 p-0"
 						value={workout.notes ?? undefined}
-						onChangeText={(text) => {
-							console.log(text);
-							db.update(schema.workouts)
-								.set({ notes: text })
-								.where(eq(schema.workouts.id, Number(id)));
-						}}
+						onChangeText={handleNotesChange}
 						placeholder="No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time"
 					/>
 				</View>
 			</View>
 
-			{/* Action Buttons */}
-			<View className="mb-8 flex-row justify-between px-4">
-				<Button variant="outline" className="mr-2 flex-1">
-					<Pencil size={16} className="mr-2" />
-					<Text>Edit Workout</Text>
-				</Button>
-				<Button variant="destructive" className="ml-2 flex-1">
-					<Trash2 size={16} className="mr-2" />
-					<Text className="text-destructive-foreground">Delete</Text>
-				</Button>
+			<View className="mb-8 flex-row px-4 mt-2">
+				<AlertDialog className="w-full">
+					<AlertDialogTrigger asChild>
+						<Button variant="destructive" className="ml-2 flex-1">
+							<Text className="text-destructive-foreground font-bold">Delete workout</Text>
+						</Button>
+					</AlertDialogTrigger>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+							<AlertDialogDescription>
+								Are you sure you want to delete this workout? This action
+								cannot be undone.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>
+								<Text>Cancel</Text>
+							</AlertDialogCancel>
+							<AlertDialogAction
+								className="bg-destructive text-destructive-foreground"
+								onPress={() => deleteWorkout()}
+							>
+								<Text>Continue</Text>
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
 			</View>
 		</ScrollView>
 	);
