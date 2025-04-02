@@ -27,14 +27,23 @@ import { Button } from "./ui/button";
 
 export function UserButton() {
     const [openDialog, setOpenDialog] = useState(false);
-    const [configObject, setConfigObject] = useState();
+    const [configObject, setConfigObject] = useState<{ preferredTheme?: string, timezone?: string }>({});
 
     const { data: userSettings } = useLiveQuery(
         db.select().from(schema.user).limit(1)
     );
     const currentUserSettings = userSettings?.[0]?.config;
 
-    console.log(currentUserSettings);
+    // Initialize configObject with current settings when they load
+    useEffect(() => {
+        if (currentUserSettings) {
+            setConfigObject(currentUserSettings);
+        }
+    }, [currentUserSettings]);
+
+    useEffect(() => {
+        console.log("configObject", configObject)
+    }, [configObject])
 
     const insets = useSafeAreaInsets();
     const contentInsets = {
@@ -44,11 +53,17 @@ export function UserButton() {
         right: 12,
     };
 
-    useEffect(() => {
-        console.log("configObject", configObject);
-    }, [configObject]);
+    const saveConfiguration = async () => {
+        try {
+            await db.update(schema.user).set({
+                config: configObject
+            });
+            setOpenDialog(false);
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
-  
     return (
         <Dialog
             open={openDialog}
@@ -76,16 +91,23 @@ export function UserButton() {
             <DialogContent className="flex w-[90vw] min-w-[300px] max-w-[360px] flex-col justify-center gap-4 self-center p-4">
                 <DialogTitle className="">User settings</DialogTitle>
 
-                <View className="flex flex-row items-center justify-between gap-2 mt-4">
+                <View className="flex flex-row gap-2 items-center justify-between mt-4">
                     <Text className="font-medium">
                         Preferred color theme
                     </Text>
 
                     <Select
+                        value={{
+                            // @ts-ignore
+                            value: configObject?.
+                                preferredTheme, label: configObject?.
+                                    preferredTheme === "dark" ? "Dark" : "Light"
+                        }}
                         // @ts-ignore
-                        value={currentUserSettings?.preferredTheme ?? undefined}
-                        // @ts-ignore
-                        onValueChange={(e) => setConfigObject({ ...configObject, preferredTheme: e?.value })}
+                        onValueChange={(e) => setConfigObject({
+                            ...
+                            configObject, preferredTheme: e?.value
+                        })}
                     >
                         <SelectTrigger className="w-[38vw]">
                             <SelectValue
@@ -96,24 +118,24 @@ export function UserButton() {
                         <SelectContent insets={contentInsets} className="w-[38vw]">
                             <SelectItem
                                 key={1}
-                                label={"Dark"}
-                                value={"dark"}
+                                label="Dark"
+                                value="dark"
                             >
-                                {"Dark"}
+                                Dark
                             </SelectItem>
                             <SelectItem
                                 key={2}
-                                label={"Light"}
-                                value={"light"}
+                                label="Light"
+                                value="light"
                             >
-                                {"Light"}
+                                Light
                             </SelectItem>
                         </SelectContent>
                     </Select>
                 </View>
-                <Button onPress={() =>{}}>
-					<Text>Save</Text>
-				</Button>
+                <Button onPress={() => saveConfiguration()}>
+                    <Text>Save</Text>
+                </Button>
 
             </DialogContent>
         </Dialog>

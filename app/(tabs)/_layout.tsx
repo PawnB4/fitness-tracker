@@ -7,7 +7,15 @@ import { House } from "~/lib/icons/House";
 import { UserButton } from "~/components/user-button";
 export default function TabLayout() {
 	return (
-		<Tabs>
+		<Tabs
+			screenOptions={{
+				tabBarStyle: {
+					height: 70,
+					paddingBottom: 10,
+					paddingTop: 10,
+				},
+			}}
+		>
 			<Tabs.Screen
 				name="index"
 				options={{

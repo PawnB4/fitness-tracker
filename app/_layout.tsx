@@ -11,12 +11,14 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform } from "react-native";
-import { ThemeToggle } from "~/components/ThemeToggle";
 import { SplashScreen } from "~/components/splash-screen";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { UserButton } from "~/components/user-button";
+import { db } from "~/db/drizzle";
+import * as schema from "~/db/schema";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -34,9 +36,23 @@ export {
 
 export default function RootLayout() {
 	const hasMounted = React.useRef(false);
-	const { colorScheme, isDarkColorScheme } = useColorScheme();
+	// Get nativewind's theme manager
+	const { colorScheme, isDarkColorScheme, setColorScheme } = useColorScheme();
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 	const [isAppReady, setIsAppReady] = React.useState(false);
+	
+	// Query for user settings from database
+	const { data: userSettings } = useLiveQuery(
+		db.select().from(schema.user).limit(1)
+	);
+	const userConfig = userSettings?.[0]?.config;
+	
+	// Apply user's theme preference when it loads from DB
+	React.useEffect(() => {
+		if (userConfig?.preferredTheme && (userConfig.preferredTheme === "dark" || userConfig.preferredTheme === "light")) {
+			setColorScheme(userConfig.preferredTheme);
+		}
+	}, [userConfig, setColorScheme]);
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -50,7 +66,7 @@ export default function RootLayout() {
 		setAndroidNavigationBar(colorScheme);
 		setIsColorSchemeLoaded(true);
 		hasMounted.current = true;
-	}, []);
+	}, [colorScheme]);
 
 	if (!isColorSchemeLoaded) {
 		return <SplashScreen />;
@@ -66,7 +82,6 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "",
 						headerRight: () => <UserButton />,
-						// headerShown: false
 					}}
 				/>
 				<Stack.Screen
