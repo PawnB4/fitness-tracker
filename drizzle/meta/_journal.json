@@ -120,6 +120,13 @@
       "when": 1741541462482,
       "tag": "0016_black_taskmaster",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1743598476545,
+      "tag": "0017_futuristic_sunspot",
+      "breakpoints": true
     }
   ]
 }

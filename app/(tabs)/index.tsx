@@ -30,7 +30,6 @@ import { fitnessTrackerDb } from "~/db/drizzle";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import migrations from "~/drizzle/migrations";
-
 export default function Page() {
 	useDrizzleStudio(fitnessTrackerDb);
 

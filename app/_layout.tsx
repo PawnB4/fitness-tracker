@@ -16,6 +16,7 @@ import { SplashScreen } from "~/components/splash-screen";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
+import { UserButton } from "~/components/user-button";
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -64,7 +65,7 @@ export default function RootLayout() {
 					name="workout/[id]"
 					options={{
 						headerTitle: "",
-						headerRight: () => <ThemeToggle />,
+						headerRight: () => <UserButton />,
 						// headerShown: false
 					}}
 				/>
@@ -72,7 +73,7 @@ export default function RootLayout() {
 					name="workout-plan/[id]"
 					options={{
 						headerTitle: "",
-						headerRight: () => <ThemeToggle />,
+						headerRight: () => <UserButton />,
 					}}
 				/>
 			</Stack>

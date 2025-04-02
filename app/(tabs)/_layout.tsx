@@ -1,11 +1,10 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
-import { ThemeToggle } from "~/components/ThemeToggle";
 import { BicepsFlexed } from "~/lib/icons/BicepsFlexed";
 import { ChartNoAxesCombined } from "~/lib/icons/ChartNoAxesCombined";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { House } from "~/lib/icons/House";
-
+import { UserButton } from "~/components/user-button";
 export default function TabLayout() {
 	return (
 		<Tabs>
@@ -14,7 +13,7 @@ export default function TabLayout() {
 				options={{
 					title: "Home",
 					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
-					headerRight: () => <ThemeToggle />,
+					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -36,7 +35,7 @@ export default function TabLayout() {
 				options={{
 					title: "Progress",
 					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
-					headerRight: () => <ThemeToggle />,
+					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -58,7 +57,7 @@ export default function TabLayout() {
 				options={{
 					title: "Workout Plans",
 					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
-					headerRight: () => <ThemeToggle />,
+					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							style={{ fontFamily: "ContrailOne_400Regular" }}
@@ -80,7 +79,7 @@ export default function TabLayout() {
 				options={{
 					title: "Exercises",
 					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
-					headerRight: () => <ThemeToggle />,
+					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							style={{ fontFamily: "ContrailOne_400Regular" }}

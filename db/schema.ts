@@ -71,6 +71,16 @@ export const workoutPlanExercises = sqliteTable("workout_plan_exercises", {
 	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 });
 
+export const user = sqliteTable("user", {
+	config: text("", { mode: "json" }).$type<{
+		preferredTheme: "dark" | "light";
+		timezone: string;
+	}>().default({
+		preferredTheme: "dark",
+		timezone: "America/Argentina/Buenos_Aires",
+	}),
+});
+
 // Zod schemas
 
 // Exercises
