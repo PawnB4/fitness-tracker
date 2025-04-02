@@ -1,5 +1,5 @@
 import { FlashList } from "@shopify/flash-list";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
@@ -41,7 +41,7 @@ export default function Page() {
 	const { success, error: migrationsError } = useMigrations(db, migrations);
 
 	const { data: workouts, error: workoutsError } = useLiveQuery(
-		db.select().from(schema.workouts),
+		db.select().from(schema.workouts).orderBy(desc(schema.workouts.createdAt)),
 	);
 
 	const { data: workoutPlans, error: workoutPlansError } = useLiveQuery(
@@ -227,7 +227,7 @@ export default function Page() {
 				renderItem={({ item }) => (
 					<WorkoutCard
 						id={item.id}
-						name={item.name || ""}
+						name={item.name}
 						notes={item.notes}
 						createdAt={item.createdAt}
 						updatedAt={item.updatedAt}
