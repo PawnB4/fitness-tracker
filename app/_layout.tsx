@@ -12,10 +12,10 @@ import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform } from "react-native";
 import { ThemeToggle } from "~/components/ThemeToggle";
+import { SplashScreen } from "~/components/splash-screen";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
-import { SplashScreen } from "~/components/splash-screen";
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -37,7 +37,6 @@ export default function RootLayout() {
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 	const [isAppReady, setIsAppReady] = React.useState(false);
 
-	
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
 			return;

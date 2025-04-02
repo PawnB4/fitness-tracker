@@ -1,19 +1,18 @@
+import { eq } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
+import { db } from "~/db/drizzle";
 import type { Workout } from "~/db/schema";
 import * as schema from "~/db/schema";
-import { formatTime } from "~/utils/date";
-import { formatDate } from "~/utils/date";
-import { Clock } from "~/lib/icons/Clock";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { db } from "~/db/drizzle";
-import { eq } from "drizzle-orm";
-import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { CircleCheck } from "~/lib/icons/CircleCheck";
 import { CircleX } from "~/lib/icons/CircleX";
-
+import { Clock } from "~/lib/icons/Clock";
+import { Dumbbell } from "~/lib/icons/Dumbbell";
+import { formatTime } from "~/utils/date";
+import { formatDate } from "~/utils/date";
 
 export const WorkoutCard = ({ id, createdAt }: Workout) => {
 	const { data: workoutExercises, error: exercisesError } = useLiveQuery(
@@ -41,10 +40,8 @@ export const WorkoutCard = ({ id, createdAt }: Workout) => {
 	return (
 		<Pressable onPress={() => router.push(`/workout/${id}`)}>
 			<Card className="flex-1 rounded-2xl shadow">
-				<CardContent className="px-3 py-2 m-0 flex gap-2">
-					<CardTitle
-						className="leading-normal font-bold tracking-wider"
-					>
+				<CardContent className="m-0 flex gap-2 px-3 py-2">
+					<CardTitle className="font-bold leading-normal tracking-wider">
 						Workout of {formatDate(createdAt ?? "")}
 					</CardTitle>
 
@@ -64,28 +61,31 @@ export const WorkoutCard = ({ id, createdAt }: Workout) => {
 							</Text>
 						</View>
 						<View className="flex-row items-center gap-2 border-0">
-							{workoutExercises?.length > 0
-								&& Math.round(
-									(workoutExercises?.reduce(
-										(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
-										0,
-									) /
-										workoutExercises?.length) *
+							{workoutExercises?.length > 0 &&
+							Math.round(
+								(workoutExercises?.reduce(
+									(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
+									0,
+								) /
+									workoutExercises?.length) *
 									100,
-								) === 100
-								? <View className="flex-row items-center gap-2 border-0">
-									<CircleCheck className="mr-1 size-3 text-primary" fill={"#4ade80"} />
-									<Text className="text-primary text-sm">
-										Completed
-									</Text>
+							) === 100 ? (
+								<View className="flex-row items-center gap-2 border-0">
+									<CircleCheck
+										className="mr-1 size-3 text-primary"
+										fill={"#4ade80"}
+									/>
+									<Text className="text-primary text-sm">Completed</Text>
 								</View>
-								: <View className="flex-row items-center gap-2 border-0">
-									<CircleX className="mr-1 size-3 text-primary" fill={"#f87171"} />
-									<Text className="text-primary text-sm">
-										Not completed
-									</Text>
+							) : (
+								<View className="flex-row items-center gap-2 border-0">
+									<CircleX
+										className="mr-1 size-3 text-primary"
+										fill={"#f87171"}
+									/>
+									<Text className="text-primary text-sm">Not completed</Text>
 								</View>
-							}
+							)}
 						</View>
 					</View>
 				</CardContent>

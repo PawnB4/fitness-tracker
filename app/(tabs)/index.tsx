@@ -1,5 +1,5 @@
 import { FlashList } from "@shopify/flash-list";
-import { eq, desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
@@ -134,7 +134,7 @@ export default function Page() {
 			</View>
 		);
 	}
-	
+
 	return (
 		<View className="flex-1 items-stretch gap-4 bg-secondary/30 p-4">
 			<Dialog

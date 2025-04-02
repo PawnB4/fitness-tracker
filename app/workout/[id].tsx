@@ -10,6 +10,17 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { DialogContent } from "~/components/ui/dialog";
 import { DialogTrigger } from "~/components/ui/dialog";
@@ -25,18 +36,6 @@ import { Clock } from "~/lib/icons/Clock";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { formatDate, formatTime } from "~/utils/date";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
-
 
 // Function to update exercise order in database - this is the direct implementation
 const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
@@ -116,7 +115,6 @@ const completeWorkoutExercise = async (id: number) => {
 		alert("Error completing exercise");
 	}
 };
-
 
 export default function Page() {
 	const { id } = useLocalSearchParams();
@@ -249,7 +247,9 @@ export default function Page() {
 
 	const deleteWorkout = async () => {
 		try {
-			await db.delete(schema.workouts).where(eq(schema.workouts.id, Number(id)));
+			await db
+				.delete(schema.workouts)
+				.where(eq(schema.workouts.id, Number(id)));
 			router.replace("/");
 		} catch (error) {
 			alert("Error deleting workout");
@@ -312,13 +312,13 @@ export default function Page() {
 					<Text className="font-bold text-lg">
 						{workoutExercises?.length > 0
 							? Math.round(
-								(workoutExercises?.reduce(
-									(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
-									0,
-								) /
-									workoutExercises?.length) *
-								100,
-							)
+									(workoutExercises?.reduce(
+										(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
+										0,
+									) /
+										workoutExercises?.length) *
+										100,
+								)
 							: 0}
 						%
 					</Text>
@@ -410,19 +410,21 @@ export default function Page() {
 				</View>
 			</View>
 
-			<View className="mb-8 flex-row px-4 mt-2">
+			<View className="mt-2 mb-8 flex-row px-4">
 				<AlertDialog className="w-full">
 					<AlertDialogTrigger asChild>
 						<Button variant="destructive" className="ml-2 flex-1">
-							<Text className="text-destructive-foreground font-bold">Delete workout</Text>
+							<Text className="font-bold text-destructive-foreground">
+								Delete workout
+							</Text>
 						</Button>
 					</AlertDialogTrigger>
 					<AlertDialogContent>
 						<AlertDialogHeader>
 							<AlertDialogTitle>Confirm Delete</AlertDialogTitle>
 							<AlertDialogDescription>
-								Are you sure you want to delete this workout? This action
-								cannot be undone.
+								Are you sure you want to delete this workout? This action cannot
+								be undone.
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
