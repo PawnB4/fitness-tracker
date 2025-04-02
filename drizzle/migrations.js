@@ -19,6 +19,7 @@ import m0014 from './0014_rich_pestilence.sql';
 import m0015 from './0015_clear_tag.sql';
 import m0016 from './0016_black_taskmaster.sql';
 import m0017 from './0017_futuristic_sunspot.sql';
+import m0018 from './0018_massive_dreaming_celestial.sql';
 
   export default {
     journal,
@@ -40,7 +41,8 @@ m0013,
 m0014,
 m0015,
 m0016,
-m0017
+m0017,
+m0018
     }
   }
   

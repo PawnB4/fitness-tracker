@@ -1,4 +1,4 @@
-import { Button, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { CircleUser } from "~/lib/icons/CircleUser";
 import { cn } from "~/lib/utils";
 import {
@@ -7,7 +7,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "~/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     type Option,
     Select,
@@ -23,9 +23,18 @@ import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq } from "drizzle-orm";
+import { Button } from "./ui/button";
 
 export function UserButton() {
     const [openDialog, setOpenDialog] = useState(false);
+    const [configObject, setConfigObject] = useState();
+
+    const { data: userSettings } = useLiveQuery(
+        db.select().from(schema.user).limit(1)
+    );
+    const currentUserSettings = userSettings?.[0]?.config;
+
+    console.log(currentUserSettings);
 
     const insets = useSafeAreaInsets();
     const contentInsets = {
@@ -35,13 +44,11 @@ export function UserButton() {
         right: 12,
     };
 
-    const { data: userSettings } = useLiveQuery(
-        db.select().from(schema.user).limit(1)
-    );
+    useEffect(() => {
+        console.log("configObject", configObject);
+    }, [configObject]);
 
-    console.log(userSettings);
-
-
+  
     return (
         <Dialog
             open={openDialog}
@@ -75,8 +82,10 @@ export function UserButton() {
                     </Text>
 
                     <Select
-                    // value={selectedWorkoutPlan}
-                    // onValueChange={(e) => setSelectedWorkoutPlan(e)}
+                        // @ts-ignore
+                        value={currentUserSettings?.preferredTheme ?? undefined}
+                        // @ts-ignore
+                        onValueChange={(e) => setConfigObject({ ...configObject, preferredTheme: e?.value })}
                     >
                         <SelectTrigger className="w-[38vw]">
                             <SelectValue
@@ -101,15 +110,11 @@ export function UserButton() {
                             </SelectItem>
                         </SelectContent>
                     </Select>
-
                 </View>
+                <Button onPress={() =>{}}>
+					<Text>Save</Text>
+				</Button>
 
-                {/* Divider */}
-                <View className="flex w-full flex-row items-center justify-between gap-2">
-                    <Separator className="my-1 w-[45%]" />
-                    <Text className="text-muted-foreground">or</Text>
-                    <Separator className="my-1 w-[45%]" />
-                </View>
             </DialogContent>
         </Dialog>
     );

@@ -122,6 +122,7 @@ export default function Page() {
 		return (
 			<View>
 				<Text>Migrations failed</Text>
+				<Text>{migrationsError.message}</Text>
 			</View>
 		);
 	}
