@@ -47,7 +47,6 @@ export const ExerciseForm = ({
 				type: value.type.value,
 				primaryMuscleGroup: value.primaryMuscleGroup?.value ?? null,
 			};
-			console.log(newExercise);
 			try {
 				await db.insert(schema.exercises).values(newExercise);
 				setOpen(false);

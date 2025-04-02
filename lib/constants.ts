@@ -75,3 +75,33 @@ export const EXERCISES = [
 	"Squats",
 	"Triceps Pushdown",
 ];
+
+// Common timezones with GMT offsets
+export const TIMEZONES = [
+	{ label: "GMT-12:00", value: "Etc/GMT+12" },
+	{ label: "GMT-11:00", value: "Etc/GMT+11" },
+	{ label: "GMT-10:00", value: "Etc/GMT+10" },
+	{ label: "GMT-09:00", value: "Etc/GMT+9" },
+	{ label: "GMT-08:00", value: "Etc/GMT+8" },
+	{ label: "GMT-07:00", value: "Etc/GMT+7" },
+	{ label: "GMT-06:00", value: "Etc/GMT+6" },
+	{ label: "GMT-05:00", value: "Etc/GMT+5" },
+	{ label: "GMT-04:00", value: "Etc/GMT+4" },
+	{ label: "GMT-03:00", value: "America/Argentina/Buenos_Aires" },
+	{ label: "GMT-02:00", value: "Etc/GMT+2" },
+	{ label: "GMT-01:00", value: "Etc/GMT+1" },
+	{ label: "GMT+00:00", value: "Etc/GMT+0" },
+	{ label: "GMT+01:00", value: "Etc/GMT-1" },
+	{ label: "GMT+02:00", value: "Etc/GMT-2" },
+	{ label: "GMT+03:00", value: "Etc/GMT-3" },
+	{ label: "GMT+04:00", value: "Etc/GMT-4" },
+	{ label: "GMT+05:00", value: "Etc/GMT-5" },
+	{ label: "GMT+05:30", value: "Asia/Kolkata" },
+	{ label: "GMT+06:00", value: "Etc/GMT-6" },
+	{ label: "GMT+07:00", value: "Etc/GMT-7" },
+	{ label: "GMT+08:00", value: "Etc/GMT-8" },
+	{ label: "GMT+09:00", value: "Etc/GMT-9" },
+	{ label: "GMT+10:00", value: "Etc/GMT-10" },
+	{ label: "GMT+11:00", value: "Etc/GMT-11" },
+	{ label: "GMT+12:00", value: "Etc/GMT-12" },
+];

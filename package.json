@@ -64,7 +64,8 @@
     "zod": "^3.24.2",
     "zustand": "^4.4.7",
     "expo-file-system": "~18.0.12",
-    "expo-splash-screen": "~0.29.22"
+    "expo-splash-screen": "~0.29.22",
+    "expo-sharing": "~13.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

@@ -14,7 +14,10 @@ async function getUserTimezone(): Promise<string> {
 }
 
 // Sync version with a provided timezone
-export function formatDateWithTimezone(dateTimeString: string, timezone?: string) {
+export function formatDateWithTimezone(
+	dateTimeString: string,
+	timezone?: string,
+) {
 	const dateObj = new Date(`${dateTimeString}Z`); // Interpret as UTC
 	const tz = timezone || "America/Argentina/Buenos_Aires";
 
@@ -27,7 +30,10 @@ export function formatDateWithTimezone(dateTimeString: string, timezone?: string
 }
 
 // Sync version with a provided timezone
-export function formatTimeWithTimezone(dateTimeString: string, timezone?: string) {
+export function formatTimeWithTimezone(
+	dateTimeString: string,
+	timezone?: string,
+) {
 	const dateObj = new Date(`${dateTimeString}Z`); // Interpret as UTC
 	const tz = timezone || "America/Argentina/Buenos_Aires";
 

@@ -80,7 +80,6 @@ export const WorkoutPlanExerciseForm = ({
 					defaultWeight:
 						value.defaultWeight === "" ? 0 : Number(value.defaultWeight),
 				};
-				console.log(exerciseData);
 				if (isUpdate && workoutPlanExerciseId) {
 					await db
 						.update(schema.workoutPlanExercises)

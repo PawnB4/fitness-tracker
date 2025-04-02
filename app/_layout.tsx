@@ -7,18 +7,18 @@ import {
 	ThemeProvider,
 } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform } from "react-native";
 import { SplashScreen } from "~/components/splash-screen";
-import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
-import { NAV_THEME } from "~/lib/constants";
-import { useColorScheme } from "~/lib/useColorScheme";
 import { UserButton } from "~/components/user-button";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
+import { NAV_THEME } from "~/lib/constants";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -40,16 +40,20 @@ export default function RootLayout() {
 	const { colorScheme, isDarkColorScheme, setColorScheme } = useColorScheme();
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 	const [isAppReady, setIsAppReady] = React.useState(false);
-	
+
 	// Query for user settings from database
 	const { data: userSettings } = useLiveQuery(
-		db.select().from(schema.user).limit(1)
+		db.select().from(schema.user).limit(1),
 	);
 	const userConfig = userSettings?.[0]?.config;
-	
+
 	// Apply user's theme preference when it loads from DB
 	React.useEffect(() => {
-		if (userConfig?.preferredTheme && (userConfig.preferredTheme === "dark" || userConfig.preferredTheme === "light")) {
+		if (
+			userConfig?.preferredTheme &&
+			(userConfig.preferredTheme === "dark" ||
+				userConfig.preferredTheme === "light")
+		) {
 			setColorScheme(userConfig.preferredTheme);
 		}
 	}, [userConfig, setColorScheme]);

@@ -79,7 +79,6 @@ export const WorkoutExerciseForm = ({
 					reps: Number(value.reps),
 					weight: value.weight === "" ? 0 : Number(value.weight),
 				};
-				console.log(exerciseData);
 				if (isUpdate && workoutExerciseId) {
 					await db
 						.update(schema.workoutExercises)
