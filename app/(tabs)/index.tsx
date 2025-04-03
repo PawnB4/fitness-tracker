@@ -42,7 +42,7 @@ export default function Page() {
 		useState<Option>(undefined);
 	const [openDialog, setOpenDialog] = useState(false);
 
-	const { success, error: migrationsError } = useMigrations(db, migrations);
+	// const { success, error: migrationsError } = useMigrations(db, migrations);
 
 	// Fetch workouts ordered by creation date
 	const { data: workouts, error: workoutsError } = useLiveQuery(
@@ -178,24 +178,6 @@ export default function Page() {
 		right: 12,
 	};
 
-	if (migrationsError) {
-		console.log("migrationsError", migrationsError);
-		return (
-			<View>
-				<Text>Migrations failed</Text>
-				<Text>{migrationsError.message}</Text>
-			</View>
-		);
-	}
-
-	// Added loading state check for the processed data
-	if (!success || !processedWorkouts) {
-		return (
-			<View className="flex-1 items-center justify-center gap-5 bg-secondary/30 p-6">
-				<ActivityIndicator size="large" color="#0284c7" />
-			</View>
-		);
-	}
 
 	// Handle potential errors from the queries
 	if (workoutsError || exercisesError) {
@@ -205,6 +187,14 @@ export default function Page() {
 			<View className="flex-1 items-center justify-center bg-secondary/30 p-6">
 				<Text className="text-destructive">Error loading workout data.</Text>
 				{/* Optionally show more details or a retry button */}
+			</View>
+		);
+	}
+
+	if (!processedWorkouts) {
+		return (
+			<View className="flex-1 items-center justify-center gap-5 bg-secondary/30 p-6">
+				<ActivityIndicator size="large" color="#0284c7" />
 			</View>
 		);
 	}
