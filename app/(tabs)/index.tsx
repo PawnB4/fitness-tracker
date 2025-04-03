@@ -4,9 +4,8 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { router } from "expo-router";
-import { useState } from "react";
-import { ActivityIndicator, View } from "react-native";
-import { ScrollView } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import {
@@ -26,10 +25,16 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
 import { WorkoutCard } from "~/components/workouts/workout-card";
-import { fitnessTrackerDb } from "~/db/drizzle";
-import { db } from "~/db/drizzle";
+import { db, fitnessTrackerDb } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import migrations from "~/drizzle/migrations";
+
+// Define the structure for the processed data passed to WorkoutCard
+type ProcessedWorkoutData = schema.Workout & {
+	totalExercises: number;
+	isCompleted: boolean;
+};
+
 export default function Page() {
 	useDrizzleStudio(fitnessTrackerDb);
 
@@ -39,9 +44,65 @@ export default function Page() {
 
 	const { success, error: migrationsError } = useMigrations(db, migrations);
 
+	// Fetch workouts ordered by creation date
 	const { data: workouts, error: workoutsError } = useLiveQuery(
 		db.select().from(schema.workouts).orderBy(desc(schema.workouts.createdAt)),
 	);
+
+	// Fetch all workout exercises to process them
+	// Note: This fetches ALL exercises. For large datasets, optimizing this might be needed.
+	const { data: allWorkoutExercises, error: exercisesError } = useLiveQuery(
+		db
+			.select({
+				id: schema.workoutExercises.id,
+				workoutId: schema.workoutExercises.workoutId,
+				completed: schema.workoutExercises.completed,
+			})
+			.from(schema.workoutExercises),
+	);
+
+	// Process workouts and exercises together using useMemo
+	const processedWorkouts: ProcessedWorkoutData[] = useMemo(() => {
+		if (!workouts || !allWorkoutExercises) {
+			return []; // Return empty array if data isn't ready
+		}
+
+		// Create a map for quick lookup of exercises per workout
+		const exercisesByWorkoutId = new Map<
+			number,
+			{ id: number; completed: boolean | null }[]
+		>();
+		for (const exercise of allWorkoutExercises) {
+			if (!exercisesByWorkoutId.has(exercise.workoutId)) {
+				exercisesByWorkoutId.set(exercise.workoutId, []);
+			}
+			exercisesByWorkoutId.get(exercise.workoutId)?.push({
+				id: exercise.id,
+				completed: exercise.completed,
+			});
+		}
+
+		// Map workouts to the desired structure including calculated fields
+		return workouts.map((workout) => {
+			const exercises = exercisesByWorkoutId.get(workout.id) || [];
+			const totalExercises = exercises.length;
+			let isCompleted = false;
+			if (totalExercises > 0) {
+				const completedCount = exercises.reduce(
+					(acc, ex) => acc + (ex.completed ? 1 : 0),
+					0,
+				);
+				const percentage = (completedCount / totalExercises) * 100;
+				isCompleted = Math.round(percentage) === 100;
+			}
+
+			return {
+				...workout, // Spread existing workout fields (id, createdAt, etc.)
+				totalExercises,
+				isCompleted,
+			};
+		});
+	}, [workouts, allWorkoutExercises]); // Re-calculate when workouts or exercises change
 
 	const { data: workoutPlans, error: workoutPlansError } = useLiveQuery(
 		db.select().from(schema.workoutPlans),
@@ -127,10 +188,23 @@ export default function Page() {
 		);
 	}
 
-	if (!success) {
+	// Added loading state check for the processed data
+	if (!success || !processedWorkouts) {
 		return (
 			<View className="flex-1 items-center justify-center gap-5 bg-secondary/30 p-6">
-				<ActivityIndicator size="large" color="##0284c7" />
+				<ActivityIndicator size="large" color="#0284c7" />
+			</View>
+		);
+	}
+
+	// Handle potential errors from the queries
+	if (workoutsError || exercisesError) {
+		console.error("Workout fetching error:", workoutsError);
+		console.error("Exercises fetching error:", exercisesError);
+		return (
+			<View className="flex-1 items-center justify-center bg-secondary/30 p-6">
+				<Text className="text-destructive">Error loading workout data.</Text>
+				{/* Optionally show more details or a retry button */}
 			</View>
 		);
 	}
@@ -160,42 +234,40 @@ export default function Page() {
 						<Text className="mb-3 font-medium">
 							Use a workout plan template
 						</Text>
-						{
-							workoutPlans?.length > 0 ? (
-						<Select
-							className="mb-3 w-full"
-							value={selectedWorkoutPlan}
-							onValueChange={(e) => setSelectedWorkoutPlan(e)}
-						>
-							<SelectTrigger>
-								<SelectValue
-									placeholder="Select a plan"
-									className="native:text-lg text-foreground text-sm"
-								/>
-							</SelectTrigger>
-							<SelectContent insets={contentInsets} className="w-[80vw]">
-								<ScrollView className="max-h-[300px]">
-									{workoutPlans?.map((plan) => (
-										<SelectItem
-											key={plan.id}
-											label={plan.name}
-											value={plan.id.toString()}
-										>
-											{plan.name}
-										</SelectItem>
-									))}
-								</ScrollView>
-									</SelectContent>
-								</Select>
-							) : (
-								<Select
-							className="mb-3 w-full"
-
-									value={{
-										value: "No workout plans found",
-										label: "No workout plans found",
-									}}
-								>
+						{workoutPlans?.length > 0 ? (
+							<Select
+								className="mb-3 w-full"
+								value={selectedWorkoutPlan}
+								onValueChange={(e) => setSelectedWorkoutPlan(e)}
+							>
+								<SelectTrigger>
+									<SelectValue
+										placeholder="Select a plan"
+										className="native:text-lg text-foreground text-sm"
+									/>
+								</SelectTrigger>
+								<SelectContent insets={contentInsets} className="w-[80vw]">
+									<ScrollView className="max-h-[300px]">
+										{workoutPlans?.map((plan) => (
+											<SelectItem
+												key={plan.id}
+												label={plan.name}
+												value={plan.id.toString()}
+											>
+												{plan.name}
+											</SelectItem>
+										))}
+									</ScrollView>
+								</SelectContent>
+							</Select>
+						) : (
+							<Select
+								className="mb-3 w-full"
+								value={{
+									value: "No workout plans found",
+									label: "No workout plans found",
+								}}
+							>
 								<SelectTrigger className="w-[275px] cursor-not-allowed opacity-50">
 									<SelectValue
 										className="native:text-lg text-foreground/50 text-sm"
@@ -203,8 +275,7 @@ export default function Page() {
 									/>
 								</SelectTrigger>
 							</Select>
-							)
-						}
+						)}
 
 						<Button
 							className="w-full"
@@ -242,19 +313,19 @@ export default function Page() {
 				</DialogContent>
 			</Dialog>
 			<FlashList
-				data={workouts}
+				data={processedWorkouts}
 				renderItem={({ item }) => (
 					<WorkoutCard
 						id={item.id}
-						name={item.name}
-						notes={item.notes}
 						createdAt={item.createdAt}
-						updatedAt={item.updatedAt}
+						totalExercises={item.totalExercises}
+						isCompleted={item.isCompleted}
 					/>
 				)}
-				estimatedItemSize={50}
+				estimatedItemSize={90}
 				showsVerticalScrollIndicator={false}
 				ItemSeparatorComponent={() => <View className="h-4" />}
+				keyExtractor={(item) => item.id.toString()}
 			/>
 		</View>
 	);

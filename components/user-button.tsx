@@ -3,7 +3,7 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Directory, File, Paths } from "expo-file-system/next";
 import * as Sharing from "expo-sharing";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
 	Dialog,
