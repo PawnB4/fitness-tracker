@@ -177,16 +177,16 @@ export default function Page() {
 	};
 
 	// Handle potential errors from the queries
-	if (workoutsError || exercisesError) {
-		console.error("Workout fetching error:", workoutsError);
-		console.error("Exercises fetching error:", exercisesError);
-		return (
-			<View className="flex-1 items-center justify-center bg-secondary/30 p-6">
-				<Text className="text-destructive">Error loading workout data.</Text>
-				{/* Optionally show more details or a retry button */}
-			</View>
-		);
-	}
+	// if (workoutsError || exercisesError) {
+	// 	console.error("Workout fetching error:", workoutsError);
+	// 	console.error("Exercises fetching error:", exercisesError);
+	// 	return (
+	// 		<View className="flex-1 items-center justify-center bg-secondary/30 p-6">
+	// 			<Text className="text-destructive">Error loading workout data.</Text>
+	// 			{/* Optionally show more details or a retry button */}
+	// 		</View>
+	// 	);
+	// }
 
 	if (!processedWorkouts) {
 		return (
