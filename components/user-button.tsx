@@ -243,7 +243,8 @@ export function UserButton() {
 					</Select>
 				</View>
 
-				<View className="mt-4 flex flex-row items-center justify-between gap-2">
+				{/* Timezone */}
+				{/* <View className="mt-4 flex flex-row items-center justify-between gap-2">
 					<Text className="font-medium">Timezone</Text>
 
 					<Select
@@ -276,7 +277,7 @@ export function UserButton() {
 							</ScrollView>
 						</SelectContent>
 					</Select>
-				</View>
+				</View> */}
 
 				<Button onPress={() => exportWorkoutData()} variant="outline">
 					<Text>Export workout data</Text>

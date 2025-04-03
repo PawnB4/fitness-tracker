@@ -160,7 +160,8 @@ export default function Page() {
 						<Text className="mb-3 font-medium">
 							Use a workout plan template
 						</Text>
-
+						{
+							workoutPlans?.length > 0 ? (
 						<Select
 							className="mb-3 w-full"
 							value={selectedWorkoutPlan}
@@ -184,8 +185,26 @@ export default function Page() {
 										</SelectItem>
 									))}
 								</ScrollView>
-							</SelectContent>
-						</Select>
+									</SelectContent>
+								</Select>
+							) : (
+								<Select
+							className="mb-3 w-full"
+
+									value={{
+										value: "No workout plans found",
+										label: "No workout plans found",
+									}}
+								>
+								<SelectTrigger className="w-[275px] cursor-not-allowed opacity-50">
+									<SelectValue
+										className="native:text-lg text-foreground/50 text-sm"
+										placeholder={"No workout plans found"}
+									/>
+								</SelectTrigger>
+							</Select>
+							)
+						}
 
 						<Button
 							className="w-full"
