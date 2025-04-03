@@ -1,7 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
@@ -27,7 +26,6 @@ import { Text } from "~/components/ui/text";
 import { WorkoutCard } from "~/components/workouts/workout-card";
 import { db, fitnessTrackerDb } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import migrations from "~/drizzle/migrations";
 
 // Define the structure for the processed data passed to WorkoutCard
 type ProcessedWorkoutData = schema.Workout & {
@@ -177,7 +175,6 @@ export default function Page() {
 		left: 12,
 		right: 12,
 	};
-
 
 	// Handle potential errors from the queries
 	if (workoutsError || exercisesError) {

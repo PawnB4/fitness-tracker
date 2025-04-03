@@ -8,20 +8,20 @@ import {
 } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform, View } from "react-native";
 import { SplashScreen } from "~/components/splash-screen";
+import { Text } from "~/components/ui/text";
 import { UserButton } from "~/components/user-button";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
+import migrations from "~/drizzle/migrations";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
-import migrations from "~/drizzle/migrations";
-import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { Text } from "~/components/ui/text";
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -44,7 +44,6 @@ export default function RootLayout() {
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 	const [isAppReady, setIsAppReady] = React.useState(false);
 	const { success, error: migrationsError } = useMigrations(db, migrations);
-
 
 	// Query for user settings from database
 	const { data: userSettings } = useLiveQuery(
@@ -80,7 +79,7 @@ export default function RootLayout() {
 	if (!isColorSchemeLoaded) {
 		return <SplashScreen />;
 	}
-		if (migrationsError) {
+	if (migrationsError) {
 		console.log("migrationsError", migrationsError);
 		return (
 			<View>
@@ -89,8 +88,6 @@ export default function RootLayout() {
 			</View>
 		);
 	}
-
-	
 
 	return (
 		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
