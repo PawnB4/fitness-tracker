@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { openDatabaseSync } from "expo-sqlite";
 
-export const fitnessTrackerDb = openDatabaseSync("fitness-tracker-dev.db", {
+export const fitnessTrackerDb = openDatabaseSync("fitness-tracker-prod.db", {
 	enableChangeListener: true,
 });
 
