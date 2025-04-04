@@ -52,6 +52,7 @@ export const WorkoutPlanExerciseForm = ({
 	currentWeight?: number;
 	exerciseName?: string;
 }) => {
+	// const [newExercise]
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
 
 	const insets = useSafeAreaInsets();
