@@ -18,6 +18,7 @@ import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 
 import type { Option } from "@rn-primitives/select";
+import { useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
 	Select,
@@ -46,6 +47,17 @@ export const ExerciseForm = ({
 		right: 12,
 	};
 
+	useEffect(() => {
+		return () => {
+			setOpen(false);
+			if (openWorkoutPlanExerciseForm) {
+				openWorkoutPlanExerciseForm();
+			} else if (openWorkoutExerciseForm) {
+				openWorkoutExerciseForm();
+			}
+		};
+	}, [openWorkoutExerciseForm, openWorkoutPlanExerciseForm, setOpen]);
+
 	const form = useForm({
 		onSubmit: async ({ value }: { value: NewExercise }) => {
 			const newExercise = {
@@ -55,14 +67,11 @@ export const ExerciseForm = ({
 			};
 			try {
 				await db.insert(schema.exercises).values(newExercise);
-				if (!openWorkoutPlanExerciseForm && !openWorkoutExerciseForm) {
-					setOpen(false);
-				} else if (openWorkoutPlanExerciseForm) {
+				setOpen(false);
+				if (openWorkoutPlanExerciseForm) {
 					openWorkoutPlanExerciseForm();
-					setOpen(false);
 				} else if (openWorkoutExerciseForm) {
 					openWorkoutExerciseForm();
-					setOpen(false);
 				}
 			} catch (error) {
 				console.log(error);
