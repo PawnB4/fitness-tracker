@@ -32,7 +32,12 @@ import { EXERCISES_TYPES, MUSCLE_GROUPS } from "~/lib/constants";
 export const ExerciseForm = ({
 	setOpen,
 	openWorkoutPlanExerciseForm,
-}: { setOpen: (open: boolean) => void, openWorkoutPlanExerciseForm: () => void }) => {
+	openWorkoutExerciseForm,
+}: {
+	setOpen: (open: boolean) => void;
+	openWorkoutPlanExerciseForm?: () => void;
+	openWorkoutExerciseForm?: () => void;
+}) => {
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
 		top: insets.top,
@@ -50,10 +55,13 @@ export const ExerciseForm = ({
 			};
 			try {
 				await db.insert(schema.exercises).values(newExercise);
-				if (!openWorkoutPlanExerciseForm) {
+				if (!openWorkoutPlanExerciseForm && !openWorkoutExerciseForm) {
 					setOpen(false);
-				}else{
+				} else if (openWorkoutPlanExerciseForm) {
 					openWorkoutPlanExerciseForm();
+					setOpen(false);
+				} else if (openWorkoutExerciseForm) {
+					openWorkoutExerciseForm();
 					setOpen(false);
 				}
 			} catch (error) {

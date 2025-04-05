@@ -20,7 +20,6 @@ import * as schema from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { dialogContentMap } from "~/app/workout-plan/[id]";
 import {
 	Select,
 	SelectContent,
@@ -46,7 +45,7 @@ export const WorkoutPlanExerciseForm = ({
 	exerciseName,
 }: {
 	setOpen: (open: boolean) => void;
-	openExerciseForm: () => void;
+	openExerciseForm?: () => void;
 	planId?: number;
 	currentExercisesAmount: number;
 	isUpdate?: boolean;
@@ -151,7 +150,7 @@ export const WorkoutPlanExerciseForm = ({
 											onValueChange={field.handleChange}
 										>
 											<SelectTrigger
-												className="w-[200px]"
+												className="w-[220px]"
 												onPressIn={() => {
 													Keyboard.dismiss();
 												}}
@@ -163,7 +162,7 @@ export const WorkoutPlanExerciseForm = ({
 											</SelectTrigger>
 											<SelectContent
 												insets={contentInsets}
-												className="w-[275px]"
+												className="w-[220px]"
 											>
 												<ScrollView className="max-h-72">
 													{EXERCISES_TYPES.map(
@@ -205,7 +204,7 @@ export const WorkoutPlanExerciseForm = ({
 							<Button
 								className="grow flex-row items-center justify-center gap-2 bg-sky-500/70"
 								onPress={() => {
-									openExerciseForm();
+									openExerciseForm?.();
 									setOpen(false);
 								}}
 							>

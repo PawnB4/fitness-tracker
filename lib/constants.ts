@@ -105,3 +105,9 @@ export const TIMEZONES = [
 	{ label: "GMT+11:00", value: "Etc/GMT-11" },
 	{ label: "GMT+12:00", value: "Etc/GMT-12" },
 ];
+
+export const DIALOG_CONTENT_MAP = {
+	WP_EXERCISE_FORM: "WorkoutPlanExerciseForm",
+	WORKOUT_EXERCISE_FORM: "WorkoutExerciseForm",
+	EXERCISE_FORM: "ExerciseForm",
+};

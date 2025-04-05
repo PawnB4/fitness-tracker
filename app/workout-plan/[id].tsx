@@ -20,7 +20,7 @@ import { WorkoutPlanExerciseForm } from "~/components/workout-plan/workout-plan-
 import { WorkoutPlanForm } from "~/components/workout-plan/workout-plan-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import { EXERCISES_TYPES } from "~/lib/constants";
+import { DIALOG_CONTENT_MAP, EXERCISES_TYPES } from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
@@ -98,11 +98,6 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 	}
 };
 
-export const dialogContentMap = {
-	WP_EXERCISE_FORM: "WorkoutPlanExerciseForm",
-	EXERCISE_FORM: "ExerciseForm",
-};
-
 export default function Page() {
 	const [openAddWorkoutPlanExerciseForm, setOpenAddWorkoutPlanExerciseForm] =
 		useState(false);
@@ -111,16 +106,16 @@ export default function Page() {
 	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
 
 	const [dialogContent, setDialogContent] = useState(
-		dialogContentMap.WP_EXERCISE_FORM,
+		DIALOG_CONTENT_MAP.WP_EXERCISE_FORM,
 	);
 
 	const openExerciseForm = () => {
-		setDialogContent(dialogContentMap.EXERCISE_FORM);
+		setDialogContent(DIALOG_CONTENT_MAP.EXERCISE_FORM);
 		setOpenAddExerciseForm(true);
 	};
 
 	const openWorkoutPlanExerciseForm = () => {
-		setDialogContent(dialogContentMap.WP_EXERCISE_FORM);
+		setDialogContent(DIALOG_CONTENT_MAP.WP_EXERCISE_FORM);
 		setOpenAddWorkoutPlanExerciseForm(true);
 	};
 
@@ -358,21 +353,19 @@ export default function Page() {
 								/>
 							))
 						)}
-
-						{dialogContent === dialogContentMap.WP_EXERCISE_FORM && (
+						<Button
+							size="lg"
+							className="flex-row items-center justify-center gap-2 bg-sky-500/70"
+							onPress={openWorkoutPlanExerciseForm}
+						>
+							<Plus className="text-primary" />
+							<Text className="font-bold text-primary">Add exercise</Text>
+						</Button>
+						{dialogContent === DIALOG_CONTENT_MAP.WP_EXERCISE_FORM && (
 							<Dialog
 								open={openAddWorkoutPlanExerciseForm}
 								onOpenChange={setOpenAddWorkoutPlanExerciseForm}
 							>
-								<DialogTrigger asChild>
-									<Button
-										size="lg"
-										className="flex-row items-center justify-center gap-2 bg-sky-500/70"
-									>
-										<Plus className="text-primary" />
-										<Text className="font-bold text-primary">Add exercise</Text>
-									</Button>
-								</DialogTrigger>
 								<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
 									<WorkoutPlanExerciseForm
 										setOpen={setOpenAddWorkoutPlanExerciseForm}
@@ -383,7 +376,7 @@ export default function Page() {
 								</DialogContent>
 							</Dialog>
 						)}
-						{dialogContent === dialogContentMap.EXERCISE_FORM && (
+						{dialogContent === DIALOG_CONTENT_MAP.EXERCISE_FORM && (
 							<Dialog
 								open={openAddExerciseForm}
 								onOpenChange={setOpenAddExerciseForm}

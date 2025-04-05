@@ -10,6 +10,7 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import { ExerciseForm } from "~/components/exercises/exercise-form";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -30,6 +31,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { WorkoutExerciseForm } from "~/components/workouts/workout-exercise-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
+import { DIALOG_CONTENT_MAP } from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Clock } from "~/lib/icons/Clock";
@@ -119,9 +121,23 @@ const completeWorkoutExercise = async (id: number) => {
 export default function Page() {
 	const { id } = useLocalSearchParams();
 
+	const [openAddWorkoutExerciseForm, setOpenAddWorkoutExerciseForm] =
+		useState(false);
 	const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
-	const [openUpdateForm, setOpenUpdateForm] = useState(false);
 	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
+
+	const [dialogContent, setDialogContent] = useState(
+		DIALOG_CONTENT_MAP.WP_EXERCISE_FORM,
+	);
+	const openExerciseForm = () => {
+		setDialogContent(DIALOG_CONTENT_MAP.EXERCISE_FORM);
+		setOpenAddExerciseForm(true);
+	};
+
+	const openWorkoutExerciseForm = () => {
+		setDialogContent(DIALOG_CONTENT_MAP.WP_EXERCISE_FORM);
+		setOpenAddWorkoutExerciseForm(true);
+	};
 
 	const { data: workoutArray, error: workoutError } = useLiveQuery(
 		db
@@ -331,26 +347,41 @@ export default function Page() {
 				<View className="mb-6">
 					<View className="mb-4 flex-row items-center justify-between">
 						<Text className="font-bold text-2xl">Exercises</Text>
-						<Dialog
-							open={openAddExerciseForm}
-							onOpenChange={setOpenAddExerciseForm}
+						<Button
+							variant="outline"
+							className="ml-auto flex-row items-center justify-center gap-2"
+							onPress={openWorkoutExerciseForm}
 						>
-							<DialogTrigger asChild>
-								<Button
-									variant="outline"
-									className="flex-row items-center justify-center gap-2 "
-								>
-									<Text className="font-bold text-primary">Add exercise</Text>
-								</Button>
-							</DialogTrigger>
-							<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
-								<WorkoutExerciseForm
-									setOpen={setOpenAddExerciseForm}
-									workoutId={Number(id)}
-									currentExercisesAmount={workoutExercises?.length || 0}
-								/>
-							</DialogContent>
-						</Dialog>
+							<Text className="font-bold text-primary">Add exercise</Text>
+						</Button>
+						{dialogContent === DIALOG_CONTENT_MAP.WP_EXERCISE_FORM && (
+							<Dialog
+								open={openAddWorkoutExerciseForm}
+								onOpenChange={setOpenAddWorkoutExerciseForm}
+							>
+								<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
+									<WorkoutExerciseForm
+										setOpen={setOpenAddWorkoutExerciseForm}
+										workoutId={Number(id)}
+										currentExercisesAmount={workoutExercises?.length || 0}
+										openExerciseForm={openExerciseForm}
+									/>
+								</DialogContent>
+							</Dialog>
+						)}
+						{dialogContent === DIALOG_CONTENT_MAP.EXERCISE_FORM && (
+							<Dialog
+								open={openAddExerciseForm}
+								onOpenChange={setOpenAddExerciseForm}
+							>
+								<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
+									<ExerciseForm
+										setOpen={setOpenAddExerciseForm}
+										openWorkoutExerciseForm={openWorkoutExerciseForm}
+									/>
+								</DialogContent>
+							</Dialog>
+						)}
 					</View>
 
 					{/* Exercise Cards */}
