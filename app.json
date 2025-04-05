@@ -1,7 +1,7 @@
 {
   "expo": {
-    // "name": "Fitness Tracker",
-    "name": "Fitness Tracker Dev",
+    "name": "Fitness Tracker",
+    // "name": "Fitness Tracker Dev",
     "slug": "fitness-tracker-nw",
     "version": "1.0.0",
     "orientation": "portrait",
