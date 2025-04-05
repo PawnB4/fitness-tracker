@@ -20,6 +20,7 @@ import * as schema from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { dialogContentMap } from "~/app/workout-plan/[id]";
 import {
 	Select,
 	SelectContent,
@@ -30,9 +31,11 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { EXERCISES_TYPES } from "~/lib/constants";
+import { Plus } from "~/lib/icons/Plus";
 
 export const WorkoutPlanExerciseForm = ({
 	setOpen,
+	openExerciseForm,
 	planId,
 	currentExercisesAmount,
 	isUpdate = false,
@@ -43,6 +46,7 @@ export const WorkoutPlanExerciseForm = ({
 	exerciseName,
 }: {
 	setOpen: (open: boolean) => void;
+	openExerciseForm: () => void;
 	planId?: number;
 	currentExercisesAmount: number;
 	isUpdate?: boolean;
@@ -52,7 +56,6 @@ export const WorkoutPlanExerciseForm = ({
 	currentWeight?: number;
 	exerciseName?: string;
 }) => {
-	// const [newExercise]
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
 
 	const insets = useSafeAreaInsets();
@@ -131,68 +134,85 @@ export const WorkoutPlanExerciseForm = ({
 				</DialogHeader>
 				<View className="flex flex-col py-3">
 					{!isUpdate ? (
-						<form.Field name="exerciseId">
-							{(field) => (
-								<View className="">
-									<Label
-										style={{ fontFamily: "ContrailOne_400Regular" }}
-										className="mb-1"
-										nativeID={field.name}
-									>
-										Exercise:
-									</Label>
-									<Select
-										value={field.state.value}
-										// @ts-ignore
-										onValueChange={field.handleChange}
-									>
-										<SelectTrigger
-											className="w-[275px]"
-											onPressIn={() => {
-												Keyboard.dismiss();
-											}}
+						<View className="flex flex-row items-center justify-stretch gap-2">
+							<form.Field name="exerciseId">
+								{(field) => (
+									<View className="">
+										<Label
+											style={{ fontFamily: "ContrailOne_400Regular" }}
+											className="mb-1"
+											nativeID={field.name}
 										>
-											<SelectValue
-												className="native:text-lg text-foreground text-sm"
-												placeholder="Select an exercise"
-											/>
-										</SelectTrigger>
-										<SelectContent insets={contentInsets} className="w-[275px]">
-											<ScrollView className="max-h-72">
-												{EXERCISES_TYPES.map(
-													(type) =>
-														exercises.filter(
-															(exercise) => exercise.type === type,
-														).length > 0 && (
-															<SelectGroup key={type}>
-																<SelectLabel className="-ml-4 font-extrabold">
-																	{type}
-																</SelectLabel>
-																{exercises
-																	.filter((exercise) => exercise.type === type)
-																	.map((exercise) => (
-																		<SelectItem
-																			key={exercise.id}
-																			label={exercise.name}
-																			value={exercise.id.toString()}
-																		>
-																			{exercise.name}
-																		</SelectItem>
-																	))}
-															</SelectGroup>
-														),
-												)}
-											</ScrollView>
-										</SelectContent>
-									</Select>
-									{field.state.meta.errors ? (
-										<Text className="mt-1 text-red-500">
-											{field.state.meta.errors[0]?.message}
-										</Text>
-									) : null}
-								</View>
-							)}
-						</form.Field>
+											Exercise:
+										</Label>
+										<Select
+											value={field.state.value}
+											// @ts-ignore
+											onValueChange={field.handleChange}
+										>
+											<SelectTrigger
+												className="w-[200px]"
+												onPressIn={() => {
+													Keyboard.dismiss();
+												}}
+											>
+												<SelectValue
+													className="native:text-lg text-foreground text-sm"
+													placeholder="Select an exercise"
+												/>
+											</SelectTrigger>
+											<SelectContent
+												insets={contentInsets}
+												className="w-[275px]"
+											>
+												<ScrollView className="max-h-72">
+													{EXERCISES_TYPES.map(
+														(type) =>
+															exercises.filter(
+																(exercise) => exercise.type === type,
+															).length > 0 && (
+																<SelectGroup key={type}>
+																	<SelectLabel className="-ml-4 font-extrabold">
+																		{type}
+																	</SelectLabel>
+																	{exercises
+																		.filter(
+																			(exercise) => exercise.type === type,
+																		)
+																		.map((exercise) => (
+																			<SelectItem
+																				key={exercise.id}
+																				label={exercise.name}
+																				value={exercise.id.toString()}
+																			>
+																				{exercise.name}
+																			</SelectItem>
+																		))}
+																</SelectGroup>
+															),
+													)}
+												</ScrollView>
+											</SelectContent>
+										</Select>
+										{field.state.meta.errors ? (
+											<Text className="mt-1 text-red-500">
+												{field.state.meta.errors[0]?.message}
+											</Text>
+										) : null}
+									</View>
+								)}
+							</form.Field>
+							<Button
+								className="grow flex-row items-center justify-center gap-2 bg-sky-500/70"
+								onPress={() => {
+									openExerciseForm();
+									setOpen(false);
+								}}
+							>
+								<Plus className="text-primary" />
+								<Text className="font-bold text-primary">New</Text>
+							</Button>
+						</View>
 					) : (
 						<View className="pb-2">
 							<Label style={{ fontFamily: "ContrailOne_400Regular" }}>

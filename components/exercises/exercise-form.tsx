@@ -31,7 +31,8 @@ import { EXERCISES_TYPES, MUSCLE_GROUPS } from "~/lib/constants";
 
 export const ExerciseForm = ({
 	setOpen,
-}: { setOpen: (open: boolean) => void }) => {
+	openWorkoutPlanExerciseForm,
+}: { setOpen: (open: boolean) => void, openWorkoutPlanExerciseForm: () => void }) => {
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
 		top: insets.top,
@@ -49,7 +50,12 @@ export const ExerciseForm = ({
 			};
 			try {
 				await db.insert(schema.exercises).values(newExercise);
-				setOpen(false);
+				if (!openWorkoutPlanExerciseForm) {
+					setOpen(false);
+				}else{
+					openWorkoutPlanExerciseForm();
+					setOpen(false);
+				}
 			} catch (error) {
 				console.log(error);
 				alert("Error: Exercise already exists");
