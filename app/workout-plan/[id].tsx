@@ -99,27 +99,30 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 };
 
 export default function Page() {
+	const { id } = useLocalSearchParams();
+
 	const [openAddWorkoutPlanExerciseForm, setOpenAddWorkoutPlanExerciseForm] =
 		useState(false);
+		const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
+
 	const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
-	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
+	const [createdExercise, setCreatedExercise] = useState<schema.Exercise | null>(null);
 
 	const [dialogContent, setDialogContent] = useState(
-		DIALOG_CONTENT_MAP.WP_EXERCISE_FORM,
+		DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM,
 	);
 
 	const openExerciseForm = () => {
 		setDialogContent(DIALOG_CONTENT_MAP.EXERCISE_FORM);
 		setOpenAddExerciseForm(true);
-	};
+	};	
 
 	const openWorkoutPlanExerciseForm = () => {
-		setDialogContent(DIALOG_CONTENT_MAP.WP_EXERCISE_FORM);
+		setDialogContent(DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM);
 		setOpenAddWorkoutPlanExerciseForm(true);
 	};
 
-	const { id } = useLocalSearchParams();
 
 	const { data: workoutPlan, error: workoutError } = useLiveQuery(
 		db
@@ -361,7 +364,7 @@ export default function Page() {
 							<Plus className="text-primary" />
 							<Text className="font-bold text-primary">Add exercise</Text>
 						</Button>
-						{dialogContent === DIALOG_CONTENT_MAP.WP_EXERCISE_FORM && (
+						{dialogContent === DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM && (
 							<Dialog
 								open={openAddWorkoutPlanExerciseForm}
 								onOpenChange={setOpenAddWorkoutPlanExerciseForm}
@@ -372,6 +375,9 @@ export default function Page() {
 										planId={Number(id)}
 										currentExercisesAmount={planExercises?.length || 0}
 										openExerciseForm={openExerciseForm}
+										exerciseName={createdExercise?.name}
+										exerciseId={createdExercise?.id}
+										setCreatedExercise={setCreatedExercise}
 									/>
 								</DialogContent>
 							</Dialog>
@@ -385,6 +391,7 @@ export default function Page() {
 									<ExerciseForm
 										setOpen={setOpenAddExerciseForm}
 										openWorkoutPlanExerciseForm={openWorkoutPlanExerciseForm}
+										setCreatedExercise={setCreatedExercise}
 									/>
 								</DialogContent>
 							</Dialog>

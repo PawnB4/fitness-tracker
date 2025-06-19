@@ -18,7 +18,7 @@ import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 
 import type { Option } from "@rn-primitives/select";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
 	Select,
@@ -34,10 +34,12 @@ export const ExerciseForm = ({
 	setOpen,
 	openWorkoutPlanExerciseForm,
 	openWorkoutExerciseForm,
+	setCreatedExercise,
 }: {
 	setOpen: (open: boolean) => void;
 	openWorkoutPlanExerciseForm?: () => void;
 	openWorkoutExerciseForm?: () => void;
+	setCreatedExercise?: (exercise: schema.Exercise | null) => void;
 }) => {
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
@@ -47,16 +49,28 @@ export const ExerciseForm = ({
 		right: 12,
 	};
 
+	const wasSubmitted = useRef(false);
+
+	useEffect(() => {
+		wasSubmitted.current = false;
+	  }, []);
+
 	useEffect(() => {
 		return () => {
-			setOpen(false);
-			if (openWorkoutPlanExerciseForm) {
-				openWorkoutPlanExerciseForm();
-			} else if (openWorkoutExerciseForm) {
-				openWorkoutExerciseForm();
+		  // Only reopen the previous form if the user DID NOT submit
+		  if (!wasSubmitted.current) {
+			console.log("Executed cleanup")
+			if (setCreatedExercise) {
+				setCreatedExercise(null);
 			}
+			if (openWorkoutPlanExerciseForm) {
+			  openWorkoutPlanExerciseForm();
+			} else if (openWorkoutExerciseForm) {
+			  openWorkoutExerciseForm();
+			}
+		  }
 		};
-	}, [openWorkoutExerciseForm, openWorkoutPlanExerciseForm, setOpen]);
+	  }, [openWorkoutExerciseForm, openWorkoutPlanExerciseForm, setCreatedExercise]);
 
 	const form = useForm({
 		onSubmit: async ({ value }: { value: NewExercise }) => {
@@ -66,13 +80,17 @@ export const ExerciseForm = ({
 				primaryMuscleGroup: value.primaryMuscleGroup?.value ?? null,
 			};
 			try {
-				await db.insert(schema.exercises).values(newExercise);
+				const [createdExercise] = await db.insert(schema.exercises).values(newExercise).returning();
+				if (setCreatedExercise) {
+					setCreatedExercise(createdExercise);
+				}
+				wasSubmitted.current = true;
 				setOpen(false);
 				if (openWorkoutPlanExerciseForm) {
 					openWorkoutPlanExerciseForm();
-				} else if (openWorkoutExerciseForm) {
+				  } else if (openWorkoutExerciseForm) {
 					openWorkoutExerciseForm();
-				}
+				  }
 			} catch (error) {
 				console.log(error);
 				alert("Error: Exercise already exists");

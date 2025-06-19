@@ -31,6 +31,7 @@ import {
 } from "~/components/ui/select";
 import { EXERCISES_TYPES } from "~/lib/constants";
 import { Plus } from "~/lib/icons/Plus";
+import { useEffect } from "react";
 
 export const WorkoutExerciseForm = ({
 	setOpen,
@@ -43,6 +44,8 @@ export const WorkoutExerciseForm = ({
 	currentReps,
 	currentWeight,
 	exerciseName,
+	exerciseId,
+	setCreatedExercise,
 }: {
 	setOpen: (open: boolean) => void;
 	openExerciseForm?: () => void;
@@ -54,6 +57,8 @@ export const WorkoutExerciseForm = ({
 	currentReps?: number;
 	currentWeight?: number;
 	exerciseName?: string;
+	exerciseId?: number;
+	setCreatedExercise?: (exercise: schema.Exercise | null) => void;
 }) => {
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
 
@@ -65,10 +70,18 @@ export const WorkoutExerciseForm = ({
 		right: 12,
 	};
 
+	useEffect(() => {
+		return () => {
+			if (setCreatedExercise) {
+				setCreatedExercise(null);
+			}
+		};
+	  }, [setCreatedExercise]);
+
 	const form = useForm({
 		defaultValues: {
 			exerciseId: {
-				value: workoutExerciseId?.toString() ?? "1",
+				value: exerciseId?.toString() ?? "1",
 				label: exerciseName ?? "Abductor Machine",
 			},
 			sets: currentSets?.toString() ?? "",

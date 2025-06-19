@@ -107,7 +107,7 @@ export const TIMEZONES = [
 ];
 
 export const DIALOG_CONTENT_MAP = {
-	WP_EXERCISE_FORM: "WorkoutPlanExerciseForm",
+	WORKOUT_PLAN_EXERCISE_FORM: "WorkoutPlanExerciseForm",
 	WORKOUT_EXERCISE_FORM: "WorkoutExerciseForm",
 	EXERCISE_FORM: "ExerciseForm",
 };

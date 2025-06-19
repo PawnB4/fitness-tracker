@@ -120,14 +120,15 @@ const completeWorkoutExercise = async (id: number) => {
 
 export default function Page() {
 	const { id } = useLocalSearchParams();
+	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
 
 	const [openAddWorkoutExerciseForm, setOpenAddWorkoutExerciseForm] =
 		useState(false);
 	const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
-	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
+	const [createdExercise, setCreatedExercise] = useState<schema.Exercise | null>(null);
 
 	const [dialogContent, setDialogContent] = useState(
-		DIALOG_CONTENT_MAP.WP_EXERCISE_FORM,
+		DIALOG_CONTENT_MAP.WORKOUT_EXERCISE_FORM,
 	);
 	const openExerciseForm = () => {
 		setDialogContent(DIALOG_CONTENT_MAP.EXERCISE_FORM);
@@ -135,9 +136,10 @@ export default function Page() {
 	};
 
 	const openWorkoutExerciseForm = () => {
-		setDialogContent(DIALOG_CONTENT_MAP.WP_EXERCISE_FORM);
+		setDialogContent(DIALOG_CONTENT_MAP.WORKOUT_EXERCISE_FORM);
 		setOpenAddWorkoutExerciseForm(true);
 	};
+	
 
 	const { data: workoutArray, error: workoutError } = useLiveQuery(
 		db
@@ -354,7 +356,7 @@ export default function Page() {
 						>
 							<Text className="font-bold text-primary">Add exercise</Text>
 						</Button>
-						{dialogContent === DIALOG_CONTENT_MAP.WP_EXERCISE_FORM && (
+						{dialogContent === DIALOG_CONTENT_MAP.WORKOUT_EXERCISE_FORM && (
 							<Dialog
 								open={openAddWorkoutExerciseForm}
 								onOpenChange={setOpenAddWorkoutExerciseForm}
@@ -365,6 +367,10 @@ export default function Page() {
 										workoutId={Number(id)}
 										currentExercisesAmount={workoutExercises?.length || 0}
 										openExerciseForm={openExerciseForm}
+										exerciseName={createdExercise?.name}
+										exerciseId={createdExercise?.id}
+										setCreatedExercise={setCreatedExercise}
+									
 									/>
 								</DialogContent>
 							</Dialog>
@@ -378,6 +384,7 @@ export default function Page() {
 									<ExerciseForm
 										setOpen={setOpenAddExerciseForm}
 										openWorkoutExerciseForm={openWorkoutExerciseForm}
+										setCreatedExercise={setCreatedExercise}
 									/>
 								</DialogContent>
 							</Dialog>
