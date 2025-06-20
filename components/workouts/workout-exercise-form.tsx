@@ -17,9 +17,9 @@ import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
 	Select,
@@ -31,7 +31,9 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { EXERCISES_TYPES } from "~/lib/constants";
+import { Info } from "~/lib/icons/Info";
 import { Plus } from "~/lib/icons/Plus";
+import { formatDate } from "~/utils/date";
 
 export const WorkoutExerciseForm = ({
 	setOpen,
@@ -61,6 +63,8 @@ export const WorkoutExerciseForm = ({
 	setCreatedExercise?: (exercise: schema.Exercise | null) => void;
 }) => {
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
+	const [lastExercise, setLastExercise] =
+		useState<schema.WorkoutExercise | null>(null);
 
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
@@ -119,6 +123,31 @@ export const WorkoutExerciseForm = ({
 		},
 	});
 
+	// Fetch last exercise data when selectedExerciseId changes
+	useEffect(() => {
+		const fetchLastExercise = async () => {
+			try {
+				const result = await db
+					.select()
+					.from(schema.workoutExercises)
+					.where(
+						eq(
+							schema.workoutExercises.exerciseId,
+							Number(form.state.values.exerciseId.value),
+						),
+					)
+					.orderBy(desc(schema.workoutExercises.createdAt))
+					.limit(1);
+				setLastExercise(result[0]);
+			} catch (error) {
+				console.error("Error fetching last exercise:", error);
+				setLastExercise(null);
+			}
+		};
+
+		fetchLastExercise();
+	}, [form.state.values.exerciseId.value]);
+
 	const setsObject = useStore(form.store, (state) => state.fieldMeta.sets);
 	const repsObject = useStore(form.store, (state) => state.fieldMeta.reps);
 	const weightObject = useStore(form.store, (state) => state.fieldMeta.weight);
@@ -134,86 +163,106 @@ export const WorkoutExerciseForm = ({
 							: "Add an exercise to your workout"}
 					</DialogDescription>
 				</DialogHeader>
-				<View className="flex flex-col py-3">
+				<View className="flex flex-col py-3 ">
 					{!isUpdate ? (
-						<View className="flex flex-row items-center justify-stretch gap-2">
-							<form.Field name="exerciseId">
-								{(field) => (
-									<View className="">
-										<Label
-											style={{ fontFamily: "ContrailOne_400Regular" }}
-											className="mb-1"
-											nativeID={field.name}
-										>
-											Exercise:
-										</Label>
-										<Select
-											value={field.state.value}
-											// @ts-ignore
-											onValueChange={field.handleChange}
-										>
-											<SelectTrigger
-												className="w-[220px]"
-												onPressIn={() => {
-													Keyboard.dismiss();
-												}}
+						<View className="flex">
+							<View className="flex flex-row items-center justify-stretch gap-2 pb-2 ">
+								<form.Field name="exerciseId">
+									{(field) => (
+										<View className="">
+											<Label
+												style={{ fontFamily: "ContrailOne_400Regular" }}
+												className="mb-1"
+												nativeID={field.name}
 											>
-												<SelectValue
-													className="native:text-lg text-foreground text-sm"
-													placeholder="Select an exercise"
-												/>
-											</SelectTrigger>
-											<SelectContent
-												insets={contentInsets}
-												className="w-[220px]"
+												Exercise:
+											</Label>
+											<Select
+												value={field.state.value}
+												// @ts-ignore
+												onValueChange={field.handleChange}
 											>
-												<ScrollView className="max-h-72">
-													{EXERCISES_TYPES.map(
-														(type) =>
-															exercises.filter(
-																(exercise) => exercise.type === type,
-															).length > 0 && (
-																<SelectGroup key={type}>
-																	<SelectLabel className="-ml-4 font-extrabold">
-																		{type}
-																	</SelectLabel>
-																	{exercises
-																		.filter(
-																			(exercise) => exercise.type === type,
-																		)
-																		.map((exercise) => (
-																			<SelectItem
-																				key={exercise.id}
-																				label={exercise.name}
-																				value={exercise.id.toString()}
-																			>
-																				{exercise.name}
-																			</SelectItem>
-																		))}
-																</SelectGroup>
-															),
-													)}
-												</ScrollView>
-											</SelectContent>
-										</Select>
-										{field.state.meta.errors ? (
-											<Text className="mt-1 text-red-500">
-												{field.state.meta.errors[0]?.message}
-											</Text>
-										) : null}
+												<SelectTrigger
+													className="w-[220px]"
+													onPressIn={() => {
+														Keyboard.dismiss();
+													}}
+												>
+													<SelectValue
+														className="native:text-lg text-foreground text-sm"
+														placeholder="Select an exercise"
+													/>
+												</SelectTrigger>
+												<SelectContent
+													insets={contentInsets}
+													className="w-[220px]"
+												>
+													<ScrollView className="max-h-72">
+														{EXERCISES_TYPES.map(
+															(type) =>
+																exercises.filter(
+																	(exercise) => exercise.type === type,
+																).length > 0 && (
+																	<SelectGroup key={type}>
+																		<SelectLabel className="-ml-4 font-extrabold">
+																			{type}
+																		</SelectLabel>
+																		{exercises
+																			.filter(
+																				(exercise) => exercise.type === type,
+																			)
+																			.map((exercise) => (
+																				<SelectItem
+																					key={exercise.id}
+																					label={exercise.name}
+																					value={exercise.id.toString()}
+																				>
+																					{exercise.name}
+																				</SelectItem>
+																			))}
+																	</SelectGroup>
+																),
+														)}
+													</ScrollView>
+												</SelectContent>
+											</Select>
+										</View>
+									)}
+								</form.Field>
+
+								<Button
+									className="mt-auto grow flex-row items-center justify-center gap-2 bg-sky-500/70"
+									onPress={() => {
+										openExerciseForm?.();
+										setOpen(false);
+									}}
+								>
+									<Plus className="text-primary" />
+									<Text className="font-bold text-primary">New</Text>
+								</Button>
+							</View>
+							{lastExercise && (
+								<View className="mb-4 flex flex gap-1 rounded-md bg-primary/10 p-2">
+									<View className="flex flex-row items-center gap-2">
+										<Info className="text-primary" />
+										<Text className="text-primary">
+											Last stats for this exercise (
+											{formatDate(lastExercise.createdAt ?? "")}):
+										</Text>
 									</View>
-								)}
-							</form.Field>
-							<Button
-								className="grow flex-row items-center justify-center gap-2 bg-sky-500/70"
-								onPress={() => {
-									openExerciseForm?.();
-									setOpen(false);
-								}}
-							>
-								<Plus className="text-primary" />
-								<Text className="font-bold text-primary">New</Text>
-							</Button>
+									<View className="flex flex-row justify-around gap-8 self-center">
+										<Text className="font-bold text-primary">
+											Sets: {lastExercise.sets}
+										</Text>
+										<Text className="font-bold text-primary">
+											Reps: {lastExercise.reps}
+										</Text>
+										<Text className="font-bold text-primary">
+											Weight: {lastExercise.weight}kg
+										</Text>
+									</View>
+								</View>
+							)}
 						</View>
 					) : (
 						<View className="pb-2">
