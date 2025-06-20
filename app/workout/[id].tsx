@@ -125,7 +125,8 @@ export default function Page() {
 	const [openAddWorkoutExerciseForm, setOpenAddWorkoutExerciseForm] =
 		useState(false);
 	const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
-	const [createdExercise, setCreatedExercise] = useState<schema.Exercise | null>(null);
+	const [createdExercise, setCreatedExercise] =
+		useState<schema.Exercise | null>(null);
 
 	const [dialogContent, setDialogContent] = useState(
 		DIALOG_CONTENT_MAP.WORKOUT_EXERCISE_FORM,
@@ -139,7 +140,6 @@ export default function Page() {
 		setDialogContent(DIALOG_CONTENT_MAP.WORKOUT_EXERCISE_FORM);
 		setOpenAddWorkoutExerciseForm(true);
 	};
-	
 
 	const { data: workoutArray, error: workoutError } = useLiveQuery(
 		db
@@ -370,7 +370,6 @@ export default function Page() {
 										exerciseName={createdExercise?.name}
 										exerciseId={createdExercise?.id}
 										setCreatedExercise={setCreatedExercise}
-									
 									/>
 								</DialogContent>
 							</Dialog>

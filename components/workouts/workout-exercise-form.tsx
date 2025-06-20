@@ -19,6 +19,7 @@ import * as schema from "~/db/schema";
 
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
 	Select,
@@ -31,7 +32,6 @@ import {
 } from "~/components/ui/select";
 import { EXERCISES_TYPES } from "~/lib/constants";
 import { Plus } from "~/lib/icons/Plus";
-import { useEffect } from "react";
 
 export const WorkoutExerciseForm = ({
 	setOpen,
@@ -76,7 +76,7 @@ export const WorkoutExerciseForm = ({
 				setCreatedExercise(null);
 			}
 		};
-	  }, [setCreatedExercise]);
+	}, [setCreatedExercise]);
 
 	const form = useForm({
 		defaultValues: {

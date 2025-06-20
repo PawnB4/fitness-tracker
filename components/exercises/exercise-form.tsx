@@ -53,24 +53,28 @@ export const ExerciseForm = ({
 
 	useEffect(() => {
 		wasSubmitted.current = false;
-	  }, []);
+	}, []);
 
 	useEffect(() => {
 		return () => {
-		  // Only reopen the previous form if the user DID NOT submit
-		  if (!wasSubmitted.current) {
-			console.log("Executed cleanup")
-			if (setCreatedExercise) {
-				setCreatedExercise(null);
+			// Only reopen the previous form if the user DID NOT submit
+			if (!wasSubmitted.current) {
+				console.log("Executed cleanup");
+				if (setCreatedExercise) {
+					setCreatedExercise(null);
+				}
+				if (openWorkoutPlanExerciseForm) {
+					openWorkoutPlanExerciseForm();
+				} else if (openWorkoutExerciseForm) {
+					openWorkoutExerciseForm();
+				}
 			}
-			if (openWorkoutPlanExerciseForm) {
-			  openWorkoutPlanExerciseForm();
-			} else if (openWorkoutExerciseForm) {
-			  openWorkoutExerciseForm();
-			}
-		  }
 		};
-	  }, [openWorkoutExerciseForm, openWorkoutPlanExerciseForm, setCreatedExercise]);
+	}, [
+		openWorkoutExerciseForm,
+		openWorkoutPlanExerciseForm,
+		setCreatedExercise,
+	]);
 
 	const form = useForm({
 		onSubmit: async ({ value }: { value: NewExercise }) => {
@@ -80,7 +84,10 @@ export const ExerciseForm = ({
 				primaryMuscleGroup: value.primaryMuscleGroup?.value ?? null,
 			};
 			try {
-				const [createdExercise] = await db.insert(schema.exercises).values(newExercise).returning();
+				const [createdExercise] = await db
+					.insert(schema.exercises)
+					.values(newExercise)
+					.returning();
 				if (setCreatedExercise) {
 					setCreatedExercise(createdExercise);
 				}
@@ -88,9 +95,9 @@ export const ExerciseForm = ({
 				setOpen(false);
 				if (openWorkoutPlanExerciseForm) {
 					openWorkoutPlanExerciseForm();
-				  } else if (openWorkoutExerciseForm) {
+				} else if (openWorkoutExerciseForm) {
 					openWorkoutExerciseForm();
-				  }
+				}
 			} catch (error) {
 				console.log(error);
 				alert("Error: Exercise already exists");

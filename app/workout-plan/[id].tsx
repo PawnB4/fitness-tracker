@@ -103,11 +103,12 @@ export default function Page() {
 
 	const [openAddWorkoutPlanExerciseForm, setOpenAddWorkoutPlanExerciseForm] =
 		useState(false);
-		const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
+	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
 
 	const [openAddExerciseForm, setOpenAddExerciseForm] = useState(false);
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
-	const [createdExercise, setCreatedExercise] = useState<schema.Exercise | null>(null);
+	const [createdExercise, setCreatedExercise] =
+		useState<schema.Exercise | null>(null);
 
 	const [dialogContent, setDialogContent] = useState(
 		DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM,
@@ -116,13 +117,12 @@ export default function Page() {
 	const openExerciseForm = () => {
 		setDialogContent(DIALOG_CONTENT_MAP.EXERCISE_FORM);
 		setOpenAddExerciseForm(true);
-	};	
+	};
 
 	const openWorkoutPlanExerciseForm = () => {
 		setDialogContent(DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM);
 		setOpenAddWorkoutPlanExerciseForm(true);
 	};
-
 
 	const { data: workoutPlan, error: workoutError } = useLiveQuery(
 		db
@@ -364,7 +364,8 @@ export default function Page() {
 							<Plus className="text-primary" />
 							<Text className="font-bold text-primary">Add exercise</Text>
 						</Button>
-						{dialogContent === DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM && (
+						{dialogContent ===
+							DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM && (
 							<Dialog
 								open={openAddWorkoutPlanExerciseForm}
 								onOpenChange={setOpenAddWorkoutPlanExerciseForm}
