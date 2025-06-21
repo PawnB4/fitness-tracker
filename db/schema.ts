@@ -74,10 +74,12 @@ export const workoutPlanExercises = sqliteTable("workout_plan_exercises", {
 export const user = sqliteTable("user", {
 	config: text("", { mode: "json" })
 		.$type<{
+			name?: string;
 			preferredTheme?: string;
 			timezone?: string;
 		}>()
 		.default({
+			name: "",
 			preferredTheme: "dark",
 			timezone: "America/Argentina/Buenos_Aires",
 		}),

@@ -141,6 +141,13 @@
       "when": 1743606266057,
       "tag": "0019_seed-user",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1750538700532,
+      "tag": "0020_public_quasar",
+      "breakpoints": true
     }
   ]
 }
