@@ -242,7 +242,7 @@ export const WorkoutExerciseForm = ({
 								</Button>
 							</View>
 							{lastExercise && (
-								<View className="mb-4 flex flex gap-1 rounded-md bg-primary/10 p-2">
+								<View className="mb-4 flex gap-1 rounded-md bg-primary/10 p-2">
 									<View className="flex flex-row items-center gap-2">
 										<Info className="text-primary" />
 										<Text className="text-primary">

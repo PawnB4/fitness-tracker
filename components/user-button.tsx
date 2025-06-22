@@ -1,5 +1,7 @@
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
 import { Directory, File, Paths } from "expo-file-system/next";
 import * as Sharing from "expo-sharing";
 import { useEffect, useState } from "react";
@@ -74,10 +76,10 @@ export function UserButton() {
 	const exportWorkoutData = async () => {
 		try {
 			// Query all workouts with exercises
-			const workoutData = await db.select().from(schema.workouts).all();
+			const workoutData = db.select().from(schema.workouts).all();
 
 			// Query all workout exercises with join to exercises
-			const workoutExercisesData = await db
+			const workoutExercisesData = db
 				.select({
 					id: schema.workoutExercises.id,
 					workoutId: schema.workoutExercises.workoutId,
@@ -181,6 +183,139 @@ export function UserButton() {
 		}
 	};
 
+	const importWorkoutData = async () => {
+		try {
+			// Pick CSV file
+			const result = await DocumentPicker.getDocumentAsync({
+				type: "text/csv",
+				copyToCacheDirectory: true,
+			});
+
+			if (!result.assets || result.canceled) {
+				return;
+			}
+
+			const fileUri = result.assets[0].uri;
+			const csvContent = await FileSystem.readAsStringAsync(fileUri);
+
+			// Parse CSV
+			const lines = csvContent.split("\n").filter((line) => line.trim());
+			const headers = lines[0].split(",");
+
+			// Expected headers: Workout ID,Workout Name,Workout Date,Exercise ID,Exercise Name,Exercise Type,Muscle Group,Sets,Reps,Weight,Notes,Completed
+			if (
+				!headers.includes("Workout ID") ||
+				!headers.includes("Exercise Name")
+			) {
+				Alert.alert("Error", "Invalid CSV format");
+				return;
+			}
+
+			const rows = lines.slice(1).map((line) => {
+				const values = line.split(",");
+				const row: Record<string, string> = {};
+				headers.forEach((header, index) => {
+					row[header.trim()] = values[index]?.replace(/"/g, "").trim() || "";
+				});
+				return row;
+			});
+
+			// Get unique exercises and create missing ones
+			const uniqueExercises = new Map();
+			for (const row of rows) {
+				if (row["Exercise Name"]) {
+					uniqueExercises.set(row["Exercise Name"], {
+						name: row["Exercise Name"],
+						type: row["Exercise Type"] || "unknown",
+						primaryMuscleGroup: row["Muscle Group"] || "",
+					});
+				}
+			}
+
+			// Check existing exercises and create missing ones
+			const existingExercises = await db.select().from(schema.exercises);
+			const existingExerciseNames = new Set(
+				existingExercises.map((e) => e.name),
+			);
+
+			const exerciseNameToId = new Map();
+			existingExercises.forEach((e) => exerciseNameToId.set(e.name, e.id));
+
+			// Create missing exercises
+			for (const [name, exerciseData] of uniqueExercises) {
+				if (!existingExerciseNames.has(name)) {
+					const newExercise = await db
+						.insert(schema.exercises)
+						.values(exerciseData)
+						.returning();
+					exerciseNameToId.set(name, newExercise[0].id);
+				}
+			}
+
+			// Group rows by workout
+			const workoutGroups = new Map();
+			for (const row of rows) {
+				const workoutKey = `${row["Workout Name"]}-${row["Workout Date"]}`;
+				if (!workoutGroups.has(workoutKey)) {
+					workoutGroups.set(workoutKey, {
+						name: row["Workout Name"],
+						date: row["Workout Date"],
+						exercises: [],
+					});
+				}
+				if (row["Exercise Name"]) {
+					workoutGroups.get(workoutKey).exercises.push(row);
+				}
+			}
+
+			// Create workouts and their exercises
+			let importedWorkouts = 0;
+			let importedExercises = 0;
+
+			for (const [, workoutData] of workoutGroups) {
+				// Create workout
+				const newWorkout = await db
+					.insert(schema.workouts)
+					.values({
+						name: workoutData.name,
+						createdAt: workoutData.date,
+					})
+					.returning();
+
+				const workoutId = newWorkout[0].id;
+
+				// Add exercises to workout
+				for (let i = 0; i < workoutData.exercises.length; i++) {
+					const exerciseRow = workoutData.exercises[i];
+					const exerciseId = exerciseNameToId.get(exerciseRow["Exercise Name"]);
+
+					if (exerciseId) {
+						await db.insert(schema.workoutExercises).values({
+							workoutId,
+							exerciseId,
+							sets: Number.parseInt(exerciseRow.Sets) || 1,
+							reps: Number.parseInt(exerciseRow.Reps) || 1,
+							weight: Number.parseFloat(exerciseRow.Weight) || 0,
+							notes: exerciseRow.Notes || null,
+							completed: exerciseRow.Completed === "Yes",
+							sortOrder: i,
+						});
+						importedExercises++;
+					}
+				}
+				importedWorkouts++;
+			}
+
+			Alert.alert(
+				"Import Successful",
+				`Imported ${importedWorkouts} workouts with ${importedExercises} exercises`,
+			);
+		} catch (error) {
+			console.error("Error importing data:", error);
+			Alert.alert("Error", "Failed to import workout data");
+		}
+	};
+
 	return (
 		<Dialog
 			open={openDialog}
@@ -281,6 +416,9 @@ export function UserButton() {
 
 				<Button onPress={() => exportWorkoutData()} variant="outline">
 					<Text>Export workout data</Text>
+				</Button>
+				<Button onPress={() => importWorkoutData()} variant="outline">
+					<Text>Import workout data</Text>
 				</Button>
 				<Button onPress={() => saveConfiguration()}>
 					<Text>Save</Text>

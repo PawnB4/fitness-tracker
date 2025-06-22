@@ -8,17 +8,16 @@ import {
 } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import * as React from "react";
-import { Platform, View } from "react-native";
+import { useEffect } from "react";
+import { useRef, useState } from "react";
+import { useLayoutEffect } from "react";
+import { Platform } from "react-native";
 import { SplashScreen } from "~/components/splash-screen";
-import { Text } from "~/components/ui/text";
 import { UserButton } from "~/components/user-button";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import migrations from "~/drizzle/migrations";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
@@ -38,21 +37,20 @@ export {
 } from "expo-router";
 
 export default function RootLayout() {
-	const hasMounted = React.useRef(false);
+	const hasMounted = useRef(false);
 	// Get nativewind's theme manager
 	const { colorScheme, isDarkColorScheme, setColorScheme } = useColorScheme();
-	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-	const [isAppReady, setIsAppReady] = React.useState(false);
-	const { success, error: migrationsError } = useMigrations(db, migrations);
+	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = useState(false);
+	// const { success, error: migrationsError } = useMigrations(db, migrations);
 
 	// Query for user settings from database
 	const { data: userSettings } = useLiveQuery(
 		db.select().from(schema.user).limit(1),
 	);
-	const userConfig = userSettings?.[0]?.config;
+	const userConfig = userSettings[0]?.config;
 
 	// Apply user's theme preference when it loads from DB
-	React.useEffect(() => {
+	useEffect(() => {
 		if (
 			userConfig?.preferredTheme &&
 			(userConfig.preferredTheme === "dark" ||
@@ -79,15 +77,16 @@ export default function RootLayout() {
 	if (!isColorSchemeLoaded) {
 		return <SplashScreen />;
 	}
-	if (migrationsError) {
-		console.log("migrationsError", migrationsError);
-		return (
-			<View>
-				<Text>Migrations failed</Text>
-				<Text>{migrationsError.message}</Text>
-			</View>
-		);
-	}
+
+	// if (migrationsError) {
+	// 	console.log("migrationsError", migrationsError);
+	// 	return (
+	// 		<View>
+	// 			<Text>Migrations failed</Text>
+	// 			<Text>{migrationsError.message}</Text>
+	// 		</View>
+	// 	);
+	// }
 
 	return (
 		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
@@ -108,6 +107,13 @@ export default function RootLayout() {
 						headerRight: () => <UserButton />,
 					}}
 				/>
+				<Stack.Screen
+					name="welcome/index"
+					options={{
+						headerTitle: "",
+						headerShown: false,
+					}}
+				/>
 			</Stack>
 			<PortalHost />
 		</ThemeProvider>
@@ -116,5 +122,5 @@ export default function RootLayout() {
 
 const useIsomorphicLayoutEffect =
 	Platform.OS === "web" && typeof window === "undefined"
-		? React.useEffect
-		: React.useLayoutEffect;
+		? useEffect
+		: useLayoutEffect;

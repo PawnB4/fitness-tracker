@@ -2,10 +2,13 @@ import { FlashList } from "@shopify/flash-list";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
-import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { Redirect, router } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+	SafeAreaView,
+	useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -39,13 +42,32 @@ export default function Page() {
 	const [selectedWorkoutPlan, setSelectedWorkoutPlan] =
 		useState<Option>(undefined);
 	const [openDialog, setOpenDialog] = useState(false);
-
-	// const { success, error: migrationsError } = useMigrations(db, migrations);
+	const [user, setUser] = useState<schema.User[] | null>(null);
+	const [hasCheckedForUser, setHasCheckedForUser] = useState(false);
 
 	// Fetch workouts ordered by creation date
 	const { data: workouts, error: workoutsError } = useLiveQuery(
 		db.select().from(schema.workouts).orderBy(desc(schema.workouts.createdAt)),
 	);
+
+	console.log("USER: ", user);
+
+	// Fetch user on component mount
+	useEffect(() => {
+		const fetchUser = async () => {
+			try {
+				const result = await db.select().from(schema.user).limit(1);
+				setUser(result);
+				setHasCheckedForUser(true);
+			} catch (error) {
+				console.error("Error fetching user:", error);
+				setUser([]);
+				setHasCheckedForUser(true);
+			}
+		};
+
+		fetchUser();
+	}, []);
 
 	// Fetch all workout exercises to process them
 	// Note: This fetches ALL exercises. For large datasets, optimizing this might be needed.
@@ -176,19 +198,8 @@ export default function Page() {
 		right: 12,
 	};
 
-	// Handle potential errors from the queries
-	// if (workoutsError || exercisesError) {
-	// 	console.error("Workout fetching error:", workoutsError);
-	// 	console.error("Exercises fetching error:", exercisesError);
-	// 	return (
-	// 		<View className="flex-1 items-center justify-center bg-secondary/30 p-6">
-	// 			<Text className="text-destructive">Error loading workout data.</Text>
-	// 			{/* Optionally show more details or a retry button */}
-	// 		</View>
-	// 	);
-	// }
-
-	if (!processedWorkouts) {
+	// Show loading while data is being fetched
+	if (!hasCheckedForUser || !processedWorkouts) {
 		return (
 			<View className="flex-1 items-center justify-center gap-5 bg-secondary/30 p-6">
 				<ActivityIndicator size="large" color="#0284c7" />
@@ -196,8 +207,15 @@ export default function Page() {
 		);
 	}
 
+	// Only redirect if we've confirmed there are no users
+	if (hasCheckedForUser && user && user.length === 0) {
+		return <Redirect href="/welcome" />;
+	}
+
 	return (
-		<View className="flex-1 items-stretch gap-4 bg-secondary/30 p-4">
+		<SafeAreaView className="flex-1 items-stretch gap-4 bg-secondary/30 px-4 py-8">
+			<Text className="text-4xl ">Hello,</Text>
+			<Text className="font-bold text-7xl">{user?.[0]?.name}</Text>
 			<Dialog
 				open={openDialog}
 				onOpenChange={(e) => {
@@ -314,6 +332,6 @@ export default function Page() {
 				ItemSeparatorComponent={() => <View className="h-4" />}
 				keyExtractor={(item) => item.id.toString()}
 			/>
-		</View>
+		</SafeAreaView>
 	);
 }

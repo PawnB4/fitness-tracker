@@ -74,15 +74,14 @@ export const workoutPlanExercises = sqliteTable("workout_plan_exercises", {
 export const user = sqliteTable("user", {
 	config: text("", { mode: "json" })
 		.$type<{
-			name?: string;
 			preferredTheme?: string;
 			timezone?: string;
 		}>()
 		.default({
-			name: "",
 			preferredTheme: "dark",
 			timezone: "America/Argentina/Buenos_Aires",
 		}),
+	name: text(),
 });
 
 // Zod schemas
@@ -232,7 +231,8 @@ export const workoutPlanExercisesFormSchema = createInsertSchema(
 export const selectWorkoutPlanExercisesSchema =
 	createSelectSchema(workoutPlanExercises);
 
-// Form-specific schema that handles string inputs from React Native TextInput
+// User
+export const selectUserSchema = createSelectSchema(user);
 
 // Types
 
@@ -254,3 +254,5 @@ export type WorkoutPlanExercise = z.infer<
 export type NewWorkoutPlanExercise = z.infer<
 	typeof workoutPlanExercisesFormSchema
 >;
+
+export type User = z.infer<typeof selectUserSchema>;

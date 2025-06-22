@@ -1,1 +1,0 @@
-ALTER TABLE `exercises` DROP COLUMN `secondary_muscle_groups`;

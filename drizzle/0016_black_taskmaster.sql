@@ -1,1 +1,0 @@
-ALTER TABLE `workout_exercises` ADD `completed` integer DEFAULT false;

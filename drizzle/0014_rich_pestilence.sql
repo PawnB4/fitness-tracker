@@ -1,1 +1,0 @@
-DROP TABLE `date_table_test`;

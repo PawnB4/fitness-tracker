@@ -1,153 +1,34 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1740545916635,
-      "tag": "0000_perpetual_the_leader",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1740546060243,
-      "tag": "0001_seed-exercises-1",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1740546093217,
-      "tag": "0002_seed-exercises-2",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1740546097471,
-      "tag": "0003_seed-exercises-3",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1740856226150,
-      "tag": "0004_lyrical_warbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1740885940054,
-      "tag": "0005_parched_stephen_strange",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1740936204197,
-      "tag": "0006_square_paibok",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1740938855250,
-      "tag": "0007_bouncy_husk",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "6",
-      "when": 1740951272476,
-      "tag": "0008_green_cerebro",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "6",
-      "when": 1740951826650,
-      "tag": "0009_marvelous_joseph",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "6",
-      "when": 1741044970836,
-      "tag": "0010_milky_power_pack",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "6",
-      "when": 1741145097572,
-      "tag": "0011_condemned_spirit",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "6",
-      "when": 1741394290891,
-      "tag": "0012_optimal_archangel",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "6",
-      "when": 1741395338465,
-      "tag": "0013_organic_norman_osborn",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "6",
-      "when": 1741395357130,
-      "tag": "0014_rich_pestilence",
-      "breakpoints": true
-    },
-    {
-      "idx": 15,
-      "version": "6",
-      "when": 1741405374839,
-      "tag": "0015_clear_tag",
-      "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "6",
-      "when": 1741541462482,
-      "tag": "0016_black_taskmaster",
-      "breakpoints": true
-    },
-    {
-      "idx": 17,
-      "version": "6",
-      "when": 1743598476545,
-      "tag": "0017_futuristic_sunspot",
-      "breakpoints": true
-    },
-    {
-      "idx": 18,
-      "version": "6",
-      "when": 1743603733695,
-      "tag": "0018_massive_dreaming_celestial",
-      "breakpoints": true
-    },
-    {
-      "idx": 19,
-      "version": "6",
-      "when": 1743606266057,
-      "tag": "0019_seed-user",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "6",
-      "when": 1750538700532,
-      "tag": "0020_public_quasar",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1750612484558,
+			"tag": "0000_oval_riptide",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1750612542798,
+			"tag": "0001_seed-exercises-1",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1750612558805,
+			"tag": "0002_seed-exercises-2",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1750612570253,
+			"tag": "0003_seed-exercises-3",
+			"breakpoints": true
+		}
+	]
 }

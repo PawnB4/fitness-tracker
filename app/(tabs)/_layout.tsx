@@ -20,8 +20,10 @@ export default function TabLayout() {
 				name="index"
 				options={{
 					title: "Home",
+					// title: "",
 					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
-					headerRight: () => <UserButton />,
+					// headerRight: () => <UserButton />,
+					headerShown: false,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							style={{ fontFamily: "ContrailOne_400Regular" }}

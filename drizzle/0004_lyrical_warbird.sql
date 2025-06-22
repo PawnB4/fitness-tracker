@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX `exercises_name_unique` ON `exercises` (`name`);
