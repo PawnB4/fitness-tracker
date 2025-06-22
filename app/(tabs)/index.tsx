@@ -1,15 +1,20 @@
-import { FlashList } from "@shopify/flash-list";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { Redirect, router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import {
+	ActivityIndicator,
+	ScrollView,
+	TouchableOpacity,
+	View,
+} from "react-native";
 import {
 	SafeAreaView,
 	useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
@@ -26,9 +31,12 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
-import { WorkoutCard } from "~/components/workouts/workout-card";
+import { UserIcon } from "~/components/user/user-icon";
 import { db, fitnessTrackerDb } from "~/db/drizzle";
 import * as schema from "~/db/schema";
+import { Dumbbell } from "~/lib/icons/Dumbbell";
+import { History } from "~/lib/icons/History";
+import { formatDate, formatTime } from "~/utils/date";
 
 // Define the structure for the processed data passed to WorkoutCard
 type ProcessedWorkoutData = schema.Workout & {
@@ -49,8 +57,6 @@ export default function Page() {
 	const { data: workouts, error: workoutsError } = useLiveQuery(
 		db.select().from(schema.workouts).orderBy(desc(schema.workouts.createdAt)),
 	);
-
-	console.log("USER: ", user);
 
 	// Fetch user on component mount
 	useEffect(() => {
@@ -213,9 +219,14 @@ export default function Page() {
 	}
 
 	return (
-		<SafeAreaView className="flex-1 items-stretch gap-4 bg-secondary/30 px-4 py-8">
-			<Text className="text-4xl ">Hello,</Text>
-			<Text className="font-bold text-7xl">{user?.[0]?.name}</Text>
+		<SafeAreaView className="flex-1 justify-center gap-4 bg-secondary/30 px-4 py-8">
+			<View className="flex flex-row items-center justify-between gap-2 px-2">
+				<View className="flex flex-col gap-2">
+					<Text className="text-4xl ">Hello,</Text>
+					<Text className="font-bold text-7xl">{user?.[0]?.name}</Text>
+				</View>
+				<UserIcon />
+			</View>
 			<Dialog
 				open={openDialog}
 				onOpenChange={(e) => {
@@ -317,21 +328,141 @@ export default function Page() {
 					</View>
 				</DialogContent>
 			</Dialog>
-			<FlashList
-				data={processedWorkouts}
-				renderItem={({ item }) => (
-					<WorkoutCard
-						id={item.id}
-						createdAt={item.createdAt}
-						totalExercises={item.totalExercises}
-						isCompleted={item.isCompleted}
-					/>
-				)}
-				estimatedItemSize={90}
-				showsVerticalScrollIndicator={false}
-				ItemSeparatorComponent={() => <View className="h-4" />}
-				keyExtractor={(item) => item.id.toString()}
-			/>
+			<View className="flex flex-col gap-4">
+				<Card className="p-4">
+					<View className="flex flex-col gap-3">
+						<Text className="font-semibold text-lg">Weekly Progress</Text>
+						<View className="flex-row items-center justify-between">
+							<View>
+								<Text className="font-bold text-2xl text-primary">
+									{
+										processedWorkouts.filter((w) => {
+											const now = new Date();
+											const startOfWeek = new Date(now);
+											// Get Monday of current week (0 = Sunday, 1 = Monday)
+											const dayOfWeek = now.getDay();
+											const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+											startOfWeek.setDate(now.getDate() - daysToMonday);
+											startOfWeek.setHours(0, 0, 0, 0);
+
+											return new Date(w.createdAt || "") >= startOfWeek;
+										}).length
+									}
+								</Text>
+								<Text className="text-muted-foreground text-sm">
+									Workouts this week
+								</Text>
+							</View>
+							<View>
+								<Text className="font-bold text-2xl text-green-600">
+									{
+										processedWorkouts.filter((w) => {
+											const now = new Date();
+											const startOfWeek = new Date(now);
+											// Get Monday of current week (0 = Sunday, 1 = Monday)
+											const dayOfWeek = now.getDay();
+											const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+											startOfWeek.setDate(now.getDate() - daysToMonday);
+											startOfWeek.setHours(0, 0, 0, 0);
+
+											return (
+												new Date(w.createdAt || "") >= startOfWeek &&
+												w.isCompleted
+											);
+										}).length
+									}
+								</Text>
+								<Text className="text-muted-foreground text-sm">Completed</Text>
+							</View>
+						</View>
+					</View>
+				</Card>
+				<Card className="p-4">
+					<View className="flex flex-col gap-3">
+						<Text className="font-semibold text-lg">Monthly Progress</Text>
+						<View className="flex-row items-center justify-between">
+							<View>
+								<Text className="font-bold text-2xl text-primary">
+									{
+										processedWorkouts.filter((w) => {
+											const now = new Date();
+											const startOfMonth = new Date(
+												now.getFullYear(),
+												now.getMonth(),
+												1,
+											);
+											startOfMonth.setHours(0, 0, 0, 0);
+
+											return new Date(w.createdAt || "") >= startOfMonth;
+										}).length
+									}
+								</Text>
+								<Text className="text-muted-foreground text-sm">
+									Workouts this month
+								</Text>
+							</View>
+							<View>
+								<Text className="font-bold text-2xl text-green-600">
+									{
+										processedWorkouts.filter((w) => {
+											const now = new Date();
+											const startOfMonth = new Date(
+												now.getFullYear(),
+												now.getMonth(),
+												1,
+											);
+											startOfMonth.setHours(0, 0, 0, 0);
+
+											return (
+												new Date(w.createdAt || "") >= startOfMonth &&
+												w.isCompleted
+											);
+										}).length
+									}
+								</Text>
+								<Text className="text-muted-foreground text-sm">Completed</Text>
+							</View>
+						</View>
+					</View>
+				</Card>
+			</View>
+			<View className="h-1 rounded bg-sky-500/70" />
+
+			<View className="flex flex-col gap-4">
+				<TouchableOpacity
+					onPress={() => router.push(`/workout/${processedWorkouts[0].id}`)}
+					activeOpacity={0.6}
+				>
+					<Card className="flex flex-row items-center justify-start gap-10 px-8 py-4">
+						<Dumbbell className="text-primary" size={50} />
+						<View className="flex flex-col gap-2">
+							<Text className="font-bold text-3xl">Your last workout</Text>
+
+							<View className="flex flex-row items-center justify-around gap-2">
+								<Text className="text-lg text-muted-foreground">
+									{formatDate(processedWorkouts[0].createdAt ?? "")}
+								</Text>
+								<Text className="text-lg text-muted-foreground">
+									{formatTime(processedWorkouts[0].createdAt ?? "")}
+								</Text>
+								<Text className="text-lg text-muted-foreground">
+									{processedWorkouts[0].totalExercises} Exercise
+									{processedWorkouts[0].totalExercises === 1 ? "" : "s"}
+								</Text>
+							</View>
+						</View>
+					</Card>
+				</TouchableOpacity>
+
+				<Button
+					variant="secondary"
+					onPress={() => router.push("/workout/history")}
+					className="flex-row items-center justify-center gap-2"
+				>
+					<History className="text-primary" />
+					<Text className="font-bold text-primary">View all workouts</Text>
+				</Button>
+			</View>
 		</SafeAreaView>
 	);
 }

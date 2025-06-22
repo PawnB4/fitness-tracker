@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Text } from "react-native";
-import { UserButton } from "~/components/user-button";
+import { UserButton } from "~/components/user/user-button";
 import { BicepsFlexed } from "~/lib/icons/BicepsFlexed";
 import { ChartNoAxesCombined } from "~/lib/icons/ChartNoAxesCombined";
 import { Dumbbell } from "~/lib/icons/Dumbbell";

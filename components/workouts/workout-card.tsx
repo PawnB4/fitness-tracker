@@ -22,8 +22,8 @@ export const WorkoutCard = ({
 	isCompleted,
 }: WorkoutCardProps) => {
 	return (
-		<Pressable onPress={() => router.push(`/workout/${id}`)}>
-			<Card className="flex-1 rounded-2xl shadow">
+		<Card className="flex-grow rounded-2xl shadow">
+			<Pressable onPress={() => router.push(`/workout/${id}`)}>
 				<CardContent className="m-0 flex gap-2 px-3 py-2">
 					<CardTitle className="font-bold leading-normal tracking-wider">
 						Workout of {formatDate(createdAt ?? "")}
@@ -64,7 +64,7 @@ export const WorkoutCard = ({
 						</View>
 					</View>
 				</CardContent>
-			</Card>
-		</Pressable>
+			</Pressable>
+		</Card>
 	);
 };
