@@ -429,30 +429,44 @@ export default function Page() {
 			<View className="h-1 rounded bg-sky-500/70" />
 
 			<View className="flex flex-col gap-4">
-				<TouchableOpacity
-					onPress={() => router.push(`/workout/${processedWorkouts[0].id}`)}
-					activeOpacity={0.6}
-				>
-					<Card className="flex flex-row items-center justify-start gap-10 px-8 py-4">
-						<Dumbbell className="text-primary" size={50} />
-						<View className="flex flex-col gap-2">
-							<Text className="font-bold text-3xl">Your last workout</Text>
+				{processedWorkouts && processedWorkouts.length > 0 ? (
+					<TouchableOpacity
+						onPress={() => router.push(`/workout/${processedWorkouts[0].id}`)}
+						activeOpacity={0.6}
+					>
+						<Card className="flex flex-row items-center justify-start gap-10 px-8 py-4">
+							<Dumbbell className="text-primary" size={50} />
+							<View className="flex flex-col gap-2">
+								<Text className="font-bold text-3xl">Your last workout</Text>
 
-							<View className="flex flex-row items-center justify-around gap-2">
-								<Text className="text-lg text-muted-foreground">
-									{formatDate(processedWorkouts[0].createdAt ?? "")}
-								</Text>
-								<Text className="text-lg text-muted-foreground">
-									{formatTime(processedWorkouts[0].createdAt ?? "")}
-								</Text>
-								<Text className="text-lg text-muted-foreground">
-									{processedWorkouts[0].totalExercises} Exercise
-									{processedWorkouts[0].totalExercises === 1 ? "" : "s"}
-								</Text>
+								<View className="flex flex-row items-center justify-around gap-2">
+									<Text className="text-lg text-muted-foreground">
+										{formatDate(processedWorkouts[0].createdAt ?? "")}
+									</Text>
+									<Text className="text-lg text-muted-foreground">
+										{formatTime(processedWorkouts[0].createdAt ?? "")}
+									</Text>
+									<Text className="text-lg text-muted-foreground">
+										{processedWorkouts[0].totalExercises} Exercise
+										{processedWorkouts[0].totalExercises === 1 ? "" : "s"}
+									</Text>
+								</View>
 							</View>
+						</Card>
+					</TouchableOpacity>
+				) : (
+					<Card className="flex flex-row items-center justify-center gap-4 px-8 py-6">
+						<Dumbbell className="text-muted-foreground" size={40} />
+						<View className="flex flex-col items-center gap-1">
+							<Text className="font-bold text-muted-foreground text-xl">
+								No workouts yet
+							</Text>
+							<Text className="text-center text-muted-foreground">
+								Create your first workout to get started!
+							</Text>
 						</View>
 					</Card>
-				</TouchableOpacity>
+				)}
 
 				<Button
 					variant="secondary"
