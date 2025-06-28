@@ -39,7 +39,7 @@
     "clsx": "^2.1.0",
     "drizzle-orm": "^0.39.3",
     "drizzle-zod": "^0.7.0",
-    "expo": "~52.0.42",
+    "expo": "~52.0.47",
     "expo-dev-client": "~5.0.19",
     "expo-document-picker": "~13.0.3",
     "expo-drizzle-studio-plugin": "^0.1.1",
