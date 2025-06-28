@@ -109,8 +109,27 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "Workout History",
 						headerRight: () => <UserButton />,
+						animation: "slide_from_bottom",
 					}}
 				/>
+				{/* This looks cool but its laggy and clunky */}
+				{/* <Stack.Screen
+					name="workout/history"
+					options={{
+						title: "Workout History",
+						headerTitle: "Workout History",
+						presentation: "formSheet",
+						contentStyle: {
+							height: "100%",
+						},
+						animation: "slide_from_bottom",
+						sheetInitialDetentIndex: 0,
+						sheetAllowedDetents: [0.75, 1],
+						sheetCornerRadius: 20,
+						sheetExpandsWhenScrolledToEdge: true,
+						sheetElevation:24,
+					}}
+				/> */}
 				<Stack.Screen
 					name="workout-plan/[id]"
 					options={{

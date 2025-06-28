@@ -4,10 +4,12 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Card } from "~/components/ui/card";
+import { Text } from "~/components/ui/text";
 import { WorkoutCard } from "~/components/workouts/workout-card";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-
+import { Dumbbell } from "~/lib/icons/Dumbbell";
 // Define the structure for the processed data passed to WorkoutCard
 type ProcessedWorkoutData = schema.Workout & {
 	totalExercises: number;
@@ -76,12 +78,6 @@ export default function Page() {
 	}, [workouts, allWorkoutExercises]); // Re-calculate when workouts or exercises change
 
 	const insets = useSafeAreaInsets();
-	const contentInsets = {
-		top: insets.top,
-		bottom: insets.bottom,
-		left: 12,
-		right: 12,
-	};
 
 	// Show loading while data is being fetched
 	if (!processedWorkouts) {
@@ -94,6 +90,20 @@ export default function Page() {
 
 	return (
 		<View className="flex-1 items-stretch gap-4 bg-secondary/30 px-4 py-8">
+			{processedWorkouts.length === 0 && (
+				<Card className="flex flex-row items-center justify-center gap-4 px-8 py-6">
+					<Dumbbell className="text-muted-foreground" size={40} />
+					<View className="flex flex-col items-center gap-1">
+						<Text className="font-bold text-muted-foreground text-xl">
+							No workouts yet
+						</Text>
+						<Text className="text-center text-muted-foreground">
+							Create your first workout to get started!
+						</Text>
+					</View>
+				</Card>
+			)}
+
 			<FlashList
 				data={processedWorkouts}
 				renderItem={({ item }) => (
