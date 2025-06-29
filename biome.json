@@ -1,0 +1,70 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on",
+				"useSortedAttributes": "on",
+				"useSortedProperties": "on"
+			}
+		},
+		"enabled": true
+	},
+	"files": {
+		"ignoreUnknown": false
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"complexity": {
+				"noForEach": "off",
+				"noUselessFragments": {
+					"fix": "safe",
+					"level": "error"
+				}
+			},
+			"correctness": {
+				"noUnusedFunctionParameters": {
+					"fix": "safe"
+				},
+				"noUnusedImports": {
+					"fix": "safe"
+				},
+				"noUnusedVariables": {
+					"fix": "safe"
+				}
+			},
+			"nursery": {
+				"useSortedClasses": {
+					"fix": "safe",
+					"level": "error"
+				}
+			},
+			"recommended": true,
+			"style": {
+				"useSelfClosingElements": "error",
+				"useTemplate": {
+					"fix": "safe",
+					"level": "error"
+				}
+			},
+			"suspicious": {
+				"noGlobalIsNan": "off"
+			}
+		}
+	},
+	"vcs": {
+		"clientKind": "git",
+		"enabled": false,
+		"useIgnoreFile": false
+	}
+}
