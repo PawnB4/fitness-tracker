@@ -39,9 +39,7 @@
 				"noUnusedImports": {
 					"fix": "safe"
 				},
-				"noUnusedVariables": {
-					"fix": "safe"
-				}
+				"noUnusedVariables": "off"
 			},
 			"nursery": {
 				"useSortedClasses": {

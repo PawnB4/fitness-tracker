@@ -36,7 +36,6 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "drizzle-orm": "^0.44.2",
-    "drizzle-zod": "^0.8.2",
     "expo": "^53.0.9",
     "expo-dev-client": "~5.2.2",
     "expo-document-picker": "~13.1.6",
