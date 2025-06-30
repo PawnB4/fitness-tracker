@@ -1,4 +1,4 @@
-import { ContrailOne_400Regular } from "@expo-google-fonts/contrail-one";
+// import { ContrailOne_400Regular } from "~/assets/fonts/ContrailOne-Regular.ttf"
 import { useFont } from "@shopify/react-native-skia";
 import { asc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -9,7 +9,7 @@ import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 
 export default function Page() {
-	const font = useFont(ContrailOne_400Regular, 12);
+	// const font = useFont(ContrailOne_400Regular, 12);
 
 	const { data: workouts, error: workoutsError } = useLiveQuery(
 		db
@@ -94,7 +94,7 @@ export default function Page() {
 				padding={10}
 				viewport={{ x: [0, 11], y: [0, 16] }}
 				xAxis={{
-					font: font,
+					// font: font,
 					tickCount: 12,
 				}}
 				xKey="month"

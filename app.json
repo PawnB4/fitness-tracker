@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.pawnb4.fitnesstracker"
     },
     "web": {
       "bundler": "metro",
@@ -33,12 +34,14 @@
     "plugins": [
       "expo-router",
       "expo-sqlite",
-      ["expo-font",
-      {
-        "fonts": [
-          "node_modules/@expo-google-fonts/contrail-one/ContrailOne_400Regular.ttf"
-        ]
-      }]
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/ContrailOne-Regular.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

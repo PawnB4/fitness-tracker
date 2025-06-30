@@ -15,7 +15,6 @@
     "format": "biome check --write app/ components/ db/ utils/ lib/"
   },
   "dependencies": {
-    "@expo-google-fonts/contrail-one": "^0.4.0",
     "@react-native-community/datetimepicker": "8.4.1",
     "@react-navigation/native": "^7.0.0",
     "@rn-primitives/alert-dialog": "^1.2.0",
