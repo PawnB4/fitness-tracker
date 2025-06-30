@@ -154,8 +154,8 @@ export const ExerciseForm = ({
 									Type:
 								</Label>
 								<Select
-									onValueChange={field.handleChange}
 									// @ts-ignore
+									onValueChange={field.handleChange}
 									value={field.state.value}
 								>
 									<SelectTrigger
@@ -197,8 +197,8 @@ export const ExerciseForm = ({
 								</Label>
 
 								<Select
-									onValueChange={field.handleChange}
 									// @ts-ignore
+									onValueChange={field.handleChange}
 									value={field.state.value as Option}
 								>
 									<SelectTrigger

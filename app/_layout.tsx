@@ -106,7 +106,6 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "Workout History",
 						headerRight: () => <UserButton />,
-						animation: "slide_from_bottom",
 					}}
 				/>
 				{/* This looks cool but its laggy and clunky */}

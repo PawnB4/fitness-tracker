@@ -157,8 +157,8 @@ export const WorkoutPlanExerciseForm = ({
 											Exercise:
 										</Label>
 										<Select
-											onValueChange={field.handleChange}
 											// @ts-ignore
+											onValueChange={field.handleChange}
 											value={field.state.value}
 										>
 											<SelectTrigger

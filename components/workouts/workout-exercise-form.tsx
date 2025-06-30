@@ -59,7 +59,7 @@ export const WorkoutExerciseForm = ({
 	currentWeight?: number;
 	exerciseName?: string;
 	exerciseId?: number;
-	setCreatedExercise?: (exercise: schema.NewExercise | null) => void;
+	setCreatedExercise?: (exercise: schema.Exercise | null) => void;
 }) => {
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
 	const [lastExercise, setLastExercise] =
@@ -177,8 +177,8 @@ export const WorkoutExerciseForm = ({
 												Exercise:
 											</Label>
 											<Select
-												onValueChange={field.handleChange}
 												// @ts-ignore
+												onValueChange={field.handleChange}
 												value={field.state.value}
 											>
 												<SelectTrigger

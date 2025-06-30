@@ -200,8 +200,8 @@ export type Exercise = {
 	id: number;
 	name: string;
 	type: string;
-	createdAt: string;
-	updatedAt: string;
+	createdAt: string | null;
+	updatedAt: string | null;
 	primaryMuscleGroup: string | null;
 };
 export type NewExercise = z.infer<typeof insertExerciseSchema>;
@@ -210,8 +210,8 @@ export type Workout = {
 	id: number;
 	name: string;
 	notes: string | null;
-	createdAt: string;
-	updatedAt: string;
+	createdAt: string | null;
+	updatedAt: string | null;
 };
 
 export type WorkoutExercise = {
@@ -233,15 +233,15 @@ export type WorkoutPlan = {
 	id: number;
 	name: string;
 	description: string | null;
-	createdAt: string;
-	updatedAt: string;
+	createdAt: string | null;
+	updatedAt: string | null;
 };
 export type NewWorkoutPlan = z.infer<typeof insertWorkoutPlansSchema>;
 
 export type WorkoutPlanExercise = {
 	id: number;
-	createdAt: string;
-	updatedAt: string;
+	createdAt: string | null;
+	updatedAt: string | null;
 	exerciseId: number;
 	sortOrder: number;
 	planId: number;
