@@ -2,7 +2,7 @@ import { FlashList } from "@shopify/flash-list";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMemo } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, SafeAreaView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
@@ -78,7 +78,7 @@ export default function Page() {
 		});
 	}, [workouts, allWorkoutExercises]); // Re-calculate when workouts or exercises change
 
-	const insets = useSafeAreaInsets();
+
 
 	// Show loading while data is being fetched
 	if (!processedWorkouts) {
@@ -88,9 +88,11 @@ export default function Page() {
 			</View>
 		);
 	}
+	
 
 	return (
-		<View className="flex-1 items-stretch gap-4 bg-secondary/30 px-4 py-8">
+		<View className="flex-1 items-stretch gap-4 bg-secondary/30 px-4 py-8"		
+		>
 			{processedWorkouts.length === 0 && (
 				<Card className="flex flex-row items-center justify-center gap-4 px-8 py-6">
 					<Dumbbell className="text-muted-foreground" size={40} />

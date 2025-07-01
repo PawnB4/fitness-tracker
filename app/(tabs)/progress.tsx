@@ -82,7 +82,7 @@ export default function Page() {
 		{ month: "Dec", count: 4 },
 	];
 
-	console.log(MONTHLY_WORKOUTS);
+	// console.log(MONTHLY_WORKOUTS);
 
 	return (
 		<View className="mx-auto h-[300px] w-4/5">

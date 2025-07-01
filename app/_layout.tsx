@@ -13,6 +13,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SplashScreen } from "~/components/splash-screen";
 import { Text } from "~/components/ui/text";
 import { UserButton } from "~/components/user/user-button";
@@ -91,7 +92,11 @@ export default function RootLayout() {
 
 	return (
 		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-			<StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+			<StatusBar 
+				style={isDarkColorScheme ? "light" : "dark"} 
+				backgroundColor={isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background}
+				translucent={false} 
+			/>
 			<Stack>
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen
@@ -99,6 +104,10 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "",
 						headerRight: () => <UserButton />,
+						headerStyle: { 
+							backgroundColor: isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background,
+						},
+						headerTintColor: isDarkColorScheme ? NAV_THEME.dark.text : NAV_THEME.light.text,
 					}}
 				/>
 				<Stack.Screen
@@ -106,31 +115,22 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "Workout History",
 						headerRight: () => <UserButton />,
+						headerStyle: { 
+							backgroundColor: isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background,
+						},
+						headerTintColor: isDarkColorScheme ? NAV_THEME.dark.text : NAV_THEME.light.text,
 					}}
 				/>
-				{/* This looks cool but its laggy and clunky */}
-				{/* <Stack.Screen
-					name="workout/history"
-					options={{
-						title: "Workout History",
-						headerTitle: "Workout History",
-						presentation: "formSheet",
-						contentStyle: {
-							height: "100%",
-						},
-						animation: "slide_from_bottom",
-						sheetInitialDetentIndex: 0,
-						sheetAllowedDetents: [0.75, 1],
-						sheetCornerRadius: 20,
-						sheetExpandsWhenScrolledToEdge: true,
-						sheetElevation:24,
-					}}
-				/> */}
+
 				<Stack.Screen
 					name="workout-plan/[id]"
 					options={{
 						headerTitle: "",
 						headerRight: () => <UserButton />,
+						headerStyle: { 
+							backgroundColor: isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background,
+						},
+						headerTintColor: isDarkColorScheme ? NAV_THEME.dark.text : NAV_THEME.light.text,
 					}}
 				/>
 				<Stack.Screen
