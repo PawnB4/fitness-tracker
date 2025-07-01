@@ -1,4 +1,3 @@
-// import { ContrailOne_400Regular } from "~/assets/fonts/ContrailOne-Regular.ttf"
 import { useFont } from "@shopify/react-native-skia";
 import { asc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -9,7 +8,7 @@ import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 
 export default function Page() {
-	// const font = useFont(ContrailOne_400Regular, 12);
+	// const font = useFont(contrail, 12);
 
 	const { data: workouts, error: workoutsError } = useLiveQuery(
 		db
@@ -98,14 +97,13 @@ export default function Page() {
 					tickCount: 12,
 				}}
 				xKey="month"
-				yKeys={["count"]}
 				// yAxis={{
 				// 	font: font,
 				// 	tickCount: 12,
 				// }}
+				yKeys={["count"]}
 			>
 				{({ points, chartBounds }) => (
-					// <Line points={points.count} color="red" strokeWidth={3} />
 					<Bar
 						chartBounds={chartBounds}
 						color="red"

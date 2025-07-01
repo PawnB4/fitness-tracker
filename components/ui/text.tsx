@@ -18,7 +18,7 @@ const Text = React.forwardRef<TextRef, SlottableTextProps>(
 					className,
 				)}
 				ref={ref}
-				style={{ fontFamily: "ContrailOne_400Regular" }}
+				// style={{ fontFamily: "Lexend_400Regular" }}
 				{...props}
 			/>
 		);

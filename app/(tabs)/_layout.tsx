@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
+import { Text } from "~/components/ui/text";
 import { UserButton } from "~/components/user/user-button";
 import { BicepsFlexed } from "~/lib/icons/BicepsFlexed";
 import { ChartNoAxesCombined } from "~/lib/icons/ChartNoAxesCombined";
@@ -27,7 +27,6 @@ export default function TabLayout() {
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
-							style={{ fontFamily: "ContrailOne_400Regular" }}
 						>
 							{children}
 						</Text>
@@ -49,7 +48,6 @@ export default function TabLayout() {
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
-							style={{ fontFamily: "ContrailOne_400Regular" }}
 						>
 							{children}
 						</Text>
@@ -71,7 +69,6 @@ export default function TabLayout() {
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
-							style={{ fontFamily: "ContrailOne_400Regular" }}
 						>
 							{children}
 						</Text>
@@ -93,7 +90,6 @@ export default function TabLayout() {
 					tabBarLabel: ({ children, focused }) => (
 						<Text
 							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
-							style={{ fontFamily: "ContrailOne_400Regular" }}
 						>
 							{children}
 						</Text>

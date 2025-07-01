@@ -92,10 +92,14 @@ export default function RootLayout() {
 
 	return (
 		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-			<StatusBar 
-				style={isDarkColorScheme ? "light" : "dark"} 
-				backgroundColor={isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background}
-				translucent={false} 
+			<StatusBar
+				backgroundColor={
+					isDarkColorScheme
+						? NAV_THEME.dark.background
+						: NAV_THEME.light.background
+				}
+				style={isDarkColorScheme ? "light" : "dark"}
+				translucent={false}
 			/>
 			<Stack>
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -104,10 +108,14 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "",
 						headerRight: () => <UserButton />,
-						headerStyle: { 
-							backgroundColor: isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background,
+						headerStyle: {
+							backgroundColor: isDarkColorScheme
+								? NAV_THEME.dark.background
+								: NAV_THEME.light.background,
 						},
-						headerTintColor: isDarkColorScheme ? NAV_THEME.dark.text : NAV_THEME.light.text,
+						headerTintColor: isDarkColorScheme
+							? NAV_THEME.dark.text
+							: NAV_THEME.light.text,
 					}}
 				/>
 				<Stack.Screen
@@ -115,10 +123,14 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "Workout History",
 						headerRight: () => <UserButton />,
-						headerStyle: { 
-							backgroundColor: isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background,
+						headerStyle: {
+							backgroundColor: isDarkColorScheme
+								? NAV_THEME.dark.background
+								: NAV_THEME.light.background,
 						},
-						headerTintColor: isDarkColorScheme ? NAV_THEME.dark.text : NAV_THEME.light.text,
+						headerTintColor: isDarkColorScheme
+							? NAV_THEME.dark.text
+							: NAV_THEME.light.text,
 					}}
 				/>
 
@@ -127,10 +139,14 @@ export default function RootLayout() {
 					options={{
 						headerTitle: "",
 						headerRight: () => <UserButton />,
-						headerStyle: { 
-							backgroundColor: isDarkColorScheme ? NAV_THEME.dark.background : NAV_THEME.light.background,
+						headerStyle: {
+							backgroundColor: isDarkColorScheme
+								? NAV_THEME.dark.background
+								: NAV_THEME.light.background,
 						},
-						headerTintColor: isDarkColorScheme ? NAV_THEME.dark.text : NAV_THEME.light.text,
+						headerTintColor: isDarkColorScheme
+							? NAV_THEME.dark.text
+							: NAV_THEME.light.text,
 					}}
 				/>
 				<Stack.Screen

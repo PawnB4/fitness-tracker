@@ -95,7 +95,7 @@ export const insertExerciseSchema = z.object({
 			value: z.string(),
 			label: z.string(),
 		})
-		.nullable(),
+		.optional(),
 });
 
 // Workout exercises

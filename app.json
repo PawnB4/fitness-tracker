@@ -38,7 +38,18 @@
         "expo-font",
         {
           "fonts": [
-            "./assets/fonts/ContrailOne-Regular.ttf"
+            "node_modules/@expo-google-fonts/cabin-sketch/400Regular/CabinSketch_400Regular.ttf",
+            "node_modules/@expo-google-fonts/cabin-sketch/700Bold/CabinSketch_700Bold.ttf",
+            "node_modules/@expo-google-fonts/funnel-sans/400Regular/FunnelSans_400Regular.ttf",
+            "node_modules/@expo-google-fonts/funnel-sans/500Medium/FunnelSans_500Medium.ttf",
+            "node_modules/@expo-google-fonts/funnel-sans/600SemiBold/FunnelSans_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/funnel-sans/700Bold/FunnelSans_700Bold.ttf",
+            "node_modules/@expo-google-fonts/funnel-sans/800ExtraBold/FunnelSans_800ExtraBold.ttf",
+            "node_modules/@expo-google-fonts/lexend/400Regular/Lexend_400Regular.ttf",
+            "node_modules/@expo-google-fonts/lexend/500Medium/Lexend_500Medium.ttf",
+            "node_modules/@expo-google-fonts/lexend/600SemiBold/Lexend_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/lexend/700Bold/Lexend_700Bold.ttf",
+            "node_modules/@expo-google-fonts/lexend/800ExtraBold/Lexend_800ExtraBold.ttf"
           ]
         }
       ]
