@@ -36,7 +36,7 @@ const CardTitle = React.forwardRef<
 	<Text
 		aria-level={3}
 		className={cn(
-			"font-semibold text-2xl text-card-foreground leading-none tracking-tight",
+			"font-funnel-semibold text-2xl text-card-foreground leading-none tracking-tight",
 			className,
 		)}
 		ref={ref}

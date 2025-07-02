@@ -86,10 +86,10 @@ export const WorkoutPlanForm = ({
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<View className="p-2">
 				<DialogHeader>
-					<DialogTitle className="font-bold text-xl">
+					<DialogTitle className="font-funnel-bold text-xl">
 						{isUpdate ? "Update workout plan" : "New workout plan"}
 					</DialogTitle>
-					<DialogDescription style={{ fontFamily: "ContrailOne_400Regular" }}>
+					<DialogDescription>
 						{isUpdate
 							? "Update your workout plan"
 							: "Create a new workout plan to add to your catalog. Workout plans are a collection of exercises from which you can create workouts."}
@@ -99,12 +99,7 @@ export const WorkoutPlanForm = ({
 					<form.Field defaultValue={currentName ?? ""} name="name">
 						{(field) => (
 							<>
-								<Label
-									nativeID={field.name}
-									style={{ fontFamily: "ContrailOne_400Regular" }}
-								>
-									Name:
-								</Label>
+								<Label nativeID={field.name}>Name:</Label>
 								<Input
 									onChangeText={field.handleChange}
 									placeholder="Monday legs, Tuesday chest, etc."
@@ -125,12 +120,7 @@ export const WorkoutPlanForm = ({
 					>
 						{(field) => (
 							<>
-								<Label
-									nativeID={field.name}
-									style={{ fontFamily: "ContrailOne_400Regular" }}
-								>
-									Description:
-								</Label>
+								<Label nativeID={field.name}>Description:</Label>
 								<Textarea
 									aria-labelledby="textareaLabel"
 									onChangeText={field.handleChange}

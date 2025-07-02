@@ -111,7 +111,7 @@ export const ExerciseForm = ({
 			<View className="p-2">
 				<DialogHeader>
 					<DialogTitle>New exercise</DialogTitle>
-					<DialogDescription style={{ fontFamily: "ContrailOne_400Regular" }}>
+					<DialogDescription>
 						Create a new exercise to add to your catalog.
 					</DialogDescription>
 				</DialogHeader>
@@ -119,12 +119,7 @@ export const ExerciseForm = ({
 					<form.Field name="name">
 						{(field) => (
 							<>
-								<Label
-									nativeID={field.name}
-									style={{ fontFamily: "ContrailOne_400Regular" }}
-								>
-									Name:
-								</Label>
+								<Label nativeID={field.name}>Name:</Label>
 								<Input
 									onChangeText={field.handleChange}
 									placeholder="Pushups, Split Squats, etc."
@@ -147,12 +142,7 @@ export const ExerciseForm = ({
 					>
 						{(field) => (
 							<>
-								<Label
-									nativeID={field.name}
-									style={{ fontFamily: "ContrailOne_400Regular" }}
-								>
-									Type:
-								</Label>
+								<Label nativeID={field.name}>Type:</Label>
 								<Select
 									// @ts-ignore
 									onValueChange={field.handleChange}
@@ -189,12 +179,7 @@ export const ExerciseForm = ({
 					<form.Field name="primaryMuscleGroup">
 						{(field) => (
 							<>
-								<Label
-									nativeID={field.name}
-									style={{ fontFamily: "ContrailOne_400Regular" }}
-								>
-									Primary muscle group:
-								</Label>
+								<Label nativeID={field.name}>Primary muscle group:</Label>
 
 								<Select
 									// @ts-ignore

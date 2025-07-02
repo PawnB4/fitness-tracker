@@ -19,7 +19,7 @@ const Label = React.forwardRef<
 		>
 			<LabelPrimitive.Text
 				className={cn(
-					"font-medium native:text-base text-foreground text-sm leading-none web:peer-disabled:cursor-not-allowed web:peer-disabled:opacity-70",
+					"font-funnel font-funnel-medium native:text-base text-foreground text-sm leading-none web:peer-disabled:cursor-not-allowed web:peer-disabled:opacity-70",
 					className,
 				)}
 				ref={ref}

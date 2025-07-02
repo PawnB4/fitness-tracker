@@ -15,6 +15,20 @@ module.exports = {
 			borderWidth: {
 				hairline: hairlineWidth(),
 			},
+			fontFamily: {
+				"cabin": ["CabinSketch_400Regular"],
+				"cabin-bold": ["CabinSketch_700Bold"],
+				"lexend": ["Lexend_400Regular"],
+				"lexend-medium": ["Lexend_500Medium"],
+				"lexend-semibold": ["Lexend_600SemiBold"],
+				"lexend-bold": ["Lexend_700Bold"],
+				"lexend-extrabold": ["Lexend_800ExtraBold"],
+				"funnel": ["FunnelSans_400Regular"],
+				"funnel-medium": ["FunnelSans_500Medium"],
+				"funnel-semibold": ["FunnelSans_600SemiBold"],
+				"funnel-bold": ["FunnelSans_700Bold"],
+				"funnel-extrabold": ["FunnelSans_800ExtraBold"],
+			},
 			colors: {
 				accent: {
 					DEFAULT: "hsl(var(--accent))",

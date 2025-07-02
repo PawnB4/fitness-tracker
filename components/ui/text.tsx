@@ -13,12 +13,11 @@ const Text = React.forwardRef<TextRef, SlottableTextProps>(
 		return (
 			<Component
 				className={cn(
-					"web:select-text text-base text-foreground",
+					"web:select-text font-funnel text-base text-foreground",
 					textClass,
 					className,
 				)}
 				ref={ref}
-				// style={{ fontFamily: "Lexend_400Regular" }}
 				{...props}
 			/>
 		);

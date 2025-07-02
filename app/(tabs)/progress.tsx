@@ -85,7 +85,7 @@ export default function Page() {
 
 	return (
 		<View className="mx-auto h-[300px] w-4/5">
-			<Text className="py-8 text-center font-bold text-2xl">
+			<Text className="py-8 text-center font-funnel-bold text-2xl">
 				Workouts per month
 			</Text>
 			<CartesianChart

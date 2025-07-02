@@ -156,7 +156,7 @@ export const WorkoutExerciseForm = ({
 			<View className="p-2">
 				<DialogHeader>
 					<DialogTitle>{isUpdate ? "Update" : "Add"} exercise</DialogTitle>
-					<DialogDescription style={{ fontFamily: "ContrailOne_400Regular" }}>
+					<DialogDescription>
 						{isUpdate
 							? "Update exercise of your workout"
 							: "Add an exercise to your workout"}
@@ -169,11 +169,7 @@ export const WorkoutExerciseForm = ({
 								<form.Field name="exerciseId">
 									{(field) => (
 										<View className="">
-											<Label
-												className="mb-1"
-												nativeID={field.name}
-												style={{ fontFamily: "ContrailOne_400Regular" }}
-											>
+											<Label className="mb-1" nativeID={field.name}>
 												Exercise:
 											</Label>
 											<Select
@@ -203,7 +199,7 @@ export const WorkoutExerciseForm = ({
 																	(exercise) => exercise.type === type,
 																).length > 0 && (
 																	<SelectGroup key={type}>
-																		<SelectLabel className="-ml-4 font-extrabold">
+																		<SelectLabel className="-ml-4 font-funnel-extrabold">
 																			{type}
 																		</SelectLabel>
 																		{exercises
@@ -237,7 +233,7 @@ export const WorkoutExerciseForm = ({
 									}}
 								>
 									<Plus className="text-primary" />
-									<Text className="font-bold text-primary">New</Text>
+									<Text className="font-funnel-bold text-primary">New</Text>
 								</Button>
 							</View>
 							{lastExercise && (
@@ -250,13 +246,13 @@ export const WorkoutExerciseForm = ({
 										</Text>
 									</View>
 									<View className="flex flex-row justify-around gap-8 self-center">
-										<Text className="font-bold text-primary">
+										<Text className="font-funnel-bold text-primary">
 											Sets: {lastExercise.sets}
 										</Text>
-										<Text className="font-bold text-primary">
+										<Text className="font-funnel-bold text-primary">
 											Reps: {lastExercise.reps}
 										</Text>
-										<Text className="font-bold text-primary">
+										<Text className="font-funnel-bold text-primary">
 											Weight: {lastExercise.weight}kg
 										</Text>
 									</View>
@@ -265,9 +261,7 @@ export const WorkoutExerciseForm = ({
 						</View>
 					) : (
 						<View className="pb-2">
-							<Label style={{ fontFamily: "ContrailOne_400Regular" }}>
-								Exercise:
-							</Label>
+							<Label>Exercise:</Label>
 							<Select
 								value={{
 									value: exerciseName ?? "",
@@ -295,12 +289,7 @@ export const WorkoutExerciseForm = ({
 						<form.Field name="sets">
 							{(field) => (
 								<View className="flex items-center justify-center gap-2 ">
-									<Label
-										nativeID={field.name}
-										style={{ fontFamily: "ContrailOne_400Regular" }}
-									>
-										Sets
-									</Label>
+									<Label nativeID={field.name}>Sets</Label>
 									<Input
 										className="w-[60px]"
 										inputMode="numeric"
@@ -315,12 +304,7 @@ export const WorkoutExerciseForm = ({
 						<form.Field name="reps">
 							{(field) => (
 								<View className="flex items-center justify-center gap-2 ">
-									<Label
-										nativeID={field.name}
-										style={{ fontFamily: "ContrailOne_400Regular" }}
-									>
-										Reps
-									</Label>
+									<Label nativeID={field.name}>Reps</Label>
 									<Input
 										className="w-[60px]"
 										inputMode="numeric"
@@ -335,12 +319,7 @@ export const WorkoutExerciseForm = ({
 						<form.Field name="weight">
 							{(field) => (
 								<View className="flex items-center justify-center gap-2 ">
-									<Label
-										nativeID={field.name}
-										style={{ fontFamily: "ContrailOne_400Regular" }}
-									>
-										Weight (kg)
-									</Label>
+									<Label nativeID={field.name}>Weight (kg)</Label>
 									<Input
 										className="w-[60px]"
 										inputMode="numeric"
@@ -357,19 +336,19 @@ export const WorkoutExerciseForm = ({
 					<View className="flex justify-around gap-1 py-2">
 						{setsObject?.errors?.length > 0 && (
 							<Text className="text-red-500 text-sm">
-								<Text className="font-bold">{"Sets"}: </Text>{" "}
+								<Text className="font-funnel-bold">{"Sets"}: </Text>{" "}
 								{setsObject.errors[0]?.message}
 							</Text>
 						)}
 						{repsObject?.errors?.length > 0 && (
 							<Text className="text-red-500 text-sm">
-								<Text className="font-bold">{"Reps"}: </Text>{" "}
+								<Text className="font-funnel-bold">{"Reps"}: </Text>{" "}
 								{repsObject.errors[0]?.message}
 							</Text>
 						)}
 						{weightObject?.errors?.length > 0 && (
 							<Text className="text-red-500 text-sm">
-								<Text className="font-bold">{"Weight"}: </Text>{" "}
+								<Text className="font-funnel-bold">{"Weight"}: </Text>{" "}
 								{weightObject.errors[0]?.message}
 							</Text>
 						)}

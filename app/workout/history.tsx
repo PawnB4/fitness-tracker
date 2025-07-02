@@ -92,7 +92,7 @@ export default function Page() {
 				<Card className="flex flex-row items-center justify-center gap-4 px-8 py-6">
 					<Dumbbell className="text-muted-foreground" size={40} />
 					<View className="flex flex-col items-center gap-1">
-						<Text className="font-bold text-muted-foreground text-xl">
+						<Text className="font-funnel-bold text-muted-foreground text-xl">
 							No workouts yet
 						</Text>
 						<Text className="text-center text-muted-foreground">

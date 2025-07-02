@@ -256,7 +256,7 @@ export default function Page() {
 			{/* Header Section */}
 			<View className="flex flex-col gap-2 rounded-b-3xl bg-primary p-6 shadow-md">
 				<View className="flex-row items-center">
-					<Text className="font-bold text-4xl text-primary-foreground">
+					<Text className="font-funnel-bold text-4xl text-primary-foreground">
 						{plan.name}
 					</Text>
 					<View className="ml-auto flex-row">
@@ -279,7 +279,7 @@ export default function Page() {
 					</View>
 				</View>
 				{plan.description && (
-					<Text className="text-lg text-primary-foreground/80">
+					<Text className="font-funnel text-lg text-primary-foreground/80">
 						{plan.description}
 					</Text>
 				)}
@@ -288,14 +288,14 @@ export default function Page() {
 				<View className="flex flex-row items-center justify-around gap-2 pt-2">
 					<View className="flex-row items-center gap-2 border-0">
 						<Dumbbell className="mr-1 size-3 text-primary-foreground" />
-						<Text className="text-primary-foreground text-sm">
+						<Text className="font-funnel text-primary-foreground text-sm">
 							{planExercises?.length || 0} Exercise
 							{planExercises?.length === 1 ? "" : "s"}
 						</Text>
 					</View>
 					<View className="flex-row items-center gap-2 border-0">
 						<Calendar className="mr-1 size-3 text-primary-foreground" />
-						<Text className="text-primary-foreground text-sm">
+						<Text className="font-funnel text-primary-foreground text-sm">
 							Created {plan.createdAt ? formatDate(plan.createdAt) : "No date"}
 						</Text>
 					</View>
@@ -307,7 +307,7 @@ export default function Page() {
 				{/* Exercises Section */}
 				<View className="mb-6">
 					<View className="mb-4 flex-row items-center justify-between">
-						<Text className="font-bold text-2xl">Exercises</Text>
+						<Text className="font-funnel-bold text-2xl">Exercises</Text>
 					</View>
 
 					{/* Exercise Cards */}
@@ -362,7 +362,9 @@ export default function Page() {
 							size="lg"
 						>
 							<Plus className="text-primary" />
-							<Text className="font-bold text-primary">Add exercise</Text>
+							<Text className="font-funnel-bold text-primary">
+								Add exercise
+							</Text>
 						</Button>
 						{dialogContent ===
 							DIALOG_CONTENT_MAP.WORKOUT_PLAN_EXERCISE_FORM && (
@@ -468,7 +470,9 @@ const WorkoutPlanExerciseListItem = ({
 
 									<View className="flex-1 p-4">
 										<View className="flex-row items-center justify-between">
-											<Text className="font-bold text-lg">{exerciseName}</Text>
+											<Text className="font-funnel-bold text-lg">
+												{exerciseName}
+											</Text>
 											<Badge className="bg-muted" variant="outline">
 												<Text className="text-xs">{exerciseType}</Text>
 											</Badge>

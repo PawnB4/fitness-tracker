@@ -319,7 +319,7 @@ export function UserForm({
 			<DialogTitle className="">User settings</DialogTitle>
 
 			<View className="mt-4 flex flex-row items-center justify-between gap-2">
-				<Text className="font-medium">Preferred color theme</Text>
+				<Text className="font-funnel-medium">Preferred color theme</Text>
 
 				<Select
 					onValueChange={(e) =>
@@ -354,7 +354,7 @@ export function UserForm({
 
 			{/* Timezone */}
 			{/* <View className="mt-4 flex flex-row items-center justify-between gap-2">
-					<Text className="font-medium">Timezone</Text>
+					<Text className="font-funnel-medium">Timezone</Text>
 
 					<Select
 						value={{

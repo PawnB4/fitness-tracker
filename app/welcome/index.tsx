@@ -42,7 +42,7 @@ export default function Page() {
 					<Dumbbell className="h-16 w-16 text-primary" />
 				</View>
 
-				<Text className="mb-4 text-center font-bold text-4xl text-foreground">
+				<Text className="mb-4 text-center font-funnel-bold text-4xl text-foreground">
 					Welcome to Fitness Tracker
 				</Text>
 
@@ -57,12 +57,7 @@ export default function Page() {
 				<form.Field defaultValue={""} name="name">
 					{(field) => (
 						<>
-							<Label
-								nativeID={field.name}
-								style={{ fontFamily: "ContrailOne_400Regular" }}
-							>
-								What should we call you?
-							</Label>
+							<Label nativeID={field.name}>What should we call you?</Label>
 							<Input
 								onChangeText={field.handleChange}
 								placeholder="Enter your name"
@@ -81,7 +76,7 @@ export default function Page() {
 					className="h-14 w-full shadow-foreground/10 shadow-lg"
 					onPress={() => form.handleSubmit()}
 				>
-					<Text className="font-semibold text-lg">Get Started</Text>
+					<Text className="font-funnel-semibold text-lg">Get Started</Text>
 				</Button>
 			</View>
 		</View>

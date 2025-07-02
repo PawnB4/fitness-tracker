@@ -81,11 +81,11 @@ export const ExerciseCard = ({
 		<Card className="flex-1 overflow-hidden rounded-2xl border-sky-500/70 border-t-2">
 			<CardContent className="bg-gradient-to-br from-background to-background/80 px-4 py-3">
 				<View className="flex flex-row items-center justify-start py-1">
-					<CardTitle className="font-semibold text-lg leading-normal">
+					<CardTitle className="font-funnel-semibold text-lg leading-normal">
 						{name}
 					</CardTitle>
 					<View className="ml-auto rounded-full bg-sky-100 px-2 py-0.5 dark:bg-sky-900/30">
-						<Text className="font-medium text-foreground/80 text-sm">
+						<Text className="font-funnel-medium text-foreground/80 text-sm">
 							{type}
 						</Text>
 					</View>
@@ -108,9 +108,11 @@ export const ExerciseCard = ({
 						}}
 					/>
 					<View className="flex flex-row flex-wrap items-center gap-1">
-						<Text className="font-semibold text-sm">Primary muscle:</Text>
+						<Text className="font-funnel-semibold text-sm">
+							Primary muscle:
+						</Text>
 						{primaryMuscleGroup && (
-							<Text className="rounded bg-muted/50 px-2 py-0.5 font-medium text-foreground/80 text-sm">
+							<Text className="rounded bg-muted/50 px-2 py-0.5 font-funnel-medium text-foreground/80 text-sm">
 								{primaryMuscleGroup}
 							</Text>
 						)}

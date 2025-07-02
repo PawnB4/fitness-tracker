@@ -25,7 +25,7 @@ export const WorkoutCard = ({
 		<Card className="flex-grow rounded-2xl shadow">
 			<Pressable onPress={() => router.push(`/workout/${id}`)}>
 				<CardContent className="m-0 flex gap-2 px-3 py-2">
-					<CardTitle className="font-bold leading-normal tracking-wider">
+					<CardTitle className="font-funnel-bold leading-normal tracking-wider">
 						Workout of {formatDate(createdAt ?? "")}
 					</CardTitle>
 

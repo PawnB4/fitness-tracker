@@ -312,11 +312,13 @@ export default function Page() {
 			{/* Stats Summary */}
 			<View className="mx-4 my-4 flex-row justify-between rounded-xl bg-card px-4 py-5 shadow-sm">
 				<View className="flex items-center justify-center">
-					<Text className="font-bold text-lg">{workoutExercises?.length}</Text>
+					<Text className="font-funnel-bold text-lg">
+						{workoutExercises?.length}
+					</Text>
 					<Text className="text-muted-foreground text-sm">Exercises</Text>
 				</View>
 				<View className="flex items-center justify-center">
-					<Text className="font-bold text-lg">
+					<Text className="font-funnel-bold text-lg">
 						{workoutExercises?.reduce(
 							(acc, ex) => acc + ex.workoutExerciseSets,
 							0,
@@ -325,7 +327,7 @@ export default function Page() {
 					<Text className="text-muted-foreground text-sm">Sets</Text>
 				</View>
 				<View className="flex items-center justify-center">
-					<Text className="font-bold text-lg">
+					<Text className="font-funnel-bold text-lg">
 						{workoutExercises?.length > 0
 							? Math.round(
 									(workoutExercises?.reduce(
@@ -346,13 +348,15 @@ export default function Page() {
 				{/* Exercises Section */}
 				<View className="mb-6">
 					<View className="mb-4 flex-row items-center justify-between">
-						<Text className="font-bold text-2xl">Exercises</Text>
+						<Text className="font-funnel-bold text-2xl">Exercises</Text>
 						<Button
 							className="ml-auto flex-row items-center justify-center gap-2"
 							onPress={openWorkoutExerciseForm}
 							variant="outline"
 						>
-							<Text className="font-bold text-primary">Add exercise</Text>
+							<Text className="font-funnel-bold text-primary">
+								Add exercise
+							</Text>
 						</Button>
 						{dialogContent === DIALOG_CONTENT_MAP.WORKOUT_EXERCISE_FORM && (
 							<Dialog
@@ -433,7 +437,7 @@ export default function Page() {
 
 			{/* Notes */}
 			<View className="mb-4 px-4">
-				<Text className="mb-2 font-bold text-xl">Notes</Text>
+				<Text className="mb-2 font-funnel-bold text-xl">Notes</Text>
 				<View className="rounded-xl bg-card p-4 shadow-sm">
 					<Textarea
 						aria-labelledby="textareaLabel"
@@ -449,7 +453,7 @@ export default function Page() {
 				<AlertDialog className="w-full">
 					<AlertDialogTrigger asChild>
 						<Button className="ml-2 flex-1" variant="destructive">
-							<Text className="font-bold text-destructive-foreground">
+							<Text className="font-funnel-bold text-destructive-foreground">
 								Delete workout
 							</Text>
 						</Button>

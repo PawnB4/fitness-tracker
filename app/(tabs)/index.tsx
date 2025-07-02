@@ -223,7 +223,7 @@ export default function Page() {
 			<View className="flex flex-row items-center justify-between gap-2 px-2">
 				<View className="flex flex-col gap-2">
 					<Text className="text-4xl ">Hello,</Text>
-					<Text className="font-bold text-7xl">{user?.[0]?.name}</Text>
+					<Text className="font-funnel-bold text-7xl">{user?.[0]?.name}</Text>
 				</View>
 				<UserIcon />
 			</View>
@@ -247,7 +247,7 @@ export default function Page() {
 
 					{/* OPTION 1: FROM WORKOUT PLAN */}
 					<View className="rounded-xl bg-muted/30 p-3">
-						<Text className="mb-3 font-medium">
+						<Text className="mb-3 font-funnel-medium">
 							Use a workout plan template
 						</Text>
 						{workoutPlans?.length > 0 ? (
@@ -315,7 +315,7 @@ export default function Page() {
 
 					{/* OPTION 2: FROM SCRATCH */}
 					<View className="rounded-xl bg-muted/30 p-3">
-						<Text className="mb-3 font-medium">
+						<Text className="mb-3 font-funnel-medium">
 							Start with an empty workout
 						</Text>
 						<Button
@@ -331,10 +331,12 @@ export default function Page() {
 			<View className="flex flex-col gap-4">
 				<Card className="p-4">
 					<View className="flex flex-col gap-3">
-						<Text className="font-semibold text-lg">Weekly Progress</Text>
+						<Text className="font-funnel-semibold text-lg">
+							Weekly Progress
+						</Text>
 						<View className="flex-row items-center justify-between">
 							<View>
-								<Text className="font-bold text-2xl text-primary">
+								<Text className="font-funnel-bold text-2xl text-primary">
 									{
 										processedWorkouts.filter((w) => {
 											const now = new Date();
@@ -354,7 +356,7 @@ export default function Page() {
 								</Text>
 							</View>
 							<View>
-								<Text className="font-bold text-2xl text-green-600">
+								<Text className="font-funnel-bold text-2xl text-green-600">
 									{
 										processedWorkouts.filter((w) => {
 											const now = new Date();
@@ -379,10 +381,12 @@ export default function Page() {
 				</Card>
 				<Card className="p-4">
 					<View className="flex flex-col gap-3">
-						<Text className="font-semibold text-lg">Monthly Progress</Text>
+						<Text className="font-funnel-semibold text-lg">
+							Monthly Progress
+						</Text>
 						<View className="flex-row items-center justify-between">
 							<View>
-								<Text className="font-bold text-2xl text-primary">
+								<Text className="font-funnel-bold text-2xl text-primary">
 									{
 										processedWorkouts.filter((w) => {
 											const now = new Date();
@@ -402,7 +406,7 @@ export default function Page() {
 								</Text>
 							</View>
 							<View>
-								<Text className="font-bold text-2xl text-green-600">
+								<Text className="font-funnel-bold text-2xl text-green-600">
 									{
 										processedWorkouts.filter((w) => {
 											const now = new Date();
@@ -434,10 +438,12 @@ export default function Page() {
 						activeOpacity={0.6}
 						onPress={() => router.push(`/workout/${processedWorkouts[0].id}`)}
 					>
-						<Card className="flex flex-row items-center justify-start gap-10 px-8 py-4">
+						<Card className="flex flex-row items-center justify-center gap-10 px-4 py-4">
 							<Dumbbell className="text-primary" size={50} />
 							<View className="flex flex-col gap-2">
-								<Text className="font-bold text-3xl">Your last workout</Text>
+								<Text className="font-funnel-bold text-3xl">
+									Your last workout
+								</Text>
 
 								<View className="flex flex-row items-center justify-around gap-2">
 									<Text className="text-lg text-muted-foreground">
@@ -458,7 +464,7 @@ export default function Page() {
 					<Card className="flex flex-row items-center justify-center gap-4 px-8 py-6">
 						<Dumbbell className="text-muted-foreground" size={40} />
 						<View className="flex flex-col items-center gap-1">
-							<Text className="font-bold text-muted-foreground text-xl">
+							<Text className="font-funnel-bold text-muted-foreground text-xl">
 								No workouts yet
 							</Text>
 							<Text className="text-center text-muted-foreground">
@@ -474,7 +480,9 @@ export default function Page() {
 					variant="secondary"
 				>
 					<History className="text-primary" />
-					<Text className="font-bold text-primary">View all workouts</Text>
+					<Text className="font-funnel-bold text-primary">
+						View all workouts
+					</Text>
 				</Button>
 			</View>
 		</SafeAreaView>

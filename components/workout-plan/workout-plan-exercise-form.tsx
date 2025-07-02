@@ -137,7 +137,7 @@ export const WorkoutPlanExerciseForm = ({
 			<View className="p-2">
 				<DialogHeader>
 					<DialogTitle>{isUpdate ? "Update" : "Add"} exercise</DialogTitle>
-					<DialogDescription style={{ fontFamily: "ContrailOne_400Regular" }}>
+					<DialogDescription>
 						{isUpdate
 							? "Update exercise of your workout plan"
 							: "Add an exercise to your workout plan"}
@@ -149,11 +149,7 @@ export const WorkoutPlanExerciseForm = ({
 							<form.Field name="exerciseId">
 								{(field) => (
 									<View className="">
-										<Label
-											className="mb-1"
-											nativeID={field.name}
-											style={{ fontFamily: "ContrailOne_400Regular" }}
-										>
+										<Label className="mb-1" nativeID={field.name}>
 											Exercise:
 										</Label>
 										<Select
@@ -183,7 +179,7 @@ export const WorkoutPlanExerciseForm = ({
 																(exercise) => exercise.type === type,
 															).length > 0 && (
 																<SelectGroup key={type}>
-																	<SelectLabel className="-ml-4 font-extrabold">
+																	<SelectLabel className="-ml-4 font-funnel-extrabold">
 																		{type}
 																	</SelectLabel>
 																	{exercises
@@ -221,14 +217,12 @@ export const WorkoutPlanExerciseForm = ({
 								}}
 							>
 								<Plus className="text-primary" />
-								<Text className="font-bold text-primary">New</Text>
+								<Text className="font-funnel-bold text-primary">New</Text>
 							</Button>
 						</View>
 					) : (
 						<View className="pb-2">
-							<Label style={{ fontFamily: "ContrailOne_400Regular" }}>
-								Exercise:
-							</Label>
+							<Label>Exercise:</Label>
 							<Select
 								value={{
 									value: exerciseName ?? "",
@@ -256,12 +250,7 @@ export const WorkoutPlanExerciseForm = ({
 						<form.Field name="defaultSets">
 							{(field) => (
 								<View className="flex items-center justify-center gap-2 ">
-									<Label
-										nativeID={field.name}
-										style={{ fontFamily: "ContrailOne_400Regular" }}
-									>
-										Sets
-									</Label>
+									<Label nativeID={field.name}>Sets</Label>
 									<Input
 										className="w-[60px]"
 										inputMode="numeric"
@@ -276,12 +265,7 @@ export const WorkoutPlanExerciseForm = ({
 						<form.Field name="defaultReps">
 							{(field) => (
 								<View className="flex items-center justify-center gap-2 ">
-									<Label
-										nativeID={field.name}
-										style={{ fontFamily: "ContrailOne_400Regular" }}
-									>
-										Reps
-									</Label>
+									<Label nativeID={field.name}>Reps</Label>
 									<Input
 										className="w-[60px]"
 										inputMode="numeric"
@@ -296,12 +280,7 @@ export const WorkoutPlanExerciseForm = ({
 						<form.Field name="defaultWeight">
 							{(field) => (
 								<View className="flex items-center justify-center gap-2 ">
-									<Label
-										nativeID={field.name}
-										style={{ fontFamily: "ContrailOne_400Regular" }}
-									>
-										Weight (kg)
-									</Label>
+									<Label nativeID={field.name}>Weight (kg)</Label>
 									<Input
 										className="w-[60px]"
 										inputMode="numeric"
@@ -318,19 +297,19 @@ export const WorkoutPlanExerciseForm = ({
 					<View className="flex justify-around gap-1 py-2">
 						{defaultSetsObject?.errors?.length > 0 && (
 							<Text className="text-red-500 text-sm">
-								<Text className="font-bold">{"Sets"}: </Text>{" "}
+								<Text className="font-funnel-bold">{"Sets"}: </Text>{" "}
 								{defaultSetsObject.errors[0]?.message}
 							</Text>
 						)}
 						{defaultRepsObject?.errors?.length > 0 && (
 							<Text className="text-red-500 text-sm">
-								<Text className="font-bold">{"Reps"}: </Text>{" "}
+								<Text className="font-funnel-bold">{"Reps"}: </Text>{" "}
 								{defaultRepsObject.errors[0]?.message}
 							</Text>
 						)}
 						{defaultWeightObject?.errors?.length > 0 && (
 							<Text className="text-red-500 text-sm">
-								<Text className="font-bold">{"Weight"}: </Text>{" "}
+								<Text className="font-funnel-bold">{"Weight"}: </Text>{" "}
 								{defaultWeightObject.errors[0]?.message}
 							</Text>
 						)}

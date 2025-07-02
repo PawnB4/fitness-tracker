@@ -26,7 +26,7 @@ export default function TabLayout() {
 					headerShown: false,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
-							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
+							className={`font-funnel-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
 						>
 							{children}
 						</Text>
@@ -47,7 +47,7 @@ export default function TabLayout() {
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
-							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
+							className={`font-funnel-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
 						>
 							{children}
 						</Text>
@@ -68,7 +68,7 @@ export default function TabLayout() {
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
-							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
+							className={`font-funnel-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
 						>
 							{children}
 						</Text>
@@ -89,7 +89,7 @@ export default function TabLayout() {
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
-							className={`font-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
+							className={`font-funnel-semibold text-sm ${focused ? "text-sky-600" : "text-foreground/80"}`}
 						>
 							{children}
 						</Text>

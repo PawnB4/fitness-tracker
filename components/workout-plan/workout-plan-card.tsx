@@ -30,7 +30,7 @@ export const WorkoutPlanCard = ({ id, name }: WorkoutPlan) => {
 				<CardContent className="px-3 py-4 ">
 					<View className="flex flex-row items-center gap-2 pl-8">
 						<CardTitle className="leading-normal">{name}</CardTitle>
-						<Text className=" ml-auto pr-8 font-bold text-foreground/70 ">
+						<Text className=" ml-auto pr-8 font-funnel-bold text-foreground/70 ">
 							{workoutPlanExercises?.length}{" "}
 							{workoutPlanExercises?.length === 1 ? "exercise" : "exercises"}
 						</Text>
