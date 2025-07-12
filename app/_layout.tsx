@@ -13,6 +13,10 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
+import {
+	configureReanimatedLogger,
+	ReanimatedLogLevel,
+} from "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SplashScreen } from "~/components/splash-screen";
 import { Text } from "~/components/ui/text";
@@ -24,6 +28,10 @@ import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 
+configureReanimatedLogger({
+	level: ReanimatedLogLevel.warn,
+	strict: false,
+});
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
 	colors: NAV_THEME.light,
@@ -122,6 +130,7 @@ export default function RootLayout() {
 					name="workout/history"
 					options={{
 						headerTitle: "Workout History",
+						headerTitleStyle: { fontFamily: "FunnelSans_500Medium" },
 						headerRight: () => <UserButton />,
 						headerStyle: {
 							backgroundColor: isDarkColorScheme
@@ -137,7 +146,6 @@ export default function RootLayout() {
 				<Stack.Screen
 					name="workout-plan/[id]"
 					options={{
-						headerTitle: "",
 						headerRight: () => <UserButton />,
 						headerStyle: {
 							backgroundColor: isDarkColorScheme

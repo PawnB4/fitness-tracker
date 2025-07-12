@@ -17,6 +17,45 @@ export const NAV_THEME = {
 	},
 };
 
+export const CHART_THEME = {
+	light: {
+		primary: "hsl(225, 15%, 16%)",
+		background: "hsl(220, 20%, 97%)",
+		foreground: "hsl(225, 15%, 16%)",
+		muted: "hsl(220, 14%, 96%)",
+		mutedForeground: "hsl(220, 9%, 46%)",
+		accent: "hsl(220, 14%, 96%)",
+		accentForeground: "hsl(220, 9%, 15%)",
+		border: "hsl(220, 13%, 91%)",
+		gradient: {
+			start: "#0ea5e9",
+			end: "#075985",
+		},
+		tooltipBg: "hsl(0, 0%, 100%)",
+		tooltipBorder: "hsl(220, 13%, 91%)",
+		trendPositive: "#10b981",
+		trendNegative: "#ef4444",
+	},
+	dark: {
+		primary: "hsl(220, 20%, 97%)",
+		background: "hsl(225, 15%, 16%)",
+		foreground: "hsl(220, 20%, 97%)",
+		muted: "hsl(225, 15%, 16%)",
+		mutedForeground: "hsl(220, 9%, 54%)",
+		accent: "hsl(225, 15%, 16%)",
+		accentForeground: "hsl(220, 20%, 97%)",
+		border: "hsl(225, 15%, 21%)",
+		gradient: {
+			start: "#0ea5e9",
+			end: "#0284c7",
+		},
+		tooltipBg: "hsl(225, 15%, 21%)",
+		tooltipBorder: "hsl(225, 15%, 26%)",
+		trendPositive: "#22c55e",
+		trendNegative: "#f87171",
+	},
+};
+
 export const EXERCISES_TYPES = [
 	"Upper Body",
 	"Lower Body",

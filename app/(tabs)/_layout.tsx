@@ -20,9 +20,6 @@ export default function TabLayout() {
 				name="index"
 				options={{
 					title: "Home",
-					// title: "",
-					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
-					// headerRight: () => <UserButton />,
 					headerShown: false,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
@@ -43,7 +40,11 @@ export default function TabLayout() {
 				name="progress"
 				options={{
 					title: "Progress",
-					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
+					headerTitleStyle: {
+						fontSize: 24,
+						lineHeight: 32,
+						fontFamily: "FunnelSans_500Medium",
+					},
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
@@ -64,7 +65,11 @@ export default function TabLayout() {
 				name="workout-plans"
 				options={{
 					title: "Workout Plans",
-					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
+					headerTitleStyle: {
+						fontSize: 24,
+						lineHeight: 32,
+						fontFamily: "FunnelSans_400Regular",
+					},
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
@@ -85,7 +90,11 @@ export default function TabLayout() {
 				name="exercises"
 				options={{
 					title: "Exercises",
-					headerTitleStyle: { fontSize: 24, lineHeight: 32 },
+					headerTitleStyle: {
+						fontSize: 24,
+						lineHeight: 32,
+						fontFamily: "FunnelSans_400Regular",
+					},
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
