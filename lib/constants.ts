@@ -61,24 +61,12 @@ export const EXERCISES_TYPES = [
 	"Lower Body",
 	"Core",
 	"Cardio",
-	"Flexibility",
 ];
 
 export const MUSCLE_GROUPS = [
-	"Abs",
-	"Adductors",
-	"Back",
-	"Biceps",
-	"Calves",
-	"Chest",
-	"Core",
-	"Forearms",
-	"Glutes",
-	"Hamstrings",
-	"Quadriceps",
-	"Shoulders",
-	"Traps",
-	"Triceps",
+	"Back", "Biceps", "Calves", "Cardio", "Chest", "Core", 
+	"Forearms", "Glutes", "Hamstrings", "Quadriceps", 
+	"Shoulders", "Traps", "Triceps"
 ];
 
 export const EXERCISES = [

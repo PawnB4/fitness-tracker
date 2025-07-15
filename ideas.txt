@@ -3,11 +3,13 @@
 ## 🏋️ EXERCISE PROGRESSION TRACKING
 
 ### Weight Progression
-- Line charts showing weight increases per exercise over time // How would you calculate the bar chart? If one day the person does 3x5 with 40kg and next week the does 4x12 with 28kg, did they improve or worsen? What can we show in the line chart that would make sense?
-- "Personal Records" dashboard showing max weight achieved for each exercise
-- Weight progression rate (kg/lbs gained per week/month) // Same question here
-- Plateau detection alerts when weight hasn't increased in X weeks // Same question here, do you mean by weight not improving? Maybe we can do this on a 
-- Suggested weight increments based on progression patterns
+- **Estimated 1RM progression**: Instead of raw weight, calculate estimated 1RM using formulas (Epley, Brzycki) to compare different set/rep schemes
+  - Example: 3x5 @ 40kg = ~45kg 1RM, 4x12 @ 28kg = ~40kg 1RM (shows regression)
+- **Volume-adjusted progression**: Track weight increases at same rep ranges
+  - Example: Bench press at 8-10 reps: 60kg → 62.5kg → 65kg over time
+- **Personal Records** dashboard showing max weight achieved for each exercise at different rep ranges (1RM, 3RM, 5RM, 10RM)
+- **Progressive overload tracking**: Show when user increases weight, reps, or sets from previous session
+- **Plateau detection**: Alert when estimated 1RM hasn't improved in 3-4 weeks for same exercise
 
 ### Volume Progression
 - Total volume per exercise (sets × reps × weight) over time
@@ -16,41 +18,26 @@
 - Weekly/monthly volume trends
 - Volume-based personal records
 
-### Rep & Set Improvements
-- Rep progression tracking (moving from 8 reps to 12 reps at same weight)
-- Set completion rates (% of planned sets actually completed)
-- "Endurance gains" - track when users can do more reps at same weight
-- Set consistency tracking (completing all planned sets)
+### Rep & Set Performance Tracking
+**Examples of what this tracks:**
+- **Rep progression**: User does bench press 3x8 @ 60kg, next week does 3x10 @ 60kg (improved endurance)
+- **Set completion**: User plans 4 sets but only completes 3 → 75% completion rate
 
 ## 📊 WORKOUT ANALYTICS
 
 ### Frequency & Consistency
 - Workout frequency heatmap (like GitHub contributions)
-- Workout streaks and longest streak achieved
+- **Workout streaks**: Track consecutive days with workouts OR consecutive weeks with X workouts
+  - Example: "7-day streak" = worked out 7 days in a row
+  - Example: "4-week streak" = completed 3+ workouts per week for 4 weeks straight
 - Days between workouts tracking
-- Weekly workout count vs target goals
-- Consistency percentage (workouts completed vs planned)
-- Best workout days of the week analysis
-
-### Workout Completion
-- Completion percentage per workout
-- Average exercises completed per workout
-- Time to complete workouts (if we add duration tracking)
-- Most/least completed exercises identification
-- Workout abandonment rate analysis
-
-### Workout Comparison
-- Current workout vs last time same workout was done
-- Workout performance trends over time
-- "Workout efficiency" - same workout done faster/with more weight
-- Rest period optimization suggestions
 
 ## 💪 MUSCLE GROUP BALANCE
 
 ### Training Distribution
-- Pie chart of training time per muscle group
+- Pie chart of training volume per muscle group
 - Weekly muscle group coverage tracking
-- Muscle group imbalance warnings
+- Muscle group imbalance warnings (e.g., "Chest volume 3x higher than back volume")
 - Training frequency per muscle group
 - Recommended muscle groups to focus on
 
@@ -63,11 +50,12 @@
 ## 🎯 GOAL SETTING & ACHIEVEMENTS
 
 ### Achievement System
-- "First 100kg squat" type milestones
-- Consistency badges (30 days, 60 days, 100 days)
-- Volume milestones (10,000kg total lifted)
-- Exercise mastery badges (performed X exercise Y times)
-- Workout plan completion certificates
+- **Consistency badges examples**:
+  - "Week Warrior" (7 consecutive workout days)
+  - "Monthly Crusher" (completed 16+ workouts in a month)
+  - "Routine Master" (followed workout plan for 30 days straight)
+  - "Volume King" (hit 10,000kg total monthly volume)
+- Exercise mastery: "Performed squats 50 times", "Bench press specialist (100 sessions)"
 
 ### Progress Predictions
 - Projected timeline to reach weight goals based on current progression
@@ -84,36 +72,24 @@
 - Seasonal performance patterns
 - Performance after breaks/rest periods
 
-### Workout Plan Effectiveness
-- Success rate of different workout plans
-- Which workout plans lead to best progression
-- Plan adherence rates
-- Plan difficulty analysis based on completion rates
-
 ## 🔥 MOTIVATION & ENGAGEMENT
 
 ### Progress Celebrations
 - Weekly progress summaries
 - Monthly achievement reports
-- Progress photos integration points
 - "You're stronger than X weeks ago" comparisons
 - Improvement percentage calculations
-
-### Challenges & Gamification
-- Monthly volume challenges
-- Consistency challenges
-- "Beat your last workout" suggestions
-- Personal competition tracking
-- Progress sharing capabilities
 
 ## 📱 DASHBOARD IDEAS
 
 ### Main Dashboard Widgets
 - Current streak counter
-- This week's total volume
-- Recent personal records
-- Upcoming workout suggestions
-- Progress towards current goals
+- **This week's total volume example**: "This week: 8,450kg total lifted (vs 7,200kg last week)"
+  - Could be helpful to show overall training load and compare week-to-week
+- **Recent personal records examples**:
+  - "New 5RM: Bench Press 70kg" (3 days ago)
+  - "Volume PR: Squat 2,100kg this week"
+  - "First time: Deadlift 2x bodyweight"
 
 ### Detailed Analytics Pages
 - Exercise progression graphs
@@ -122,25 +98,10 @@
 - Historical trend analysis
 - Workout completion statistics
 
-## 🚀 ADVANCED FEATURES
-
-### Smart Recommendations
-- Suggest weight increases based on rep completion
-- Recommend deload weeks when progress stalls
-- Exercise variation suggestions
-- Optimal rest day recommendations
-- Workout plan recommendations based on goals
-
-### Health Integration
-- Correlation with sleep/nutrition data if available
-- Recovery tracking based on performance drops
-- Injury prevention alerts (overtraining detection)
-- Performance optimization suggestions
-
 ## 📊 SPECIFIC CHART TYPES
 
 ### Progress Charts
-- Line charts: Weight progression over time
+- Line charts: Estimated 1RM progression over time
 - Bar charts: Volume comparisons between periods
 - Area charts: Cumulative volume over time
 - Scatter plots: Weight vs reps relationship
