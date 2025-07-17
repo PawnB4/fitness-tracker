@@ -47,7 +47,8 @@
             "node_modules/@expo-google-fonts/funnel-sans/800ExtraBold/FunnelSans_800ExtraBold.ttf"
           ]
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true
