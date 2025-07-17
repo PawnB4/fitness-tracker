@@ -12,7 +12,7 @@
     "clean": "rm -rf .expo node_modules",
     "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css",
     "lint": "biome check app/ components/ db/ utils/ lib/",
-    "format": "biome check --write app/ components/ db/ utils/ lib/"
+    "format": "biome check --write app/ components/ db/ utils/ lib/ drizzle/"
   },
   "dependencies": {
     "@expo-google-fonts/cabin-sketch": "^0.4.0",
