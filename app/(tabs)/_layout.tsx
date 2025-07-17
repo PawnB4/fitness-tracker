@@ -68,7 +68,7 @@ export default function TabLayout() {
 					headerTitleStyle: {
 						fontSize: 24,
 						lineHeight: 32,
-						fontFamily: "FunnelSans_400Regular",
+						fontFamily: "FunnelSans_500Medium",
 					},
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (
@@ -93,7 +93,7 @@ export default function TabLayout() {
 					headerTitleStyle: {
 						fontSize: 24,
 						lineHeight: 32,
-						fontFamily: "FunnelSans_400Regular",
+						fontFamily: "FunnelSans_500Medium",
 					},
 					headerRight: () => <UserButton />,
 					tabBarLabel: ({ children, focused }) => (

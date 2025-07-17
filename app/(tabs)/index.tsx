@@ -204,16 +204,22 @@ export default function Page() {
 		}
 	};
 	const increaseWeeklyTarget = async () => {
-		if(weeklyTargetQuery?.[0]?.weeklyTarget && weeklyTargetQuery?.[0]?.weeklyTarget <7){
-		await db
-			.update(schema.user)
-			.set({ weeklyTarget: weeklyTargetQuery?.[0]?.weeklyTarget + 1 });
-		} else{
+		if (
+			weeklyTargetQuery?.[0]?.weeklyTarget &&
+			weeklyTargetQuery?.[0]?.weeklyTarget < 14
+		) {
+			await db
+				.update(schema.user)
+				.set({ weeklyTarget: weeklyTargetQuery?.[0]?.weeklyTarget + 1 });
+		} else {
 			alert("You can't have more than 7 workouts per week");
 		}
 	};
 	const decreaseWeeklyTarget = async () => {
-		if (weeklyTargetQuery?.[0]?.weeklyTarget && weeklyTargetQuery?.[0]?.weeklyTarget > 1) {
+		if (
+			weeklyTargetQuery?.[0]?.weeklyTarget &&
+			weeklyTargetQuery?.[0]?.weeklyTarget > 1
+		) {
 			await db
 				.update(schema.user)
 				.set({ weeklyTarget: weeklyTargetQuery?.[0]?.weeklyTarget - 1 });
@@ -261,8 +267,8 @@ export default function Page() {
 					<View className="flex flex-row items-center justify-center gap-4">
 						<Button
 							className="h-12 w-12 rounded-full bg-secondary shadow-sm"
-							variant="secondary"
 							onPress={decreaseWeeklyTarget}
+							variant="secondary"
 						>
 							<Text className="font-funnel-bold text-foreground text-xl">
 								-
@@ -277,8 +283,8 @@ export default function Page() {
 						</View>
 						<Button
 							className="h-12 w-12 rounded-full bg-secondary shadow-sm"
-							variant="secondary"
 							onPress={increaseWeeklyTarget}
+							variant="secondary"
 						>
 							<Text className="font-funnel-bold text-foreground text-xl">
 								+

@@ -31,7 +31,8 @@ export const workoutExercises = sqliteTable("workout_exercises", {
 		.notNull()
 		.references(() => exercises.id, { onDelete: "cascade" }),
 	sets: integer().notNull(),
-	reps: integer().notNull(),
+	reps: integer(),
+	durationSeconds: integer(),
 	weight: real().notNull(), // Using real for decimal weights
 	notes: text(), // For workout-specific notes about this exercise
 	sortOrder: integer().notNull(), // For ordering exercises within a workout
@@ -59,7 +60,8 @@ export const workoutPlanExercises = sqliteTable("workout_plan_exercises", {
 		.notNull()
 		.references(() => exercises.id, { onDelete: "cascade" }),
 	defaultSets: integer().notNull(),
-	defaultReps: integer().notNull(),
+	defaultReps: integer(),
+	defaultDurationSeconds: integer(),
 	defaultWeight: real().notNull(),
 	sortOrder: integer().notNull(), // To maintain exercise order in plan
 	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
@@ -124,7 +126,21 @@ export const insertWorkoutExerciseSchema = z.object({
 		.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
 		.refine((val) => Number.isInteger(Number(val)), {
 			message: "Reps must be a whole number",
-		}),
+		})
+		.optional(),
+	durationSeconds: z
+		.string()
+		.min(1, { message: "Duration is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Duration must be a number",
+		})
+		.refine((val) => Number(val) >= 1, {
+			message: "Duration must be at least 1",
+		})
+		.refine((val) => Number.isInteger(Number(val)), {
+			message: "Duration must be a whole number",
+		})
+		.optional(),
 	weight: z
 		.string()
 		.min(0, { message: "Weight is required" })
@@ -175,7 +191,21 @@ export const insertWorkoutPlanExerciseSchema = z.object({
 		.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
 		.refine((val) => Number.isInteger(Number(val)), {
 			message: "Reps must be a whole number",
-		}),
+		})
+		.optional(),
+	defaultDurationSeconds: z
+		.string()
+		.min(1, { message: "Duration is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Duration must be a number",
+		})
+		.refine((val) => Number(val) >= 1, {
+			message: "Duration must be at least 1",
+		})
+		.refine((val) => Number.isInteger(Number(val)), {
+			message: "Duration must be a whole number",
+		})
+		.optional(),
 	defaultWeight: z
 		.string()
 		.refine((val) => !isNaN(Number(val)), {
@@ -192,16 +222,18 @@ export const insertUserSchema = z.object({
 		.string()
 		.min(1, { message: "Name is required" })
 		.max(40, { message: "Name must be less than 40 characters" }),
-	weeklyTarget: z.string().min(1, { message: "Weekly target is required" }),
-	// .refine((val) => !isNaN(Number(val)), {
-	// 	message: "Weekly target must be a number",
-	// })
-	// .refine((val) => Number(val) >= 1, {
-	// 	message: "Weekly target must be at least 1",
-	// })
-	// .refine((val) => Number.isInteger(Number(val)), {
-	// 	message: "Weekly target must be a whole number",
-	// }),
+	weeklyTarget: z
+		.string()
+		.min(1, { message: "Weekly target is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Weekly target must be a number",
+		})
+		.refine((val) => Number(val) >= 1, {
+			message: "Weekly target must be at least 1",
+		})
+		.refine((val) => Number.isInteger(Number(val)), {
+			message: "Weekly target must be a whole number",
+		}),
 });
 
 // Types
@@ -232,7 +264,8 @@ export type WorkoutExercise = {
 	workoutId: number;
 	exerciseId: number;
 	sets: number;
-	reps: number;
+	reps: number | null;
+	durationSeconds: number | null;
 	weight: number;
 	sortOrder: number;
 	completed: boolean | null;
@@ -256,7 +289,8 @@ export type WorkoutPlanExercise = {
 	sortOrder: number;
 	planId: number;
 	defaultSets: number;
-	defaultReps: number;
+	defaultReps: number | null;
+	defaultDurationSeconds: number | null;
 	defaultWeight: number;
 };
 export type NewWorkoutPlanExercise = z.infer<
