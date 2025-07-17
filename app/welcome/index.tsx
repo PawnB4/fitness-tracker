@@ -11,15 +11,17 @@ import * as schema from "~/db/schema";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 
 export default function Page() {
-	const insets = useSafeAreaInsets();
-
 	const form = useForm({
 		onSubmit: async ({ value }: { value: schema.NewUser }) => {
 			const newUser = {
 				name: value.name,
+				weeklyTarget: value.weeklyTarget,
 			};
 			try {
-				await db.insert(schema.user).values({ name: newUser.name });
+				await db.insert(schema.user).values({
+					name: newUser.name,
+					weeklyTarget: Number(newUser.weeklyTarget),
+				});
 				router.push("/");
 			} catch (error) {
 				console.log(error);
@@ -32,12 +34,9 @@ export default function Page() {
 	});
 
 	return (
-		<View
-			className="flex-1 bg-secondary/30 px-8"
-			style={{ paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }}
-		>
+		<View className="flex flex-1 flex-col justify-around bg-secondary/30 px-8">
 			{/* Header Section */}
-			<View className="flex-1 items-center justify-center">
+			<View className=" items-center justify-center">
 				<View className="mb-8 rounded-full bg-primary/10 p-8">
 					<Dumbbell className="h-16 w-16 text-primary" />
 				</View>
@@ -53,7 +52,7 @@ export default function Page() {
 			</View>
 
 			{/* Form Section */}
-			<View className="flex flex-col gap-4">
+			<View className="flex flex-col gap-2">
 				<form.Field defaultValue={""} name="name">
 					{(field) => (
 						<>
@@ -61,8 +60,30 @@ export default function Page() {
 							<Input
 								onChangeText={field.handleChange}
 								placeholder="Enter your name"
-								value={field.state.value as string}
+								value={field.state.value}
 							/>
+							{field.state.meta.errors ? (
+								<Text className="text-red-500">
+									{field.state.meta.errors[0]?.message}
+								</Text>
+							) : null}
+						</>
+					)}
+				</form.Field>
+
+				<form.Field defaultValue={""} name="weeklyTarget">
+					{(field) => (
+						<>
+							<Label nativeID={field.name}>
+								How many workouts do you want to do per week?
+							</Label>
+							<Input
+								inputMode="numeric"
+								onChangeText={field.handleChange}
+								placeholder="Enter your weekly target"
+								value={field.state.value}
+							/>
+
 							{field.state.meta.errors ? (
 								<Text className="text-red-500">
 									{field.state.meta.errors[0]?.message}
@@ -74,7 +95,11 @@ export default function Page() {
 
 				<Button
 					className="h-14 w-full shadow-foreground/10 shadow-lg"
-					onPress={() => form.handleSubmit()}
+					onPress={() => {
+						console.log(form.state.fieldMeta.name.errors);
+						console.log(form.state.fieldMeta.weeklyTarget.errors);
+						form.handleSubmit();
+					}}
 				>
 					<Text className="font-funnel-semibold text-lg">Get Started</Text>
 				</Button>

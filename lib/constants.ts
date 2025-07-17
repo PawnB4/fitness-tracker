@@ -56,17 +56,22 @@ export const CHART_THEME = {
 	},
 };
 
-export const EXERCISES_TYPES = [
-	"Upper Body",
-	"Lower Body",
-	"Core",
-	"Cardio",
-];
+export const EXERCISES_TYPES = ["Upper Body", "Lower Body", "Core", "Cardio"];
 
 export const MUSCLE_GROUPS = [
-	"Back", "Biceps", "Calves", "Cardio", "Chest", "Core", 
-	"Forearms", "Glutes", "Hamstrings", "Quadriceps", 
-	"Shoulders", "Traps", "Triceps"
+	"Back",
+	"Biceps",
+	"Calves",
+	"Cardio",
+	"Chest",
+	"Core",
+	"Forearms",
+	"Glutes",
+	"Hamstrings",
+	"Quadriceps",
+	"Shoulders",
+	"Traps",
+	"Triceps",
 ];
 
 export const EXERCISES = [

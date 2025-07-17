@@ -5,6 +5,7 @@ import { Redirect, router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
 	ActivityIndicator,
+	Pressable,
 	ScrollView,
 	TouchableOpacity,
 	View,
@@ -185,6 +186,13 @@ export default function Page() {
 		}
 	};
 
+	const { data: weeklyTargetQuery, error: weeklyTargetError } = useLiveQuery(
+		db
+			.select({ weeklyTarget: schema.user.weeklyTarget })
+			.from(schema.user)
+			.limit(1),
+	);
+
 	const createWorkoutFromScratch = async () => {
 		try {
 			const res = await db.insert(schema.workouts).values({}).returning();
@@ -193,6 +201,24 @@ export default function Page() {
 			router.push(`/workout/${res[0].id}`);
 		} catch (error) {
 			alert("Error creating workout");
+		}
+	};
+	const increaseWeeklyTarget = async () => {
+		if(weeklyTargetQuery?.[0]?.weeklyTarget && weeklyTargetQuery?.[0]?.weeklyTarget <7){
+		await db
+			.update(schema.user)
+			.set({ weeklyTarget: weeklyTargetQuery?.[0]?.weeklyTarget + 1 });
+		} else{
+			alert("You can't have more than 7 workouts per week");
+		}
+	};
+	const decreaseWeeklyTarget = async () => {
+		if (weeklyTargetQuery?.[0]?.weeklyTarget && weeklyTargetQuery?.[0]?.weeklyTarget > 1) {
+			await db
+				.update(schema.user)
+				.set({ weeklyTarget: weeklyTargetQuery?.[0]?.weeklyTarget - 1 });
+		} else {
+			alert("You can't have less than 1 workout per week");
 		}
 	};
 
@@ -223,10 +249,47 @@ export default function Page() {
 			<View className="flex flex-row items-center justify-between gap-2 px-2">
 				<View className="flex flex-col gap-2">
 					<Text className="text-4xl ">Hello,</Text>
-					<Text className="font-funnel-bold text-7xl">{user?.[0]?.name}</Text>
+					<Text className="font-funnel-bold text-6xl">{user?.[0]?.name}</Text>
 				</View>
 				<UserIcon />
 			</View>
+			<Card className="p-2">
+				<View className="flex flex-col gap-3">
+					<Text className="text-center font-funnel-semibold text-lg">
+						Your weekly target
+					</Text>
+					<View className="flex flex-row items-center justify-center gap-4">
+						<Button
+							className="h-12 w-12 rounded-full bg-secondary shadow-sm"
+							variant="secondary"
+							onPress={decreaseWeeklyTarget}
+						>
+							<Text className="font-funnel-bold text-foreground text-xl">
+								-
+							</Text>
+						</Button>
+						<View className="flex flex-col items-center gap-1">
+							<View className="rounded-xl bg-sky-500/40 px-6 py-3">
+								<Text className="font-funnel-bold text-4xl text-primary">
+									{weeklyTargetQuery?.[0]?.weeklyTarget ?? "-"}
+								</Text>
+							</View>
+						</View>
+						<Button
+							className="h-12 w-12 rounded-full bg-secondary shadow-sm"
+							variant="secondary"
+							onPress={increaseWeeklyTarget}
+						>
+							<Text className="font-funnel-bold text-foreground text-xl">
+								+
+							</Text>
+						</Button>
+					</View>
+					<Text className="text-center text-muted-foreground text-xs">
+						workouts per week
+					</Text>
+				</View>
+			</Card>
 			<Dialog
 				onOpenChange={(e) => {
 					setOpenDialog(e);
@@ -328,8 +391,8 @@ export default function Page() {
 					</View>
 				</DialogContent>
 			</Dialog>
-			<View className="flex flex-col gap-4">
-				<Card className="p-4">
+			<View className="flex flex-col gap-2">
+				<Card className="px-4 py-2">
 					<View className="flex flex-col gap-3">
 						<Text className="font-funnel-semibold text-lg">
 							Weekly Progress
@@ -379,7 +442,7 @@ export default function Page() {
 						</View>
 					</View>
 				</Card>
-				<Card className="p-4">
+				<Card className="px-4 py-2">
 					<View className="flex flex-col gap-3">
 						<Text className="font-funnel-semibold text-lg">
 							Monthly Progress
@@ -438,21 +501,21 @@ export default function Page() {
 						activeOpacity={0.6}
 						onPress={() => router.push(`/workout/${processedWorkouts[0].id}`)}
 					>
-						<Card className="flex flex-row items-center justify-center gap-10 px-4 py-4">
-							<Dumbbell className="text-primary" size={50} />
+						<Card className="flex flex-row items-center justify-center gap-10 px-4 py-2">
+							<Dumbbell className="text-primary" size={40} />
 							<View className="flex flex-col gap-2">
-								<Text className="font-funnel-bold text-3xl">
+								<Text className="font-funnel-bold text-2xl">
 									Your last workout
 								</Text>
 
 								<View className="flex flex-row items-center justify-around gap-2">
-									<Text className="text-lg text-muted-foreground">
+									<Text className="text-muted-foreground text-sm">
 										{formatDate(processedWorkouts[0].createdAt ?? "")}
 									</Text>
-									<Text className="text-lg text-muted-foreground">
+									<Text className="text-muted-foreground text-sm">
 										{formatTime(processedWorkouts[0].createdAt ?? "")}
 									</Text>
-									<Text className="text-lg text-muted-foreground">
+									<Text className="text-muted-foreground text-sm">
 										{processedWorkouts[0].totalExercises} Exercise
 										{processedWorkouts[0].totalExercises === 1 ? "" : "s"}
 									</Text>

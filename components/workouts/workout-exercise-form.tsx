@@ -294,7 +294,6 @@ export const WorkoutExerciseForm = ({
 										className="w-[60px]"
 										inputMode="numeric"
 										onChangeText={field.handleChange}
-										placeholder="4"
 										value={field.state.value}
 									/>
 								</View>
@@ -309,7 +308,6 @@ export const WorkoutExerciseForm = ({
 										className="w-[60px]"
 										inputMode="numeric"
 										onChangeText={field.handleChange}
-										placeholder="12"
 										value={field.state.value}
 									/>
 								</View>
@@ -324,7 +322,6 @@ export const WorkoutExerciseForm = ({
 										className="w-[60px]"
 										inputMode="numeric"
 										onChangeText={field.handleChange}
-										placeholder="25"
 										value={field.state.value}
 									/>
 								</View>

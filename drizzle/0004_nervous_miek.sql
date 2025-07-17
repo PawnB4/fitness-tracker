@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `weekly_target` integer;

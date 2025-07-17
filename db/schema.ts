@@ -77,6 +77,7 @@ export const user = sqliteTable("user", {
 			timezone: "America/Argentina/Buenos_Aires",
 		}),
 	name: text(),
+	weeklyTarget: integer(),
 });
 
 // Zod schemas
@@ -177,7 +178,6 @@ export const insertWorkoutPlanExerciseSchema = z.object({
 		}),
 	defaultWeight: z
 		.string()
-		.min(0, { message: "Weight is required" })
 		.refine((val) => !isNaN(Number(val)), {
 			message: "Weight must be a number",
 		})
@@ -192,6 +192,16 @@ export const insertUserSchema = z.object({
 		.string()
 		.min(1, { message: "Name is required" })
 		.max(40, { message: "Name must be less than 40 characters" }),
+	weeklyTarget: z.string().min(1, { message: "Weekly target is required" }),
+	// .refine((val) => !isNaN(Number(val)), {
+	// 	message: "Weekly target must be a number",
+	// })
+	// .refine((val) => Number(val) >= 1, {
+	// 	message: "Weekly target must be at least 1",
+	// })
+	// .refine((val) => Number.isInteger(Number(val)), {
+	// 	message: "Weekly target must be a whole number",
+	// }),
 });
 
 // Types
@@ -255,6 +265,7 @@ export type NewWorkoutPlanExercise = z.infer<
 
 export type User = {
 	name: string | null;
+	weeklyTarget: number | null;
 	config: {
 		preferredTheme?: string;
 		timezone?: string;
