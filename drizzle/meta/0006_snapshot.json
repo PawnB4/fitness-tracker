@@ -1,8 +1,8 @@
 {
-	"id": "11172fff-344d-477d-8fd3-b9fc1f61a531",
-	"prevId": "5104cdc7-0c42-4d1e-9d6d-3c1f37bb5364",
 	"version": "6",
 	"dialect": "sqlite",
+	"id": "4330401e-239b-4e26-86ed-3a993b73a2ac",
+	"prevId": "9ae51d93-51f9-4388-88ca-9536fbe7c552",
 	"tables": {
 		"exercises": {
 			"name": "exercises",
@@ -73,11 +73,18 @@
 					"primaryKey": false,
 					"notNull": false,
 					"autoincrement": false,
-					"default": "'{\"preferredTheme\":\"dark\",\"timezone\":\"America/Argentina/Buenos_Aires\"}'"
+					"default": "'{\"preferredTheme\":\"dark\",\"timezone\":\"America/Argentina/Buenos_Aires\",\"locale\":\"en\"}'"
 				},
 				"name": {
 					"name": "name",
 					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"weekly_target": {
+					"name": "weekly_target",
+					"type": "integer",
 					"primaryKey": false,
 					"notNull": false,
 					"autoincrement": false
@@ -124,7 +131,14 @@
 					"name": "reps",
 					"type": "integer",
 					"primaryKey": false,
-					"notNull": true,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"duration_seconds": {
+					"name": "duration_seconds",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
 					"autoincrement": false
 				},
 				"weight": {
@@ -178,20 +192,20 @@
 				"workout_exercises_workout_id_workouts_id_fk": {
 					"name": "workout_exercises_workout_id_workouts_id_fk",
 					"tableFrom": "workout_exercises",
-					"columnsFrom": ["workout_id"],
 					"tableTo": "workouts",
+					"columnsFrom": ["workout_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				},
 				"workout_exercises_exercise_id_exercises_id_fk": {
 					"name": "workout_exercises_exercise_id_exercises_id_fk",
 					"tableFrom": "workout_exercises",
-					"columnsFrom": ["exercise_id"],
 					"tableTo": "exercises",
+					"columnsFrom": ["exercise_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -233,7 +247,14 @@
 					"name": "default_reps",
 					"type": "integer",
 					"primaryKey": false,
-					"notNull": true,
+					"notNull": false,
+					"autoincrement": false
+				},
+				"default_duration_seconds": {
+					"name": "default_duration_seconds",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
 					"autoincrement": false
 				},
 				"default_weight": {
@@ -272,20 +293,20 @@
 				"workout_plan_exercises_plan_id_workout_plans_id_fk": {
 					"name": "workout_plan_exercises_plan_id_workout_plans_id_fk",
 					"tableFrom": "workout_plan_exercises",
-					"columnsFrom": ["plan_id"],
 					"tableTo": "workout_plans",
+					"columnsFrom": ["plan_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				},
 				"workout_plan_exercises_exercise_id_exercises_id_fk": {
 					"name": "workout_plan_exercises_exercise_id_exercises_id_fk",
 					"tableFrom": "workout_plan_exercises",
-					"columnsFrom": ["exercise_id"],
 					"tableTo": "exercises",
+					"columnsFrom": ["exercise_id"],
 					"columnsTo": ["id"],
-					"onUpdate": "no action",
-					"onDelete": "cascade"
+					"onDelete": "cascade",
+					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -397,9 +418,9 @@
 	"views": {},
 	"enums": {},
 	"_meta": {
-		"columns": {},
 		"schemas": {},
-		"tables": {}
+		"tables": {},
+		"columns": {}
 	},
 	"internal": {
 		"indexes": {}

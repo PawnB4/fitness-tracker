@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { router } from "expo-router";
+import { I18n } from "i18n-js";
 import { TouchableOpacity, View } from "react-native";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
@@ -8,7 +9,23 @@ import { db } from "~/db/drizzle";
 import type { WorkoutPlan } from "~/db/schema";
 import * as schema from "~/db/schema";
 
-export const WorkoutPlanCard = ({ id, name }: WorkoutPlan) => {
+const i18n = new I18n({
+	en: {
+		exercise: "exercise",
+		exercises: "exercises",
+	},
+	es: {
+		exercise: "ejercicio",
+		exercises: "ejercicios",
+	},
+});
+
+export const WorkoutPlanCard = ({
+	id,
+	name,
+	locale,
+}: WorkoutPlan & { locale: string }) => {
+	i18n.locale = locale;
 	const { data: workoutPlanExercises, error: workoutPlanExercisesError } =
 		useLiveQuery(
 			db
@@ -32,7 +49,9 @@ export const WorkoutPlanCard = ({ id, name }: WorkoutPlan) => {
 						<CardTitle className="leading-normal">{name}</CardTitle>
 						<Text className=" ml-auto pr-8 font-funnel-bold text-foreground/70 ">
 							{workoutPlanExercises?.length}{" "}
-							{workoutPlanExercises?.length === 1 ? "exercise" : "exercises"}
+							{workoutPlanExercises?.length === 1
+								? i18n.t("exercise")
+								: i18n.t("exercises")}
 						</Text>
 					</View>
 				</CardContent>

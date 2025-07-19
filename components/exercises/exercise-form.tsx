@@ -1,5 +1,7 @@
 import type { Option } from "@rn-primitives/select";
 import { useForm } from "@tanstack/react-form";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { I18n } from "i18n-js";
 import { useEffect, useRef } from "react";
 import {
 	Keyboard,
@@ -28,6 +30,32 @@ import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import { EXERCISES_TYPES, MUSCLE_GROUPS } from "~/lib/constants";
 
+const i18n = new I18n({
+	en: {
+		newExercise: "New exercise",
+		newExerciseDescription: "Create a new exercise to add to your catalog.",
+		name: "Name",
+		namePlaceholder: "Pushups, Split Squats, etc.",
+		type: "Type",
+		typePlaceholder: "Select the type of exercise",
+		primaryMuscleGroup: "Primary muscle group",
+		primaryMuscleGroupPlaceholder: "Select muscle group",
+		create: "Create",
+	},
+	es: {
+		newExercise: "Nuevo ejercicio",
+		newExerciseDescription:
+			"Crea un nuevo ejercicio para agregar a tu catálogo.",
+		name: "Nombre",
+		namePlaceholder: "Flexiones, Sentadillas, etc.",
+		type: "Tipo",
+		typePlaceholder: "Seleccionar el tipo de ejercicio",
+		primaryMuscleGroup: "Grupo muscular principal",
+		primaryMuscleGroupPlaceholder: "Seleccionar grupo muscular",
+		create: "Crear",
+	},
+});
+
 export const ExerciseForm = ({
 	setOpen,
 	openWorkoutPlanExerciseForm,
@@ -46,6 +74,12 @@ export const ExerciseForm = ({
 		left: 12,
 		right: 12,
 	};
+
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 
 	const wasSubmitted = useRef(false);
 
@@ -110,19 +144,19 @@ export const ExerciseForm = ({
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<View className="p-2">
 				<DialogHeader>
-					<DialogTitle>New exercise</DialogTitle>
+					<DialogTitle>{i18n.t("newExercise")}</DialogTitle>
 					<DialogDescription>
-						Create a new exercise to add to your catalog.
+						{i18n.t("newExerciseDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				<View className="flex flex-col py-3">
 					<form.Field name="name">
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>Name:</Label>
+								<Label nativeID={field.name}>{i18n.t("name")}:</Label>
 								<Input
 									onChangeText={field.handleChange}
-									placeholder="Pushups, Split Squats, etc."
+									placeholder={i18n.t("namePlaceholder")}
 									value={field.state.value as string}
 								/>
 								{field.state.meta.errors ? (
@@ -133,16 +167,10 @@ export const ExerciseForm = ({
 							</>
 						)}
 					</form.Field>
-					<form.Field
-						defaultValue={{
-							value: EXERCISES_TYPES[0],
-							label: EXERCISES_TYPES[0],
-						}}
-						name="type"
-					>
+					<form.Field name="type">
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>Type:</Label>
+								<Label nativeID={field.name}>{i18n.t("type")}:</Label>
 								<Select
 									// @ts-ignore
 									onValueChange={field.handleChange}
@@ -156,15 +184,17 @@ export const ExerciseForm = ({
 									>
 										<SelectValue
 											className="native:text-lg text-foreground text-sm"
-											placeholder="Select the type of exercise"
+											placeholder={i18n.t("typePlaceholder")}
 										/>
 									</SelectTrigger>
 									<SelectContent className="w-[275px]" insets={contentInsets}>
-										{EXERCISES_TYPES.map((type) => (
-											<SelectItem key={type} label={type} value={type}>
-												{type}
-											</SelectItem>
-										))}
+										{Object.entries(EXERCISES_TYPES[i18n.locale]).map(
+											([key, value]) => (
+												<SelectItem key={key} label={value} value={key}>
+													{value}
+												</SelectItem>
+											),
+										)}
 									</SelectContent>
 								</Select>
 								{field.state.meta.errors ? (
@@ -179,7 +209,9 @@ export const ExerciseForm = ({
 					<form.Field name="primaryMuscleGroup">
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>Primary muscle group:</Label>
+								<Label nativeID={field.name}>
+									{i18n.t("primaryMuscleGroup")}:
+								</Label>
 
 								<Select
 									// @ts-ignore
@@ -194,21 +226,19 @@ export const ExerciseForm = ({
 									>
 										<SelectValue
 											className="native:text-lg text-foreground text-sm"
-											placeholder="(Optional) Select muscle group"
+											placeholder={i18n.t("primaryMuscleGroupPlaceholder")}
 										/>
 									</SelectTrigger>
 
 									<SelectContent className="w-[275px]" insets={contentInsets}>
 										<ScrollView className="max-h-56">
-											{MUSCLE_GROUPS.map((muscleGroup) => (
-												<SelectItem
-													key={muscleGroup}
-													label={muscleGroup}
-													value={muscleGroup}
-												>
-													{muscleGroup}
-												</SelectItem>
-											))}
+											{Object.entries(MUSCLE_GROUPS[i18n.locale]).map(
+												([key, value]) => (
+													<SelectItem key={key} label={value} value={key}>
+														{value}
+													</SelectItem>
+												),
+											)}
 										</ScrollView>
 									</SelectContent>
 								</Select>
@@ -222,7 +252,7 @@ export const ExerciseForm = ({
 					</form.Field>
 				</View>
 				<Button onPress={() => form.handleSubmit()}>
-					<Text>Create</Text>
+					<Text>{i18n.t("create")}</Text>
 				</Button>
 			</View>
 		</TouchableWithoutFeedback>

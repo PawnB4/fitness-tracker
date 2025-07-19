@@ -19,3 +19,16 @@ export function formatTime(dateTimeString: string) {
 		hour12: false, // Mantener formato 24 horas
 	});
 }
+
+export const formatDurationFromSeconds = (totalSeconds: number) => {
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+	return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
+
+export const minutesSecondsToTotalSeconds = (
+	minutes: number,
+	seconds: number,
+) => {
+	return minutes * 60 + seconds;
+};

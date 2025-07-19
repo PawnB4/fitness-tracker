@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { Redirect, router } from "expo-router";
+import { I18n } from "i18n-js";
 import { useEffect, useMemo, useState } from "react";
 import {
 	ActivityIndicator,
@@ -45,6 +46,61 @@ type ProcessedWorkoutData = schema.Workout & {
 	isCompleted: boolean;
 };
 
+const i18n = new I18n({
+	en: {
+		hello: "Hello",
+		weeklyTarget: "Your weekly target",
+		workoutsThisWeek: "Workouts this week",
+		completed: "Completed",
+		monthlyProgress: "Monthly Progress",
+		workoutsThisMonth: "Workouts this month",
+		lastWorkout: "Your last workout",
+		workoutsPerWeek: "workouts per week",
+		newWorkout: "New Workout",
+		createWorkout: "Create Workout",
+		useWorkoutPlanTemplate: "Use a workout plan template",
+		startWithEmptyWorkout: "Start with an empty workout",
+		createEmptyWorkout: "Create empty workout",
+		or: "or",
+		weeklyProgress: "Weekly Progress",
+		viewAllWorkouts: "View all workouts",
+		noWorkoutsYet: "No workouts yet",
+		createYourFirstWorkout: "Create your first workout to get started!",
+		exercise: "exercise",
+		selectPlan: "Select a plan",
+		noWorkoutPlansFound: "No workout plans found",
+		create: "Create",
+		workout: "workout",
+		selectPlanFirst: "Select a plan first",
+	},
+	es: {
+		hello: "Hola",
+		weeklyTarget: "Tu objetivo semanal",
+		workoutsThisWeek: "Entrenamientos esta semana",
+		completed: "Completado",
+		monthlyProgress: "Progreso mensual",
+		workoutsThisMonth: "Entrenamientos este mes",
+		lastWorkout: "Tu último entrenamiento",
+		workoutsPerWeek: "entrenamientos por semana",
+		newWorkout: "Nuevo entrenamiento",
+		createWorkout: "Crear entrenamiento",
+		useWorkoutPlanTemplate: "Usar una rutina existente",
+		startWithEmptyWorkout: "Comenzar con un entrenamiento vacío",
+		createEmptyWorkout: "Crear entrenamiento desde cero",
+		or: "o",
+		weeklyProgress: "Progreso semanal",
+		viewAllWorkouts: "Ver todos los entrenamientos",
+		noWorkoutsYet: "No hay entrenamientos todavía",
+		createYourFirstWorkout: "Crea tu primer entrenamiento para empezar!",
+		exercise: "ejercicio",
+		selectPlan: "Seleccionar una plan",
+		noWorkoutPlansFound: "No hay planes de entrenamiento encontrados",
+		create: "Crear",
+		workout: "entrenamiento",
+		selectPlanFirst: "Seleccionar un plan primero",
+	},
+});
+
 export default function Page() {
 	useDrizzleStudio(fitnessTrackerDb);
 
@@ -58,6 +114,12 @@ export default function Page() {
 	const { data: workouts, error: workoutsError } = useLiveQuery(
 		db.select().from(schema.workouts).orderBy(desc(schema.workouts.createdAt)),
 	);
+
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 
 	// Fetch user on component mount
 	useEffect(() => {
@@ -254,7 +316,7 @@ export default function Page() {
 		<SafeAreaView className="flex-1 justify-center gap-4 bg-secondary/30 px-4 py-8">
 			<View className="flex flex-row items-center justify-between gap-2 px-2">
 				<View className="flex flex-col gap-2">
-					<Text className="text-4xl ">Hello,</Text>
+					<Text className="text-4xl ">{i18n.t("hello")},</Text>
 					<Text className="font-funnel-bold text-6xl">{user?.[0]?.name}</Text>
 				</View>
 				<UserIcon />
@@ -262,7 +324,7 @@ export default function Page() {
 			<Card className="p-2">
 				<View className="flex flex-col gap-3">
 					<Text className="text-center font-funnel-semibold text-lg">
-						Your weekly target
+						{i18n.t("weeklyTarget")}
 					</Text>
 					<View className="flex flex-row items-center justify-center gap-4">
 						<Button
@@ -292,7 +354,7 @@ export default function Page() {
 						</Button>
 					</View>
 					<Text className="text-center text-muted-foreground text-xs">
-						workouts per week
+						{i18n.t("workoutsPerWeek")}
 					</Text>
 				</View>
 			</Card>
@@ -308,16 +370,18 @@ export default function Page() {
 						className="shadow shadow-foreground/5"
 						onPress={() => setOpenDialog(true)}
 					>
-						<Text>New Workout</Text>
+						<Text>{i18n.t("newWorkout")}</Text>
 					</Button>
 				</DialogTrigger>
 				<DialogContent className="flex w-[90vw] min-w-[300px] max-w-[360px] flex-col justify-center gap-4 self-center p-4">
-					<DialogTitle className="text-center">Create Workout</DialogTitle>
+					<DialogTitle className="text-center">
+						{i18n.t("createWorkout")}
+					</DialogTitle>
 
 					{/* OPTION 1: FROM WORKOUT PLAN */}
 					<View className="rounded-xl bg-muted/30 p-3">
 						<Text className="mb-3 font-funnel-medium">
-							Use a workout plan template
+							{i18n.t("useWorkoutPlanTemplate")}
 						</Text>
 						{workoutPlans?.length > 0 ? (
 							<Select
@@ -328,7 +392,7 @@ export default function Page() {
 								<SelectTrigger>
 									<SelectValue
 										className="native:text-lg text-foreground text-sm"
-										placeholder="Select a plan"
+										placeholder={i18n.t("selectPlan")}
 									/>
 								</SelectTrigger>
 								<SelectContent className="w-[80vw]" insets={contentInsets}>
@@ -356,7 +420,7 @@ export default function Page() {
 								<SelectTrigger className="w-[275px] cursor-not-allowed opacity-50">
 									<SelectValue
 										className="native:text-lg text-foreground/50 text-sm"
-										placeholder={"No workout plans found"}
+										placeholder={i18n.t("noWorkoutPlansFound")}
 									/>
 								</SelectTrigger>
 							</Select>
@@ -369,8 +433,8 @@ export default function Page() {
 						>
 							<Text>
 								{selectedWorkoutPlan
-									? `Create ${selectedWorkoutPlan.label} workout`
-									: "Select a plan first"}
+									? `${i18n.t("create")} ${i18n.t("workout")} - ${selectedWorkoutPlan.label}`
+									: i18n.t("selectPlanFirst")}
 							</Text>
 						</Button>
 					</View>
@@ -378,21 +442,21 @@ export default function Page() {
 					{/* Divider */}
 					<View className="flex w-full flex-row items-center justify-between gap-2">
 						<Separator className="my-1 w-[45%]" />
-						<Text className="text-muted-foreground">or</Text>
+						<Text className="text-muted-foreground">{i18n.t("or")}</Text>
 						<Separator className="my-1 w-[45%]" />
 					</View>
 
 					{/* OPTION 2: FROM SCRATCH */}
 					<View className="rounded-xl bg-muted/30 p-3">
 						<Text className="mb-3 font-funnel-medium">
-							Start with an empty workout
+							{i18n.t("startWithEmptyWorkout")}
 						</Text>
 						<Button
 							className="w-full"
 							onPress={createWorkoutFromScratch}
 							variant="outline"
 						>
-							<Text>Create empty workout</Text>
+							<Text>{i18n.t("createEmptyWorkout")}</Text>
 						</Button>
 					</View>
 				</DialogContent>
@@ -401,7 +465,7 @@ export default function Page() {
 				<Card className="px-4 py-2">
 					<View className="flex flex-col gap-3">
 						<Text className="font-funnel-semibold text-lg">
-							Weekly Progress
+							{i18n.t("weeklyProgress")}
 						</Text>
 						<View className="flex-row items-center justify-between">
 							<View>
@@ -421,7 +485,7 @@ export default function Page() {
 									}
 								</Text>
 								<Text className="text-muted-foreground text-sm">
-									Workouts this week
+									{i18n.t("workoutsThisWeek")}
 								</Text>
 							</View>
 							<View>
@@ -443,7 +507,10 @@ export default function Page() {
 										}).length
 									}
 								</Text>
-								<Text className="text-muted-foreground text-sm">Completed</Text>
+								<Text className="text-muted-foreground text-sm">
+									{i18n.t("completed")}
+									{i18n.locale === "es" && "s"}
+								</Text>
 							</View>
 						</View>
 					</View>
@@ -451,7 +518,7 @@ export default function Page() {
 				<Card className="px-4 py-2">
 					<View className="flex flex-col gap-3">
 						<Text className="font-funnel-semibold text-lg">
-							Monthly Progress
+							{i18n.t("monthlyProgress")}
 						</Text>
 						<View className="flex-row items-center justify-between">
 							<View>
@@ -471,7 +538,7 @@ export default function Page() {
 									}
 								</Text>
 								<Text className="text-muted-foreground text-sm">
-									Workouts this month
+									{i18n.t("workoutsThisMonth")}
 								</Text>
 							</View>
 							<View>
@@ -493,7 +560,10 @@ export default function Page() {
 										}).length
 									}
 								</Text>
-								<Text className="text-muted-foreground text-sm">Completed</Text>
+								<Text className="text-muted-foreground text-sm">
+									{i18n.t("completed")}
+									{i18n.locale === "es" && "s"}
+								</Text>
 							</View>
 						</View>
 					</View>
@@ -511,7 +581,7 @@ export default function Page() {
 							<Dumbbell className="text-primary" size={40} />
 							<View className="flex flex-col gap-2">
 								<Text className="font-funnel-bold text-2xl">
-									Your last workout
+									{i18n.t("lastWorkout")}
 								</Text>
 
 								<View className="flex flex-row items-center justify-around gap-2">
@@ -522,7 +592,7 @@ export default function Page() {
 										{formatTime(processedWorkouts[0].createdAt ?? "")}
 									</Text>
 									<Text className="text-muted-foreground text-sm">
-										{processedWorkouts[0].totalExercises} Exercise
+										{processedWorkouts[0].totalExercises} {i18n.t("exercise")}
 										{processedWorkouts[0].totalExercises === 1 ? "" : "s"}
 									</Text>
 								</View>
@@ -534,10 +604,10 @@ export default function Page() {
 						<Dumbbell className="text-muted-foreground" size={40} />
 						<View className="flex flex-col items-center gap-1">
 							<Text className="font-funnel-bold text-muted-foreground text-xl">
-								No workouts yet
+								{i18n.t("noWorkoutsYet")}
 							</Text>
 							<Text className="text-center text-muted-foreground">
-								Create your first workout to get started!
+								{i18n.t("createYourFirstWorkout")}
 							</Text>
 						</View>
 					</Card>
@@ -550,7 +620,7 @@ export default function Page() {
 				>
 					<History className="text-primary" />
 					<Text className="font-funnel-bold text-primary">
-						View all workouts
+						{i18n.t("viewAllWorkouts")}
 					</Text>
 				</Button>
 			</View>

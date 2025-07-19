@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import { I18n } from "i18n-js";
 import { TouchableOpacity, View } from "react-native";
 import {
 	AlertDialog,
@@ -16,8 +17,27 @@ import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import type { Exercise } from "~/db/schema";
 import * as schema from "~/db/schema";
-import { EXERCISES, EXERCISES_TYPES } from "~/lib/constants";
+import { EXERCISES, EXERCISES_TYPES, MUSCLE_GROUPS } from "~/lib/constants";
 import { Trash2 } from "~/lib/icons/Trash2";
+
+const i18n = new I18n({
+	en: {
+		primaryMuscle: "Primary muscle",
+		confirmDelete: "Confirm Delete",
+		confirmDeleteDescription:
+			"Are you sure you want to delete this exercise? This action cannot be undone.",
+		cancel: "Cancel",
+		continue: "Continue",
+	},
+	es: {
+		primaryMuscle: "Grupo muscular principal",
+		confirmDelete: "Confirmar eliminación",
+		confirmDeleteDescription:
+			"¿Estás seguro de querer eliminar este ejercicio? Esta acción no se puede deshacer.",
+		cancel: "Cancelar",
+		continue: "Continuar",
+	},
+});
 
 const deleteExercise = async (id: number) => {
 	try {
@@ -76,7 +96,9 @@ export const ExerciseCard = ({
 	name,
 	type,
 	primaryMuscleGroup,
-}: Exercise) => {
+	locale,
+}: Exercise & { locale: string }) => {
+	i18n.locale = locale;
 	return (
 		<Card className="flex-1 overflow-hidden rounded-2xl border-sky-500/70 border-t-2">
 			<CardContent className="bg-gradient-to-br from-background to-background/80 px-4 py-3">
@@ -86,7 +108,7 @@ export const ExerciseCard = ({
 					</CardTitle>
 					<View className="ml-auto rounded-full bg-sky-100 px-2 py-0.5 dark:bg-sky-900/30">
 						<Text className="font-funnel-medium text-foreground/80 text-sm">
-							{type}
+							{EXERCISES_TYPES[locale][type]}
 						</Text>
 					</View>
 				</View>
@@ -96,24 +118,28 @@ export const ExerciseCard = ({
 						className="h-6 w-1.5 rounded-full"
 						style={{
 							backgroundColor:
-								type === EXERCISES_TYPES[0]
+								EXERCISES_TYPES[locale][type] ===
+								EXERCISES_TYPES[locale].upper_body
 									? "#16a34a"
-									: type === EXERCISES_TYPES[1]
+									: EXERCISES_TYPES[locale][type] ===
+											EXERCISES_TYPES[locale].lower_body
 										? "#8b5cf6"
-										: type === EXERCISES_TYPES[2]
+										: EXERCISES_TYPES[locale][type] ===
+												EXERCISES_TYPES[locale].cardio
 											? "#eab308"
-											: type === EXERCISES_TYPES[3]
+											: EXERCISES_TYPES[locale][type] ===
+													EXERCISES_TYPES[locale].core
 												? "#ef4444"
 												: "#0284c7",
 						}}
 					/>
 					<View className="flex flex-row flex-wrap items-center gap-1">
 						<Text className="font-funnel-semibold text-sm">
-							Primary muscle:
+							{i18n.t("primaryMuscle")}:
 						</Text>
 						{primaryMuscleGroup && (
 							<Text className="rounded bg-muted/50 px-2 py-0.5 font-funnel-medium text-foreground/80 text-sm">
-								{primaryMuscleGroup}
+								{MUSCLE_GROUPS[locale][primaryMuscleGroup]}
 							</Text>
 						)}
 					</View>
@@ -128,21 +154,22 @@ export const ExerciseCard = ({
 								</AlertDialogTrigger>
 								<AlertDialogContent>
 									<AlertDialogHeader>
-										<AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+										<AlertDialogTitle>
+											{i18n.t("confirmDelete")}
+										</AlertDialogTitle>
 										<AlertDialogDescription>
-											Are you sure you want to delete this exercise? This action
-											cannot be undone.
+											{i18n.t("confirmDeleteDescription")}
 										</AlertDialogDescription>
 									</AlertDialogHeader>
 									<AlertDialogFooter>
 										<AlertDialogCancel>
-											<Text>Cancel</Text>
+											<Text>{i18n.t("cancel")}</Text>
 										</AlertDialogCancel>
 										<AlertDialogAction
 											className="bg-destructive text-destructive-foreground"
 											onPress={() => deleteExercise(id)}
 										>
-											<Text>Continue</Text>
+											<Text>{i18n.t("continue")}</Text>
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>

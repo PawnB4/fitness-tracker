@@ -146,6 +146,7 @@ export default function RootLayout() {
 				<Stack.Screen
 					name="workout-plan/[id]"
 					options={{
+						headerTitle: "",
 						headerRight: () => <UserButton />,
 						headerStyle: {
 							backgroundColor: isDarkColorScheme

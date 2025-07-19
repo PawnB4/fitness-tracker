@@ -1,6 +1,8 @@
 import { useForm } from "@tanstack/react-form";
 import { eq } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { router } from "expo-router";
+import { I18n } from "i18n-js";
 import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import {
 	AlertDialog,
@@ -26,6 +28,46 @@ import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import { Textarea } from "../ui/textarea";
 
+const i18n = new I18n({
+	en: {
+		updateWorkoutPlan: "Update workout plan",
+		newWorkoutPlan: "New workout plan",
+		updateWorkoutPlanDescription: "Update your workout plan",
+		newWorkoutPlanDescription:
+			"Create a new workout plan to add to your catalog. Workout plans are a collection of exercises from which you can create workouts.",
+		name: "Name",
+		namePlaceholder: "Monday legs, Tuesday chest, etc.",
+		description: "Description",
+		descriptionPlaceholder: "Add a description to your workout plan",
+		save: "Save",
+		create: "Create",
+		deleteWorkoutPlan: "Delete workout plan",
+		deleteWorkoutPlanConfirmation:
+			"Are you sure you want to delete this workout plan? This action cannot be undone.",
+		deleteWorkoutPlanConfirmationTitle: "Confirm Delete",
+		cancel: "Cancel",
+		continue: "Continue",
+	},
+	es: {
+		updateWorkoutPlan: "Actualizar rutina",
+		newWorkoutPlan: "Nueva rutina",
+		updateWorkoutPlanDescription: "Actualiza tu rutina",
+		newWorkoutPlanDescription:
+			"Crea una nueva rutina para agregar a tu catálogo. Las rutinas son una colección de ejercicios de las que puedes crear entrenamientos.",
+		name: "Nombre",
+		namePlaceholder: "Lunes piernas, Martes pecho, etc.",
+		description: "Descripción",
+		descriptionPlaceholder: "Agrega una descripción a tu rutina",
+		save: "Guardar",
+		create: "Crear",
+		deleteWorkoutPlan: "Eliminar rutina",
+		deleteWorkoutPlanConfirmation:
+			"¿Estás seguro de querer eliminar esta rutina? Esta acción no se puede deshacer.",
+		deleteWorkoutPlanConfirmationTitle: "Confirmar eliminación",
+		cancel: "Cancelar",
+		continue: "Continuar",
+	},
+});
 const deleteWorkoutPlan = async (planId: number) => {
 	try {
 		await db
@@ -51,6 +93,11 @@ export const WorkoutPlanForm = ({
 	currentName?: string;
 	currentDescription?: string;
 }) => {
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 	const form = useForm({
 		onSubmit: async ({ value }: { value: schema.NewWorkoutPlan }) => {
 			const workoutPlan = {
@@ -87,22 +134,22 @@ export const WorkoutPlanForm = ({
 			<View className="p-2">
 				<DialogHeader>
 					<DialogTitle className="font-funnel-bold text-xl">
-						{isUpdate ? "Update workout plan" : "New workout plan"}
+						{isUpdate ? i18n.t("updateWorkoutPlan") : i18n.t("newWorkoutPlan")}
 					</DialogTitle>
 					<DialogDescription>
 						{isUpdate
-							? "Update your workout plan"
-							: "Create a new workout plan to add to your catalog. Workout plans are a collection of exercises from which you can create workouts."}
+							? i18n.t("updateWorkoutPlanDescription")
+							: i18n.t("newWorkoutPlanDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				<View className="flex flex-col py-3">
 					<form.Field defaultValue={currentName ?? ""} name="name">
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>Name:</Label>
+								<Label nativeID={field.name}>{i18n.t("name")}:</Label>
 								<Input
 									onChangeText={field.handleChange}
-									placeholder="Monday legs, Tuesday chest, etc."
+									placeholder={i18n.t("namePlaceholder")}
 									value={field.state.value as string}
 								/>
 								{field.state.meta.errors ? (
@@ -120,11 +167,11 @@ export const WorkoutPlanForm = ({
 					>
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>Description:</Label>
+								<Label nativeID={field.name}>{i18n.t("description")}:</Label>
 								<Textarea
 									aria-labelledby="textareaLabel"
 									onChangeText={field.handleChange}
-									placeholder="(Optional) Add a description to your workout plan"
+									placeholder={i18n.t("descriptionPlaceholder")}
 									value={field.state.value as string}
 								/>
 								{field.state.meta.errors ? (
@@ -138,34 +185,35 @@ export const WorkoutPlanForm = ({
 				</View>
 				<View className="flex grow gap-2">
 					<Button onPress={() => form.handleSubmit()}>
-						<Text>{isUpdate ? "Save" : "Create"}</Text>
+						<Text>{isUpdate ? i18n.t("save") : i18n.t("create")}</Text>
 					</Button>
 					{isUpdate && planId && (
 						<AlertDialog className="">
 							<AlertDialogTrigger asChild>
 								<Button className="bg-destructive">
 									<Text className="text-destructive-foreground">
-										Delete workout plan
+										{i18n.t("deleteWorkoutPlan")}
 									</Text>
 								</Button>
 							</AlertDialogTrigger>
 							<AlertDialogContent>
 								<AlertDialogHeader>
-									<AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+									<AlertDialogTitle>
+										{i18n.t("deleteWorkoutPlanConfirmationTitle")}
+									</AlertDialogTitle>
 									<AlertDialogDescription>
-										Are you sure you want to delete this workout plan? This
-										action cannot be undone.
+										{i18n.t("deleteWorkoutPlanConfirmation")}
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>
 									<AlertDialogCancel>
-										<Text>Cancel</Text>
+										<Text>{i18n.t("cancel")}</Text>
 									</AlertDialogCancel>
 									<AlertDialogAction
 										className="bg-destructive text-destructive-foreground"
 										onPress={() => deleteWorkoutPlan(planId)}
 									>
-										<Text>Continue</Text>
+										<Text>{i18n.t("continue")}</Text>
 									</AlertDialogAction>
 								</AlertDialogFooter>
 							</AlertDialogContent>

@@ -1,5 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { I18n } from "i18n-js";
 import { Dumbbell } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -11,11 +12,31 @@ import { WorkoutPlanForm } from "~/components/workout-plan/workout-plan-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 
+const i18n = new I18n({
+	en: {
+		noWorkoutPlansFound: "No workout plans found",
+		addWorkoutPlan: "Add a workout plan",
+		noWorkoutPlansCreatedYet: "No workout plans created yet.",
+		tapAddWorkoutPlanToGetStarted: "Tap 'Add Workout Plan' to get started!",
+	},
+	es: {
+		noWorkoutPlansFound: "No hay planes de entrenamiento encontrados",
+		addWorkoutPlan: "Crear una rutina",
+		noWorkoutPlansCreatedYet: "No hay rutinas creadas todavía.",
+		tapAddWorkoutPlanToGetStarted: "Toca 'Crear una rutina' para empezar!",
+	},
+});
+
 export default function Page() {
 	const [open, setOpen] = useState(false);
 	const { data: workoutPlans, error: workoutPlansError } = useLiveQuery(
 		db.select().from(schema.workoutPlans),
 	);
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 
 	if (workoutPlansError) {
 		return (
@@ -41,17 +62,17 @@ export default function Page() {
 		>
 			<DialogTrigger asChild>
 				<Button className="shadow shadow-foreground/5">
-					<Text>Add a workout plan</Text>
+					<Text>{i18n.t("addWorkoutPlan")}</Text>
 				</Button>
 			</DialogTrigger>
 			{workoutPlans.length === 0 ? (
 				<View className="items-center rounded-lg bg-card p-6">
 					<Dumbbell className="mb-4 size-10 text-muted-foreground" />
 					<Text className="text-center text-muted-foreground">
-						No workout plans created yet.
+						{i18n.t("noWorkoutPlansCreatedYet")}
 					</Text>
 					<Text className="text-center text-muted-foreground">
-						Tap "Add Workout Plan" to get started!
+						{i18n.t("tapAddWorkoutPlanToGetStarted")}
 					</Text>
 				</View>
 			) : (
@@ -60,7 +81,7 @@ export default function Page() {
 					estimatedItemSize={50}
 					ItemSeparatorComponent={() => <View className="h-4" />}
 					renderItem={({ item, index }) => (
-						<WorkoutPlanCard {...item} key={index} />
+						<WorkoutPlanCard {...item} key={index} locale={i18n.locale} />
 					)}
 					showsVerticalScrollIndicator={false}
 				/>

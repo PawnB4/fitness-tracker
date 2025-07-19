@@ -1,7 +1,9 @@
 import { useForm } from "@tanstack/react-form";
+import { getLocales } from "expo-localization";
 import { router } from "expo-router";
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { I18n } from "i18n-js";
+import { useState } from "react";
+import { Pressable, View } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -9,18 +11,53 @@ import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
+import { Languages } from "~/lib/icons/Languages";
+
+const i18n = new I18n({
+	en: {
+		title: "Welcome to Fitness Tracker",
+		subtitle:
+			"Your personal fitness companion. Track workouts, monitor progress, and achieve your fitness goals with ease.",
+		formName: "What should we call you?",
+		formNamePlaceholder: "Enter your name",
+		formWeeklyTarget: "How many workouts do you want to do per week?",
+		formWeeklyTargetPlaceholder: "Enter your weekly target",
+		beginButton: "Get Started",
+	},
+	es: {
+		title: "Bienvenido/a a Fitness Tracker",
+		subtitle:
+			"Tu compañero de fitness personal. Registrá tus entrenamientos, seguí tu progreso y alcanzá tus objetivos de fitness con facilidad.",
+		formName: "¿Cómo querés que te llamemos?",
+		formNamePlaceholder: "Ingresá tu nombre",
+		formWeeklyTarget: "¿Cuántos entrenamientos querés hacer por semana?",
+		formWeeklyTargetPlaceholder: "Ingresá tu objetivo semanal",
+		beginButton: "Empezar",
+	},
+});
 
 export default function Page() {
+	const deviceLanguage = getLocales()[0].languageCode;
+	const [locale, setLocale] = useState(deviceLanguage ?? "en");
+	i18n.locale = locale;
+
+	const swapLanguage = () => {
+		const newLocale = locale === "en" ? "es" : "en";
+		setLocale(newLocale);
+	};
+
 	const form = useForm({
 		onSubmit: async ({ value }: { value: schema.NewUser }) => {
 			const newUser = {
 				name: value.name,
 				weeklyTarget: value.weeklyTarget,
+				locale: locale,
 			};
 			try {
 				await db.insert(schema.user).values({
 					name: newUser.name,
 					weeklyTarget: Number(newUser.weeklyTarget),
+					locale: newUser.locale,
 				});
 				router.push("/");
 			} catch (error) {
@@ -35,6 +72,15 @@ export default function Page() {
 
 	return (
 		<View className="flex flex-1 flex-col justify-around bg-secondary/30 px-8">
+			<Pressable
+				className="absolute top-0 right-0 flex flex-row items-center justify-center gap-2 p-8"
+				onPress={swapLanguage}
+			>
+				<Languages className="h-10 w-10 text-primary" />
+				<Text className="font-funnel-semibold text-lg">
+					{locale.toUpperCase()}
+				</Text>
+			</Pressable>
 			{/* Header Section */}
 			<View className=" items-center justify-center">
 				<View className="mb-8 rounded-full bg-primary/10 p-8">
@@ -42,12 +88,11 @@ export default function Page() {
 				</View>
 
 				<Text className="mb-4 text-center font-funnel-bold text-4xl text-foreground">
-					Welcome to Fitness Tracker
+					{i18n.t("title")}
 				</Text>
 
 				<Text className="max-w-sm text-center text-lg text-muted-foreground leading-relaxed">
-					Your personal fitness companion. Track workouts, monitor progress, and
-					achieve your fitness goals with ease.
+					{i18n.t("subtitle")}
 				</Text>
 			</View>
 
@@ -56,10 +101,10 @@ export default function Page() {
 				<form.Field defaultValue={""} name="name">
 					{(field) => (
 						<>
-							<Label nativeID={field.name}>What should we call you?</Label>
+							<Label nativeID={field.name}>{i18n.t("formName")}</Label>
 							<Input
 								onChangeText={field.handleChange}
-								placeholder="Enter your name"
+								placeholder={i18n.t("formNamePlaceholder")}
 								value={field.state.value}
 							/>
 							{field.state.meta.errors ? (
@@ -74,13 +119,11 @@ export default function Page() {
 				<form.Field defaultValue={""} name="weeklyTarget">
 					{(field) => (
 						<>
-							<Label nativeID={field.name}>
-								How many workouts do you want to do per week?
-							</Label>
+							<Label nativeID={field.name}>{i18n.t("formWeeklyTarget")}</Label>
 							<Input
 								inputMode="numeric"
 								onChangeText={field.handleChange}
-								placeholder="Enter your weekly target"
+								placeholder={i18n.t("formWeeklyTargetPlaceholder")}
 								value={field.state.value}
 							/>
 
@@ -101,7 +144,9 @@ export default function Page() {
 						form.handleSubmit();
 					}}
 				>
-					<Text className="font-funnel-semibold text-lg">Get Started</Text>
+					<Text className="font-funnel-semibold text-lg">
+						{i18n.t("beginButton")}
+					</Text>
 				</Button>
 			</View>
 		</View>

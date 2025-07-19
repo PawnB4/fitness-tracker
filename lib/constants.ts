@@ -56,23 +56,51 @@ export const CHART_THEME = {
 	},
 };
 
-export const EXERCISES_TYPES = ["Upper Body", "Lower Body", "Core", "Cardio"];
+export const EXERCISES_TYPES: Record<string, Record<string, string>> = {
+	en: {
+		upper_body: "Upper Body",
+		lower_body: "Lower Body",
+		core: "Core",
+		cardio: "Cardio",
+	},
+	es: {
+		upper_body: "Tren superior",
+		lower_body: "Tren inferior",
+		core: "Core",
+		cardio: "Cardio",
+	},
+};
 
-export const MUSCLE_GROUPS = [
-	"Back",
-	"Biceps",
-	"Calves",
-	"Cardio",
-	"Chest",
-	"Core",
-	"Forearms",
-	"Glutes",
-	"Hamstrings",
-	"Quadriceps",
-	"Shoulders",
-	"Traps",
-	"Triceps",
-];
+export const MUSCLE_GROUPS: Record<string, Record<string, string>> = {
+	en: {
+		back: "Back",
+		biceps: "Biceps",
+		calves: "Calves",
+		cardio: "Cardio",
+		chest: "Chest",
+		forearms: "Forearms",
+		glutes: "Glutes",
+		hamstrings: "Hamstrings",
+		quadriceps: "Quadriceps",
+		shoulders: "Shoulders",
+		traps: "Traps",
+		triceps: "Triceps",
+	},
+	es: {
+		back: "Espalda",
+		biceps: "Biceps",
+		calves: "Pantorrillas",
+		cardio: "Cardio",
+		chest: "Pecho",
+		forearms: "Antebrazos",
+		glutes: "Glúteos",
+		hamstrings: "Isquios",
+		quadriceps: "Cuádriceps",
+		shoulders: "Hombros",
+		traps: "Trapecios",
+		triceps: "Tríceps",
+	},
+};
 
 export const EXERCISES = [
 	"Abductor Machine",

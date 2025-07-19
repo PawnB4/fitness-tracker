@@ -80,6 +80,7 @@ export const user = sqliteTable("user", {
 		}),
 	name: text(),
 	weeklyTarget: integer(),
+	locale: text(),
 });
 
 // Zod schemas
@@ -166,56 +167,6 @@ export const insertWorkoutPlansSchema = z.object({
 		.optional(),
 });
 
-// Workout plan exercises
-export const insertWorkoutPlanExerciseSchema = z.object({
-	exerciseId: z.object({
-		value: z.string(),
-		label: z.string(),
-	}),
-	defaultSets: z
-		.string()
-		.min(1, { message: "Sets is required" })
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Sets must be a number",
-		})
-		.refine((val) => Number(val) >= 1, { message: "Sets must be at least 1" })
-		.refine((val) => Number.isInteger(Number(val)), {
-			message: "Sets must be a whole number",
-		}),
-	defaultReps: z
-		.string()
-		.min(1, { message: "Reps is required" })
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Reps must be a number",
-		})
-		.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
-		.refine((val) => Number.isInteger(Number(val)), {
-			message: "Reps must be a whole number",
-		})
-		.optional(),
-	defaultDurationSeconds: z
-		.string()
-		.min(1, { message: "Duration is required" })
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Duration must be a number",
-		})
-		.refine((val) => Number(val) >= 1, {
-			message: "Duration must be at least 1",
-		})
-		.refine((val) => Number.isInteger(Number(val)), {
-			message: "Duration must be a whole number",
-		})
-		.optional(),
-	defaultWeight: z
-		.string()
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Weight must be a number",
-		})
-		.refine((val) => Number(val) >= 0, {
-			message: "Weight cannot be negative",
-		}),
-});
-
 // User
 export const insertUserSchema = z.object({
 	name: z
@@ -234,6 +185,7 @@ export const insertUserSchema = z.object({
 		.refine((val) => Number.isInteger(Number(val)), {
 			message: "Weekly target must be a whole number",
 		}),
+	locale: z.string(),
 });
 
 // Types
@@ -293,9 +245,6 @@ export type WorkoutPlanExercise = {
 	defaultDurationSeconds: number | null;
 	defaultWeight: number;
 };
-export type NewWorkoutPlanExercise = z.infer<
-	typeof insertWorkoutPlanExerciseSchema
->;
 
 export type User = {
 	name: string | null;
@@ -304,5 +253,6 @@ export type User = {
 		preferredTheme?: string;
 		timezone?: string;
 	} | null;
+	locale: string | null;
 };
 export type NewUser = z.infer<typeof insertUserSchema>;

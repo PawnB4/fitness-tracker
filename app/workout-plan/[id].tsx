@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams } from "expo-router";
+import { I18n } from "i18n-js";
 import { useState } from "react";
 import {
 	ActivityIndicator,
@@ -29,6 +30,28 @@ import { Plus } from "~/lib/icons/Plus";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { Triangle } from "~/lib/icons/Triangle";
 import { formatDate } from "~/utils/date";
+
+const i18n = new I18n({
+	en: {
+		exercises: "exercises",
+		exercise: "exercise",
+		created: "Created",
+		noDate: "No date",
+		noExercisesAddedToThisPlanYet: "No exercises added to this plan yet.",
+		addExercise: "Add Exercise",
+		tapAddExerciseToGetStarted: "Tap 'Add Exercise' to get started!",
+	},
+	es: {
+		exercises: "ejercicios",
+		exercise: "ejercicio",
+		created: "Creado",
+		noDate: "Sin fecha",
+		noExercisesAddedToThisPlanYet:
+			"No hay ejercicios agregados a este plan todavía.",
+		addExercise: "Agregar ejercicio",
+		tapAddExerciseToGetStarted: "Tocá 'Agregar ejercicio' para empezar!",
+	},
+});
 
 // Function to update exercise order in database - this is the direct implementation
 const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
@@ -101,6 +124,12 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 export default function Page() {
 	const { id } = useLocalSearchParams();
 
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
+
 	const [openAddWorkoutPlanExerciseForm, setOpenAddWorkoutPlanExerciseForm] =
 		useState(false);
 	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
@@ -141,6 +170,8 @@ export default function Page() {
 				exercisePrimaryMuscleGroup: schema.exercises.primaryMuscleGroup,
 				workoutPlanExerciseDefaultSets: schema.workoutPlanExercises.defaultSets,
 				workoutPlanExerciseDefaultReps: schema.workoutPlanExercises.defaultReps,
+				workoutPlanExerciseDefaultDurationSeconds:
+					schema.workoutPlanExercises.defaultDurationSeconds,
 				workoutPlanExerciseDefaultWeight:
 					schema.workoutPlanExercises.defaultWeight,
 				workoutPlanExerciseSortOrder: schema.workoutPlanExercises.sortOrder,
@@ -289,14 +320,17 @@ export default function Page() {
 					<View className="flex-row items-center gap-2 border-0">
 						<Dumbbell className="mr-1 size-3 text-primary-foreground" />
 						<Text className="font-funnel text-primary-foreground text-sm">
-							{planExercises?.length || 0} Exercise
-							{planExercises?.length === 1 ? "" : "s"}
+							{planExercises?.length || 0}{" "}
+							{planExercises?.length === 1
+								? i18n.t("exercise")
+								: i18n.t("exercises")}
 						</Text>
 					</View>
 					<View className="flex-row items-center gap-2 border-0">
 						<Calendar className="mr-1 size-3 text-primary-foreground" />
 						<Text className="font-funnel text-primary-foreground text-sm">
-							Created {plan.createdAt ? formatDate(plan.createdAt) : "No date"}
+							{i18n.t("created")}{" "}
+							{plan.createdAt ? formatDate(plan.createdAt) : i18n.t("noDate")}
 						</Text>
 					</View>
 				</View>
@@ -307,7 +341,9 @@ export default function Page() {
 				{/* Exercises Section */}
 				<View className="mb-6">
 					<View className="mb-4 flex-row items-center justify-between">
-						<Text className="font-funnel-bold text-2xl">Exercises</Text>
+						<Text className="font-funnel-bold text-2xl">
+							{i18n.t("exercises")}
+						</Text>
 					</View>
 
 					{/* Exercise Cards */}
@@ -317,10 +353,10 @@ export default function Page() {
 							<View className="items-center rounded-lg bg-card p-6">
 								<Dumbbell className="mb-4 size-10 text-muted-foreground" />
 								<Text className="text-center text-muted-foreground">
-									No exercises added to this plan yet.
+									{i18n.t("noExercisesAddedToThisPlanYet")}
 								</Text>
 								<Text className="text-center text-muted-foreground">
-									Tap "Add Exercise" to get started!
+									{i18n.t("tapAddExerciseToGetStarted")}
 								</Text>
 							</View>
 						) : (
@@ -340,8 +376,11 @@ export default function Page() {
 									onMoveDown={() => moveExerciseDown(index)}
 									onMoveUp={() => moveExerciseUp(index)}
 									totalExercises={planExercises.length}
+									workoutPlanExerciseDefaultDurationSeconds={
+										item.workoutPlanExerciseDefaultDurationSeconds
+									}
 									workoutPlanExerciseDefaultReps={
-										item.workoutPlanExerciseDefaultReps
+										item.workoutPlanExerciseDefaultReps ?? 0
 									}
 									workoutPlanExerciseDefaultSets={
 										item.workoutPlanExerciseDefaultSets
@@ -363,7 +402,7 @@ export default function Page() {
 						>
 							<Plus className="text-primary" />
 							<Text className="font-funnel-bold text-primary">
-								Add exercise
+								{i18n.t("addExercise")}
 							</Text>
 						</Button>
 						{dialogContent ===
@@ -377,6 +416,7 @@ export default function Page() {
 										currentExercisesAmount={planExercises?.length || 0}
 										exerciseId={createdExercise?.id}
 										exerciseName={createdExercise?.name}
+										locale={i18n.locale}
 										openExerciseForm={openExerciseForm}
 										planId={Number(id)}
 										setCreatedExercise={setCreatedExercise}
@@ -413,7 +453,8 @@ type WorkoutPlanExerciseListItemProps = {
 	exerciseType: string;
 	exercisePrimaryMuscleGroup: string | null;
 	workoutPlanExerciseDefaultSets: number;
-	workoutPlanExerciseDefaultReps: number;
+	workoutPlanExerciseDefaultReps: number | null;
+	workoutPlanExerciseDefaultDurationSeconds: number | null;
 	workoutPlanExerciseDefaultWeight: number;
 	workoutPlanExerciseSortOrder: number;
 	totalExercises: number;
@@ -430,6 +471,7 @@ const WorkoutPlanExerciseListItem = ({
 	exercisePrimaryMuscleGroup,
 	workoutPlanExerciseDefaultSets,
 	workoutPlanExerciseDefaultReps,
+	workoutPlanExerciseDefaultDurationSeconds,
 	workoutPlanExerciseDefaultWeight,
 	workoutPlanExerciseSortOrder,
 	totalExercises,
@@ -456,13 +498,17 @@ const WorkoutPlanExerciseListItem = ({
 										className="w-2"
 										style={{
 											backgroundColor:
-												exerciseType === EXERCISES_TYPES[0]
+												EXERCISES_TYPES[i18n.locale][exerciseType] ===
+												EXERCISES_TYPES[i18n.locale].upper_body
 													? "#16a34a"
-													: exerciseType === EXERCISES_TYPES[1]
+													: EXERCISES_TYPES[i18n.locale][exerciseType] ===
+															EXERCISES_TYPES[i18n.locale].lower_body
 														? "#8b5cf6"
-														: exerciseType === EXERCISES_TYPES[2]
+														: EXERCISES_TYPES[i18n.locale][exerciseType] ===
+																EXERCISES_TYPES[i18n.locale].cardio
 															? "#eab308"
-															: exerciseType === EXERCISES_TYPES[3]
+															: EXERCISES_TYPES[i18n.locale][exerciseType] ===
+																	EXERCISES_TYPES[i18n.locale].core
 																? "#ef4444"
 																: "#0284c7",
 										}}
@@ -514,12 +560,16 @@ const WorkoutPlanExerciseListItem = ({
 				</DialogTrigger>
 				<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
 					<WorkoutPlanExerciseForm
+						currentDurationSeconds={
+							workoutPlanExerciseDefaultDurationSeconds ?? 0
+						}
 						currentExercisesAmount={totalExercises}
-						currentReps={workoutPlanExerciseDefaultReps}
+						currentReps={workoutPlanExerciseDefaultReps ?? 0}
 						currentSets={workoutPlanExerciseDefaultSets}
 						currentWeight={workoutPlanExerciseDefaultWeight}
 						exerciseName={exerciseName}
 						isUpdate={true}
+						locale={i18n.locale}
 						setOpen={setOpenUpdateForm}
 						workoutPlanExerciseId={workoutPlanExerciseId}
 					/>

@@ -4,8 +4,10 @@ import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
 import { Directory, File, Paths } from "expo-file-system/next";
 import * as Sharing from "expo-sharing";
+import { I18n } from "i18n-js";
+import { Languages } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DialogTitle } from "~/components/ui/dialog";
 import {
@@ -21,6 +23,33 @@ import * as schema from "~/db/schema";
 import { TIMEZONES } from "~/lib/constants";
 import { Button } from "../ui/button";
 
+const i18n = new I18n({
+	en: {
+		title: "User settings",
+		preferredColorTheme: "Preferred color theme",
+		dark: "Dark",
+		light: "Light",
+		preferredLanguage: "Preferred language",
+		english: "English",
+		spanish: "Spanish",
+		exportWorkoutData: "Export workout data",
+		importWorkoutData: "Import workout data",
+		save: "Save",
+	},
+	es: {
+		title: "Configuración",
+		preferredColorTheme: "Tema preferido",
+		dark: "Oscuro",
+		light: "Claro",
+		preferredLanguage: "Idioma preferido",
+		english: "Inglés",
+		spanish: "Español",
+		exportWorkoutData: "Exportar datos de entrenamiento",
+		importWorkoutData: "Importar datos de entrenamiento",
+		save: "Guardar",
+	},
+});
+
 export function UserForm({
 	openDialog,
 	setOpenDialog,
@@ -32,18 +61,22 @@ export function UserForm({
 		preferredTheme?: string;
 		timezone?: string;
 	}>({});
-
 	const { data: userSettings } = useLiveQuery(
 		db.select().from(schema.user).limit(1),
 	);
 	const currentUserSettings = userSettings?.[0]?.config;
+	const currentUserLocale = userSettings?.[0]?.locale;
 
-	// Initialize configObject with current settings when they load
+	const [locale, setLocale] = useState("");
+	i18n.locale = locale;
 	useEffect(() => {
 		if (currentUserSettings) {
 			setConfigObject(currentUserSettings);
 		}
-	}, [currentUserSettings]);
+		if (currentUserLocale) {
+			setLocale(currentUserLocale);
+		}
+	}, [currentUserSettings, currentUserLocale]);
 
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
@@ -57,6 +90,7 @@ export function UserForm({
 		try {
 			await db.update(schema.user).set({
 				config: configObject,
+				locale: locale,
 			});
 			setOpenDialog(false);
 		} catch (error) {
@@ -316,10 +350,12 @@ export function UserForm({
 
 	return (
 		<View className="flex flex-col justify-center gap-4 ">
-			<DialogTitle className="">User settings</DialogTitle>
+			<DialogTitle className="">{i18n.t("title")}</DialogTitle>
 
 			<View className="mt-4 flex flex-row items-center justify-between gap-2">
-				<Text className="font-funnel-medium">Preferred color theme</Text>
+				<Text className="font-funnel-medium">
+					{i18n.t("preferredColorTheme")}
+				</Text>
 
 				<Select
 					onValueChange={(e) =>
@@ -332,70 +368,66 @@ export function UserForm({
 					value={{
 						// @ts-ignore
 						value: configObject?.preferredTheme,
-						label: configObject?.preferredTheme === "dark" ? "Dark" : "Light",
+						label:
+							configObject?.preferredTheme === "dark"
+								? i18n.t("dark")
+								: i18n.t("light"),
 					}}
 				>
 					<SelectTrigger className="w-[38vw]">
 						<SelectValue
 							className="native:text-lg text-foreground text-sm"
-							placeholder="Select a theme"
+							placeholder={i18n.t("selectTheme")}
 						/>
 					</SelectTrigger>
 					<SelectContent className="w-[38vw]" insets={contentInsets}>
-						<SelectItem key={1} label="Dark" value="dark">
-							Dark
+						<SelectItem key={1} label={i18n.t("dark")} value="dark">
+							{i18n.t("dark")}
 						</SelectItem>
-						<SelectItem key={2} label="Light" value="light">
-							Light
+						<SelectItem key={2} label={i18n.t("light")} value="light">
+							{i18n.t("light")}
 						</SelectItem>
 					</SelectContent>
 				</Select>
 			</View>
 
-			{/* Timezone */}
-			{/* <View className="mt-4 flex flex-row items-center justify-between gap-2">
-					<Text className="font-funnel-medium">Timezone</Text>
+			<View className="flex flex-row items-center justify-between gap-2">
+				<Text className="font-funnel-medium">
+					{i18n.t("preferredLanguage")}
+				</Text>
 
-					<Select
-						value={{
-							// @ts-ignore
-							value: configObject?.timezone,
-							label: getTimezoneLabel(configObject?.timezone),
-						}}
-						// @ts-ignore
-						onValueChange={(e) =>
-							setConfigObject({
-								...configObject,
-								timezone: e?.value,
-							})
-						}
-					>
-						<SelectTrigger className="w-[38vw]">
-							<SelectValue
-								placeholder="Select a timezone"
-								className="native:text-lg text-foreground text-sm"
-							/>
-						</SelectTrigger>
-						<SelectContent insets={contentInsets} className="w-[38vw]">
-							<ScrollView className="max-h-56">
-								{TIMEZONES.map((tz) => (
-									<SelectItem key={tz.value} label={tz.label} value={tz.value}>
-										{tz.label}
-									</SelectItem>
-								))}
-							</ScrollView>
-						</SelectContent>
-					</Select>
-				</View> */}
+				<Select
+					onValueChange={(e) => setLocale(e?.value ?? "en")}
+					value={{
+						value: locale,
+						label: locale === "en" ? i18n.t("english") : i18n.t("spanish"),
+					}}
+				>
+					<SelectTrigger className="w-[38vw]">
+						<SelectValue
+							className="native:text-lg text-foreground text-sm"
+							placeholder={i18n.t("selectLanguage")}
+						/>
+					</SelectTrigger>
+					<SelectContent className="w-[38vw]" insets={contentInsets}>
+						<SelectItem key={1} label={i18n.t("english")} value="en">
+							{i18n.t("english")}
+						</SelectItem>
+						<SelectItem key={2} label={i18n.t("spanish")} value="es">
+							{i18n.t("spanish")}
+						</SelectItem>
+					</SelectContent>
+				</Select>
+			</View>
 
 			<Button onPress={() => exportWorkoutData()} variant="outline">
-				<Text>Export workout data</Text>
+				<Text>{i18n.t("exportWorkoutData")}</Text>
 			</Button>
 			<Button onPress={() => importWorkoutData()} variant="outline">
-				<Text>Import workout data</Text>
+				<Text>{i18n.t("importWorkoutData")}</Text>
 			</Button>
 			<Button onPress={() => saveConfiguration()}>
-				<Text>Save</Text>
+				<Text>{i18n.t("save")}</Text>
 			</Button>
 		</View>
 	);
