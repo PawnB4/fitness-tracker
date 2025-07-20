@@ -165,6 +165,7 @@ export default function Page() {
 		db
 			.select({
 				workoutPlanExerciseId: schema.workoutPlanExercises.id,
+				exerciseId: schema.workoutPlanExercises.exerciseId,
 				exerciseName: schema.exercises.name,
 				exerciseType: schema.exercises.type,
 				exercisePrimaryMuscleGroup: schema.exercises.primaryMuscleGroup,
@@ -358,6 +359,7 @@ export default function Page() {
 						) : (
 							planExercises.map((item, index) => (
 								<WorkoutPlanExerciseListItem
+									exerciseId={item.exerciseId}
 									exerciseName={item.exerciseName}
 									exercisePrimaryMuscleGroup={item.exercisePrimaryMuscleGroup}
 									exerciseType={item.exerciseType}
@@ -444,6 +446,7 @@ type WorkoutPlanExerciseListItemProps = {
 	onMoveDown: () => void;
 	onDelete: () => void;
 	isUpdating: boolean;
+	exerciseId: number;
 };
 
 const WorkoutPlanExerciseListItem = ({
@@ -458,6 +461,7 @@ const WorkoutPlanExerciseListItem = ({
 	onMoveDown,
 	onDelete,
 	isUpdating,
+	exerciseId,
 }: WorkoutPlanExerciseListItemProps) => {
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
 
@@ -568,12 +572,10 @@ const WorkoutPlanExerciseListItem = ({
 				</DialogTrigger>
 				<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
 					<WorkoutPlanExerciseForm
-						currentDurationSeconds={firstSet?.defaultDurationSeconds ?? 0}
 						currentExercisesAmount={totalExercises}
-						currentReps={firstSet?.defaultReps ?? 0}
-						currentSets={totalSets}
-						currentWeight={firstSet?.defaultWeight ?? 0}
+						exerciseId={exerciseId}
 						exerciseName={exerciseName}
+						existingExerciseData={workoutPlanExerciseData}
 						isUpdate={true}
 						locale={i18n.locale}
 						setOpen={setOpenUpdateForm}

@@ -1,4 +1,4 @@
-import { useForm, useStore } from "@tanstack/react-form";
+import { useForm } from "@tanstack/react-form";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useEffect, useState } from "react";
@@ -87,6 +87,7 @@ export const WorkoutPlanExerciseForm = ({
 	exerciseId,
 	locale,
 	setCreatedExercise,
+	existingExerciseData,
 }: {
 	setOpen: (open: boolean) => void;
 	openExerciseForm?: () => void;
@@ -102,6 +103,7 @@ export const WorkoutPlanExerciseForm = ({
 	exerciseId?: number;
 	locale: string;
 	setCreatedExercise?: (exercise: schema.Exercise | null) => void;
+	existingExerciseData?: schema.WorkoutPlanExerciseData[];
 }) => {
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
 
@@ -121,6 +123,103 @@ export const WorkoutPlanExerciseForm = ({
 		};
 	}, [setCreatedExercise]);
 
+	// Initialize form values and state from existing data
+	const initializeFromExistingData = () => {
+		if (!existingExerciseData || existingExerciseData.length === 0) {
+			return {
+				valueType:
+					currentReps !== undefined && currentReps !== null
+						? "reps"
+						: currentDurationSeconds !== undefined &&
+								currentDurationSeconds !== null
+							? "time"
+							: "reps",
+				defaultSets: currentSets?.toString() ?? "",
+				defaultReps: currentReps?.toString() ?? "",
+				defaultDurationSeconds: currentDurationSeconds?.toString() ?? "",
+				defaultWeight: currentWeight?.toString() ?? "",
+				initialDropSets: [],
+				initialDurationMinutes: currentDurationSeconds
+					? Math.floor(currentDurationSeconds / 60)
+					: 0,
+				initialDurationSeconds: currentDurationSeconds
+					? currentDurationSeconds % 60
+					: 30,
+			};
+		}
+
+		const firstSet = existingExerciseData[0];
+		const isTimeBased =
+			firstSet?.defaultReps === null &&
+			firstSet?.defaultDurationSeconds !== null;
+		
+		// Helper function to check if sets have variable values
+		const hasVariableValues = (sets: schema.WorkoutPlanExerciseData[]) => {
+			if (sets.length <= 1) return false;
+			
+			const firstSet = sets[0];
+			return sets.some(set => {
+				// For time-based exercises, check duration and weight
+				if (isTimeBased) {
+					return set.defaultDurationSeconds !== firstSet.defaultDurationSeconds ||
+						   set.defaultWeight !== firstSet.defaultWeight;
+				}
+				// For reps-based exercises, check reps and weight
+				else {
+					return set.defaultReps !== firstSet.defaultReps ||
+						   set.defaultWeight !== firstSet.defaultWeight;
+				}
+			});
+		};
+
+		// Only treat as drop sets if there are multiple sets AND values actually vary
+		const isDropSets = existingExerciseData.length > 1 && hasVariableValues(existingExerciseData);
+
+		let initialDropSets: Array<{
+			setNumber: number;
+			reps: string;
+			durationMinutes: string;
+			durationSeconds: string;
+			weight: string;
+		}> = [];
+
+		if (isDropSets) {
+			initialDropSets = existingExerciseData.map((set) => ({
+				setNumber: set.defaultSetNumber,
+				reps: set.defaultReps?.toString() ?? "",
+				durationMinutes: set.defaultDurationSeconds
+					? Math.floor(set.defaultDurationSeconds / 60).toString()
+					: "0",
+				durationSeconds: set.defaultDurationSeconds
+					? (set.defaultDurationSeconds % 60).toString()
+					: "30",
+				weight: set.defaultWeight?.toString() ?? "",
+			}));
+		}
+
+		return {
+			valueType: isTimeBased ? "time" : "reps",
+			defaultSets: isDropSets ? "1" : existingExerciseData.length.toString(),
+			defaultReps: isDropSets
+				? (initialDropSets[0]?.reps ?? "")
+				: (firstSet?.defaultReps?.toString() ?? ""),
+			defaultDurationSeconds:
+				firstSet?.defaultDurationSeconds?.toString() ?? "",
+			defaultWeight: isDropSets
+				? (initialDropSets[0]?.weight ?? "")
+				: (firstSet?.defaultWeight?.toString() ?? ""),
+			initialDropSets,
+			initialDurationMinutes: firstSet?.defaultDurationSeconds
+				? Math.floor(firstSet.defaultDurationSeconds / 60)
+				: 0,
+			initialDurationSeconds: firstSet?.defaultDurationSeconds
+				? firstSet.defaultDurationSeconds % 60
+				: 30,
+		};
+	};
+
+	const initData = initializeFromExistingData();
+
 	// State for drop sets
 	const [dropSets, setDropSets] = useState<
 		Array<{
@@ -130,21 +229,14 @@ export const WorkoutPlanExerciseForm = ({
 			durationSeconds: string;
 			weight: string;
 		}>
-	>([]);
+	>(initData.initialDropSets);
 
-	const [durationMinutes, setDurationMinutes] = useState(() => {
-		if (currentDurationSeconds) {
-			return Math.floor(currentDurationSeconds / 60);
-		}
-		return 0;
-	});
-
-	const [durationSeconds, setDurationSeconds] = useState(() => {
-		if (currentDurationSeconds) {
-			return currentDurationSeconds % 60;
-		}
-		return 30;
-	});
+	const [durationMinutes, setDurationMinutes] = useState(
+		initData.initialDurationMinutes,
+	);
+	const [durationSeconds, setDurationSeconds] = useState(
+		initData.initialDurationSeconds,
+	);
 
 	const form = useForm({
 		defaultValues: {
@@ -152,17 +244,11 @@ export const WorkoutPlanExerciseForm = ({
 				value: exerciseId?.toString() ?? "1",
 				label: exerciseName ?? "Abductor Machine",
 			},
-			valueType:
-				currentReps !== undefined && currentReps !== null
-					? "reps"
-					: currentDurationSeconds !== undefined &&
-							currentDurationSeconds !== null
-						? "time"
-						: "reps",
-			defaultSets: currentSets?.toString() ?? "",
-			defaultReps: currentReps?.toString() ?? "",
-			defaultDurationSeconds: currentDurationSeconds?.toString() ?? "",
-			defaultWeight: currentWeight?.toString() ?? "",
+			valueType: initData.valueType,
+			defaultSets: initData.defaultSets,
+			defaultReps: initData.defaultReps,
+			defaultDurationSeconds: initData.defaultDurationSeconds,
+			defaultWeight: initData.defaultWeight,
 		},
 		onSubmit: async ({ value }) => {
 			try {
@@ -238,19 +324,6 @@ export const WorkoutPlanExerciseForm = ({
 		},
 	});
 
-	const defaultSetsObject = useStore(
-		form.store,
-		(state) => state.fieldMeta.defaultSets,
-	);
-	const defaultRepsObject = useStore(
-		form.store,
-		(state) => state.fieldMeta.defaultReps,
-	);
-	const defaultWeightObject = useStore(
-		form.store,
-		(state) => state.fieldMeta.defaultWeight,
-	);
-
 	const updateDropSet = (index: number, field: string, value: string) => {
 		const newDropSets = [...dropSets];
 		newDropSets[index] = { ...newDropSets[index], [field]: value };
@@ -318,20 +391,24 @@ export const WorkoutPlanExerciseForm = ({
 		}
 	};
 
-	const valueType = form.getFieldValue("valueType");
-
 	// State for drop sets validation errors
 	const [dropSetsErrors, setDropSetsErrors] = useState<string>("");
+
+	// State for main row validation errors
+	const [mainRowErrors, setMainRowErrors] = useState<{
+		sets?: string;
+		reps?: string;
+		weight?: string;
+	}>({});
 
 	const validateDropSetsManually = () => {
 		if (dropSets.length === 0) return "";
 
 		const errors: string[] = [];
-		const valueType = form.getFieldValue("valueType");
 
 		dropSets.forEach((set) => {
 			// Validate reps (only for reps mode)
-			if (valueType === "reps") {
+			if (form.getFieldValue("valueType") === "reps") {
 				try {
 					repsSchema.parse(set.reps);
 				} catch (error) {
@@ -354,21 +431,74 @@ export const WorkoutPlanExerciseForm = ({
 		return errors.length > 0 ? errors.join(", ") : "";
 	};
 
-	const handleSubmit = async () => {
-		// Manual drop sets validation
-		if (dropSets.length > 0) {
-			const dropSetsError = validateDropSetsManually();
-			setDropSetsErrors(dropSetsError);
+	const validateMainRowManually = () => {
+		const errors: { sets?: string; reps?: string; weight?: string } = {};
 
-			if (dropSetsError) {
-				console.log("❌ Drop sets validation failed:", dropSetsError);
-				return; // Don't submit if there are drop sets errors
+		// Get individual field values
+		const defaultSets = form.getFieldValue("defaultSets");
+		const defaultReps = form.getFieldValue("defaultReps");
+		const defaultWeight = form.getFieldValue("defaultWeight");
+		const valueType = form.getFieldValue("valueType");
+
+		// Validate sets (always required)
+		try {
+			setsSchema.parse(defaultSets);
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				errors.sets = error.errors[0]?.message;
 			}
+		}
+
+		// Validate reps (only for reps mode)
+		if (valueType === "reps") {
+			try {
+				repsSchema.parse(defaultReps);
+			} catch (error) {
+				if (error instanceof z.ZodError) {
+					errors.reps = error.errors[0]?.message;
+				}
+			}
+		}
+
+		// Validate weight (always required)
+		try {
+			weightSchema.parse(defaultWeight);
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				errors.weight = error.errors[0]?.message;
+			}
+		}
+
+		return errors;
+	};
+
+	const handleSubmit = async () => {
+		// Manual main row validation
+		const mainRowValidationErrors = validateMainRowManually();
+		setMainRowErrors(mainRowValidationErrors);
+
+		// Manual drop sets validation
+		let dropSetsError = "";
+		if (dropSets.length > 0) {
+			dropSetsError = validateDropSetsManually();
+			setDropSetsErrors(dropSetsError);
 		} else {
-			setDropSetsErrors(""); // Clear any previous errors
+			setDropSetsErrors("");
+		}
+
+		// Check if there are any validation errors
+		const hasMainRowErrors = Object.keys(mainRowValidationErrors).length > 0;
+		const hasDropSetsErrors = dropSetsError.length > 0;
+
+		if (hasMainRowErrors || hasDropSetsErrors) {
+			console.log("❌ Validation failed");
+			console.log("Main row errors:", mainRowValidationErrors);
+			console.log("Drop sets errors:", dropSetsError);
+			return; // Don't submit if there are errors
 		}
 
 		console.log("✅ All validation passed, submitting form");
+		console.log(form.state.errors);
 		form.handleSubmit();
 	};
 
@@ -488,6 +618,7 @@ export const WorkoutPlanExerciseForm = ({
 												: "bg-transparent"
 										}`}
 										onPress={() => {
+											if(form.getFieldValue("valueType") === "reps") return;
 											field.handleChange("reps");
 											setDropSets([]); // Reset drop sets when switching
 											setDropSetsErrors(""); // Clear any drop sets errors
@@ -526,6 +657,7 @@ export const WorkoutPlanExerciseForm = ({
 												: "bg-transparent"
 										}`}
 										onPress={() => {
+											if(form.getFieldValue("valueType") === "time") return;
 											field.handleChange("time");
 											setDropSets([]); // Reset drop sets when switching
 											setDropSetsErrors(""); // Clear any drop sets errors
@@ -565,8 +697,8 @@ export const WorkoutPlanExerciseForm = ({
 					{!isUpdate && (
 						<Text className="text-muted-foreground text-sm">
 							Specify the number of sets,{" "}
-							{valueType === "reps" ? "reps" : "duration"} and weight for the
-							exercise.
+							{form.getFieldValue("valueType") === "reps" ? "reps" : "duration"}{" "}
+							and weight for the exercise.
 						</Text>
 					)}
 
@@ -575,7 +707,7 @@ export const WorkoutPlanExerciseForm = ({
 						<View className="flex w-1/3 items-center justify-center ">
 							<Label className="text-center">Sets</Label>
 						</View>
-						{valueType === "reps" ? (
+						{form.getFieldValue("valueType") === "reps" ? (
 							<View className="flex w-1/3 items-center justify-center">
 								<Label className="text-center">Reps</Label>
 							</View>
@@ -591,12 +723,7 @@ export const WorkoutPlanExerciseForm = ({
 
 					<View className="flex flex-row justify-around">
 						{/* Sets Input */}
-						<form.Field
-							name="defaultSets"
-							validators={{
-								onChange: setsSchema,
-							}}
-						>
+						<form.Field name="defaultSets">
 							{(field) => (
 								<View className="w-1/3">
 									<View className="flex items-center justify-center gap-2">
@@ -604,7 +731,16 @@ export const WorkoutPlanExerciseForm = ({
 											className="w-[60px]"
 											editable={dropSets.length === 0}
 											inputMode="numeric"
-											onChangeText={field.handleChange}
+											onChangeText={(text) => {
+												field.handleChange(text);
+												// Clear errors when user starts typing
+												if (mainRowErrors.sets) {
+													setMainRowErrors((prev) => ({
+														...prev,
+														sets: undefined,
+													}));
+												}
+											}}
 											value={dropSets.length > 0 ? "1" : field.state.value}
 										/>
 									</View>
@@ -613,63 +749,8 @@ export const WorkoutPlanExerciseForm = ({
 						</form.Field>
 
 						{/* Reps or Duration Input */}
-						{valueType === "reps" ? (
-							<form.Field
-								name="defaultReps"
-								validators={{
-									onChange: z.string().superRefine((val, ctx) => {
-										// Only validate if we're in reps mode
-										if (form.getFieldValue("valueType") === "reps") {
-											// Check if field is required
-											if (val.length < 1) {
-												ctx.addIssue({
-													code: z.ZodIssueCode.too_small,
-													minimum: 1,
-													type: "string",
-													message: "Reps is required",
-													inclusive: true,
-												});
-											}
-											// Check if it's a valid number (only if not empty)
-											if (val.length > 0 && isNaN(Number(val))) {
-												ctx.addIssue({
-													code: z.ZodIssueCode.invalid_type,
-													message: "Reps must be a number",
-													expected: "number",
-													received: typeof val,
-												});
-											}
-											// Check minimum value (only if it's a valid number)
-											if (
-												val.length > 0 &&
-												!isNaN(Number(val)) &&
-												Number(val) < 1
-											) {
-												ctx.addIssue({
-													code: z.ZodIssueCode.too_small,
-													minimum: 1,
-													type: "number",
-													message: "Reps must be at least 1",
-													inclusive: true,
-												});
-											}
-											// Check if it's a whole number (only if it's a valid number)
-											if (
-												val.length > 0 &&
-												!isNaN(Number(val)) &&
-												!Number.isInteger(Number(val))
-											) {
-												ctx.addIssue({
-													code: z.ZodIssueCode.invalid_type,
-													message: "Reps must be a whole number",
-													expected: "integer",
-													received: "float",
-												});
-											}
-										}
-									}),
-								}}
-							>
+						{form.getFieldValue("valueType") === "reps" ? (
+							<form.Field name="defaultReps">
 								{(field) => (
 									<View className="w-1/3">
 										<View className="flex items-center justify-center gap-2">
@@ -685,6 +766,13 @@ export const WorkoutPlanExerciseForm = ({
 														newDropSets[0] = { ...newDropSets[0], reps: text };
 														setDropSets(newDropSets);
 													}
+													// Clear errors when user starts typing
+													if (mainRowErrors.reps) {
+														setMainRowErrors((prev) => ({
+															...prev,
+															reps: undefined,
+														}));
+													}
 												}}
 												value={
 													dropSets.length > 0
@@ -697,63 +785,60 @@ export const WorkoutPlanExerciseForm = ({
 								)}
 							</form.Field>
 						) : (
-							<View className="flex items-center justify-center gap-2">
-								<View className="flex flex-row items-center gap-1">
-									<View className="relative flex items-center gap-1">
-										<Input
-											className="w-[50px] text-center"
-											inputMode="numeric"
-											onChangeText={(text) => {
-												if (Number(text) > 59) return;
-												const minutes = Number(text) || 0;
-												setDurationMinutes(minutes);
-												form.setFieldValue(
-													"defaultDurationSeconds",
-													minutesSecondsToTotalSeconds(
-														minutes,
-														durationSeconds,
-													).toString(),
-												);
-											}}
-											value={durationMinutes.toString()}
-										/>
-										<Text className="-bottom-5 absolute text-muted-foreground text-xs">
-											min
-										</Text>
-									</View>
-									<Text className="text-foreground">:</Text>
-									<View className="relative flex items-center gap-1">
-										<Input
-											className="w-[50px] text-center"
-											inputMode="numeric"
-											onChangeText={(text) => {
-												const seconds = Math.min(Number(text) || 0, 59);
-												setDurationSeconds(seconds);
-												form.setFieldValue(
-													"defaultDurationSeconds",
-													minutesSecondsToTotalSeconds(
-														durationMinutes,
-														seconds,
-													).toString(),
-												);
-											}}
-											value={durationSeconds.toString()}
-										/>
-										<Text className="-bottom-5 absolute text-muted-foreground text-xs">
-											sec
-										</Text>
+							<View className="w-1/3">
+								<View className="flex items-center justify-center gap-2">
+									<View className="flex flex-row items-center gap-1">
+										<View className="relative flex items-center gap-1">
+											<Input
+												className="w-[50px] text-center"
+												inputMode="numeric"
+												onChangeText={(text) => {
+													if (Number(text) > 59) return;
+													const minutes = Number(text) || 0;
+													setDurationMinutes(minutes);
+													form.setFieldValue(
+														"defaultDurationSeconds",
+														minutesSecondsToTotalSeconds(
+															minutes,
+															durationSeconds,
+														).toString(),
+													);
+												}}
+												value={durationMinutes.toString()}
+											/>
+											<Text className="-bottom-5 absolute text-muted-foreground text-xs">
+												min
+											</Text>
+										</View>
+										<Text className="text-foreground">:</Text>
+										<View className="relative flex items-center gap-1">
+											<Input
+												className="w-[50px] text-center"
+												inputMode="numeric"
+												onChangeText={(text) => {
+													const seconds = Math.min(Number(text) || 0, 59);
+													setDurationSeconds(seconds);
+													form.setFieldValue(
+														"defaultDurationSeconds",
+														minutesSecondsToTotalSeconds(
+															durationMinutes,
+															seconds,
+														).toString(),
+													);
+												}}
+												value={durationSeconds.toString()}
+											/>
+											<Text className="-bottom-5 absolute text-muted-foreground text-xs">
+												sec
+											</Text>
+										</View>
 									</View>
 								</View>
 							</View>
 						)}
 
 						{/* Weight Input */}
-						<form.Field
-							name="defaultWeight"
-							validators={{
-								onChange: weightSchema,
-							}}
-						>
+						<form.Field name="defaultWeight">
 							{(field) => (
 								<View className="w-1/3">
 									<View className="flex items-center justify-center gap-2">
@@ -768,6 +853,13 @@ export const WorkoutPlanExerciseForm = ({
 													const newDropSets = [...dropSets];
 													newDropSets[0] = { ...newDropSets[0], weight: text };
 													setDropSets(newDropSets);
+												}
+												// Clear errors when user starts typing
+												if (mainRowErrors.weight) {
+													setMainRowErrors((prev) => ({
+														...prev,
+														weight: undefined,
+													}));
 												}
 											}}
 											value={
@@ -802,7 +894,7 @@ export const WorkoutPlanExerciseForm = ({
 									</View>
 
 									{/* Reps or Duration */}
-									{valueType === "reps" ? (
+									{form.getFieldValue("valueType") === "reps" ? (
 										<View className="w-1/3">
 											<View className="flex items-center justify-center gap-2">
 												<Input
@@ -889,52 +981,43 @@ export const WorkoutPlanExerciseForm = ({
 					)}
 
 					{/* Add more button - centralized */}
-					{valueType === "reps" && (
-						<View className="py-2">
-							{dropSets.length === 0 ? (
-								// Normal mode - always show the button
-								<Pressable className="" onPress={addDropSet}>
-									<Text className="text-center text-sky-500 text-xs">
-										+ add more
-									</Text>
-								</Pressable>
-							) : (
-								// Drop sets mode - check if current drop sets < 4
-								dropSets.length < 4 && (
-									<Pressable className="" onPress={addDropSet}>
-										<Text className="text-center text-sky-500 text-xs">
-											+ add more
-										</Text>
-									</Pressable>
-								)
-							)}
-						</View>
-					)}
+					<View
+						className={`${form.getFieldValue("valueType") === "reps" ? "pt-4" : "pt-8"}`}
+					>
+						{dropSets.length < 4 && (
+							<Pressable
+								className="mx-auto w-32 rounded-lg border border-sky-500/30 bg-sky-50 px-2 py-1 active:bg-sky-100"
+								onPress={addDropSet}
+							>
+								<Text className="text-center font-medium text-sky-600 text-sm">
+									+ add more
+								</Text>
+							</Pressable>
+						)}
+					</View>
 
 					{/* Error Display */}
-					<View
-						className={`flex justify-around gap-1 ${valueType === "reps" ? "pt-0" : "pt-6"} pb-2`}
-					>
-						{/* Debug logging */}
+					<View className={`flex justify-around gap-1 py-2`}>
+						{/* Show main row errors for normal mode, drop sets errors for drop sets mode */}
 						{dropSets.length < 2 ? (
 							<>
-								{defaultSetsObject?.errors?.length > 0 && (
+								{mainRowErrors.sets && (
 									<Text className="text-red-500 text-sm">
 										<Text className="font-funnel-bold">Sets: </Text>
-										{defaultSetsObject.errors[0]?.message}
+										{mainRowErrors.sets}
 									</Text>
 								)}
-								{valueType === "reps" &&
-									defaultRepsObject?.errors?.length > 0 && (
+								{form.getFieldValue("valueType") === "reps" &&
+									mainRowErrors.reps && (
 										<Text className="text-red-500 text-sm">
 											<Text className="font-funnel-bold">Reps: </Text>
-											{defaultRepsObject.errors[0]?.message}
+											{mainRowErrors.reps}
 										</Text>
 									)}
-								{defaultWeightObject?.errors?.length > 0 && (
+								{mainRowErrors.weight && (
 									<Text className="text-red-500 text-sm">
 										<Text className="font-funnel-bold">Weight: </Text>
-										{defaultWeightObject.errors[0]?.message}
+										{mainRowErrors.weight}
 									</Text>
 								)}
 							</>
