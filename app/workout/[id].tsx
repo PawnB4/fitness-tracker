@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { router, useLocalSearchParams } from "expo-router";
+import { I18n } from "i18n-js";
 import { Triangle } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -29,13 +30,60 @@ import { Textarea } from "~/components/ui/textarea";
 import { WorkoutExerciseForm } from "~/components/workouts/workout-exercise-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import { DIALOG_CONTENT_MAP } from "~/lib/constants";
+import { DIALOG_CONTENT_MAP, EXERCISES_TYPES } from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Clock } from "~/lib/icons/Clock";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { formatDate, formatTime } from "~/utils/date";
+
+const i18n = new I18n({
+	en: {
+		exercises: "exercises",
+		exercise: "exercise",
+		sets: "sets",
+		reps: "reps",
+		addExercise: "Add exercise",
+		workoutDetails: "Workout Details",
+		notes: "Notes",
+		deleteWorkout: "Delete workout",
+		confirmDelete: "Confirm Delete",
+		deleteWorkoutConfirmation:
+			"Are you sure you want to delete this workout? This action cannot be undone.",
+		cancel: "Cancel",
+		continue: "Continue",
+		completed: "Completed",
+		noExercisesYet: "No exercises added to this workout yet.",
+		tapAddExerciseToGetStarted: 'Tap "Add Exercise" to get started!',
+		noNotesPlaceholder:
+			"No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time",
+		noDate: "No date",
+		noTime: "No time",
+	},
+	es: {
+		exercises: "ejercicios",
+		exercise: "ejercicio",
+		sets: "series",
+		reps: "repeticiones",
+		addExercise: "Agregar ejercicio",
+		workoutDetails: "Detalles del entrenamiento",
+		notes: "Notas",
+		deleteWorkout: "Eliminar entrenamiento",
+		confirmDelete: "Confirmar eliminación",
+		deleteWorkoutConfirmation:
+			"¿Estás seguro de que quieres eliminar este entrenamiento? Esta acción no se puede deshacer.",
+		cancel: "Cancelar",
+		continue: "Continuar",
+		completed: "Completado",
+		noExercisesYet: "No se agregaron ejercicios a este entrenamiento todavía.",
+		tapAddExerciseToGetStarted: 'Tocá "Agregar ejercicio" para empezar!',
+		noNotesPlaceholder:
+			"Sin notas para este entrenamiento. Tocá para agregar notas sobre cómo te sentiste, qué salió bien, o mejoras para la próxima vez",
+		noDate: "Sin fecha",
+		noTime: "Sin hora",
+	},
+});
 
 // Function to update exercise order in database - this is the direct implementation
 const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
@@ -119,6 +167,11 @@ const completeWorkoutExercise = async (id: number) => {
 export default function Page() {
 	const { id } = useLocalSearchParams();
 	const [isUpdating, setIsUpdating] = useState(false); // Flag to prevent multiple simultaneous updates
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 
 	const [openAddWorkoutExerciseForm, setOpenAddWorkoutExerciseForm] =
 		useState(false);
@@ -151,12 +204,11 @@ export default function Page() {
 		db
 			.select({
 				workoutExerciseId: schema.workoutExercises.id,
+				exerciseId: schema.workoutExercises.exerciseId,
 				exerciseName: schema.exercises.name,
 				exerciseType: schema.exercises.type,
 				exercisePrimaryMuscleGroup: schema.exercises.primaryMuscleGroup,
-				workoutExerciseSets: schema.workoutExercises.sets,
-				workoutExerciseReps: schema.workoutExercises.reps,
-				workoutExerciseWeight: schema.workoutExercises.weight,
+				workoutExerciseData: schema.workoutExercises.workoutExerciseData,
 				workoutExerciseSortOrder: schema.workoutExercises.sortOrder,
 				workoutExerciseCompleted: schema.workoutExercises.completed,
 			})
@@ -291,19 +343,23 @@ export default function Page() {
 			{/* Header */}
 			<View className="rounded-b-3xl bg-primary p-6">
 				<Text className="mb-4 text-center text-4xl text-primary-foreground">
-					Workout Details
+					{i18n.t("workoutDetails")}
 				</Text>
 				<View className="flex-row justify-around">
 					<View className="flex-row items-center">
 						<Calendar className="mr-2 text-primary-foreground" size={18} />
 						<Text className="text-md text-primary-foreground">
-							{workout.createdAt ? formatDate(workout.createdAt) : "No date"}
+							{workout.createdAt
+								? formatDate(workout.createdAt)
+								: i18n.t("noDate")}
 						</Text>
 					</View>
 					<View className="flex-row items-center">
 						<Clock className="mr-2 text-primary-foreground" size={18} />
 						<Text className="text-md text-primary-foreground">
-							{workout.createdAt ? formatTime(workout.createdAt) : "No time"}
+							{workout.createdAt
+								? formatTime(workout.createdAt)
+								: i18n.t("noTime")}
 						</Text>
 					</View>
 				</View>
@@ -315,16 +371,20 @@ export default function Page() {
 					<Text className="font-funnel-bold text-lg">
 						{workoutExercises?.length}
 					</Text>
-					<Text className="text-muted-foreground text-sm">Exercises</Text>
+					<Text className="text-muted-foreground text-sm">
+						{i18n.t("exercises")}
+					</Text>
 				</View>
 				<View className="flex items-center justify-center">
 					<Text className="font-funnel-bold text-lg">
 						{workoutExercises?.reduce(
-							(acc, ex) => acc + ex.workoutExerciseSets,
+							(acc, ex) => acc + (ex.workoutExerciseData?.length || 0),
 							0,
 						)}
 					</Text>
-					<Text className="text-muted-foreground text-sm">Sets</Text>
+					<Text className="text-muted-foreground text-sm">
+						{i18n.t("sets")}
+					</Text>
 				</View>
 				<View className="flex items-center justify-center">
 					<Text className="font-funnel-bold text-lg">
@@ -340,7 +400,9 @@ export default function Page() {
 							: 0}
 						%
 					</Text>
-					<Text className="text-muted-foreground text-sm">Completed</Text>
+					<Text className="text-muted-foreground text-sm">
+						{i18n.t("completed")}
+					</Text>
 				</View>
 			</View>
 
@@ -355,7 +417,7 @@ export default function Page() {
 							variant="outline"
 						>
 							<Text className="font-funnel-bold text-primary">
-								Add exercise
+								{i18n.t("addExercise")}
 							</Text>
 						</Button>
 						{dialogContent === DIALOG_CONTENT_MAP.WORKOUT_EXERCISE_FORM && (
@@ -368,6 +430,7 @@ export default function Page() {
 										currentExercisesAmount={workoutExercises?.length || 0}
 										exerciseId={createdExercise?.id}
 										exerciseName={createdExercise?.name}
+										locale={i18n.locale}
 										openExerciseForm={openExerciseForm}
 										setCreatedExercise={setCreatedExercise}
 										setOpen={setOpenAddWorkoutExerciseForm}
@@ -399,21 +462,23 @@ export default function Page() {
 							<View className="items-center rounded-lg bg-card p-6">
 								<Dumbbell className="mb-4 size-10 text-muted-foreground" />
 								<Text className="text-center text-muted-foreground">
-									No exercises added to this workout yet.
+									{i18n.t("noExercisesYet")}
 								</Text>
 								<Text className="text-center text-muted-foreground">
-									Tap "Add Exercise" to get started!
+									{i18n.t("tapAddExerciseToGetStarted")}
 								</Text>
 							</View>
 						) : (
 							workoutExercises.map((item, index) => (
 								<WorkoutExerciseListItem
 									completed={item.workoutExerciseCompleted || false}
+									exerciseId={item.exerciseId}
 									exerciseName={item.exerciseName}
 									exercisePrimaryMuscleGroup={item.exercisePrimaryMuscleGroup}
 									exerciseType={item.exerciseType}
 									isUpdating={isUpdating}
 									key={item.workoutExerciseId}
+									locale={i18n.locale}
 									onDelete={() =>
 										handleDeleteExercise(
 											item.workoutExerciseId,
@@ -423,11 +488,9 @@ export default function Page() {
 									onMoveDown={() => moveExerciseDown(index)}
 									onMoveUp={() => moveExerciseUp(index)}
 									totalExercises={workoutExercises.length}
+									workoutExerciseData={item.workoutExerciseData}
 									workoutExerciseId={item.workoutExerciseId}
-									workoutExerciseReps={item.workoutExerciseReps}
-									workoutExerciseSets={item.workoutExerciseSets}
 									workoutExerciseSortOrder={item.workoutExerciseSortOrder}
-									workoutExerciseWeight={item.workoutExerciseWeight}
 								/>
 							))
 						)}
@@ -437,13 +500,13 @@ export default function Page() {
 
 			{/* Notes */}
 			<View className="mb-4 px-4">
-				<Text className="mb-2 font-funnel-bold text-xl">Notes</Text>
+				<Text className="mb-2 font-funnel-bold text-xl">{i18n.t("notes")}</Text>
 				<View className="rounded-xl bg-card p-4 shadow-sm">
 					<Textarea
 						aria-labelledby="textareaLabel"
 						className="border-0 p-0"
 						onChangeText={handleNotesChange}
-						placeholder="No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time"
+						placeholder={i18n.t("noNotesPlaceholder")}
 						value={workout.notes ?? undefined}
 					/>
 				</View>
@@ -454,27 +517,26 @@ export default function Page() {
 					<AlertDialogTrigger asChild>
 						<Button className="ml-2 flex-1" variant="destructive">
 							<Text className="font-funnel-bold text-destructive-foreground">
-								Delete workout
+								{i18n.t("deleteWorkout")}
 							</Text>
 						</Button>
 					</AlertDialogTrigger>
 					<AlertDialogContent>
 						<AlertDialogHeader>
-							<AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+							<AlertDialogTitle>{i18n.t("confirmDelete")}</AlertDialogTitle>
 							<AlertDialogDescription>
-								Are you sure you want to delete this workout? This action cannot
-								be undone.
+								{i18n.t("deleteWorkoutConfirmation")}
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel>
-								<Text>Cancel</Text>
+								<Text>{i18n.t("cancel")}</Text>
 							</AlertDialogCancel>
 							<AlertDialogAction
 								className="bg-destructive text-destructive-foreground"
 								onPress={() => deleteWorkout()}
 							>
-								<Text>Continue</Text>
+								<Text>{i18n.t("continue")}</Text>
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>
@@ -486,12 +548,11 @@ export default function Page() {
 
 type WorkoutExerciseListItemProps = {
 	workoutExerciseId: number;
+	exerciseId: number;
 	exerciseName: string;
 	exerciseType: string;
 	exercisePrimaryMuscleGroup: string | null;
-	workoutExerciseSets: number;
-	workoutExerciseReps: number;
-	workoutExerciseWeight: number;
+	workoutExerciseData: schema.WorkoutExerciseData[];
 	workoutExerciseSortOrder: number;
 	totalExercises: number;
 	onMoveUp: () => void;
@@ -499,14 +560,15 @@ type WorkoutExerciseListItemProps = {
 	onDelete: () => void;
 	isUpdating: boolean;
 	completed: boolean;
+	locale: string;
 };
 
 const WorkoutExerciseListItem = ({
 	workoutExerciseId,
+	exerciseId,
 	exerciseName,
-	workoutExerciseSets,
-	workoutExerciseReps,
-	workoutExerciseWeight,
+	exerciseType,
+	workoutExerciseData,
 	workoutExerciseSortOrder,
 	totalExercises,
 	onMoveUp,
@@ -514,8 +576,44 @@ const WorkoutExerciseListItem = ({
 	onDelete,
 	isUpdating,
 	completed,
+	locale,
 }: WorkoutExerciseListItemProps) => {
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
+
+	// Calculate display values from the JSON data
+	const totalSets = workoutExerciseData.length;
+	const firstSet = workoutExerciseData[0];
+	const isTimeBased =
+		firstSet?.reps === null && firstSet?.durationSeconds !== null;
+
+	// For display, show range if values vary, otherwise show single value
+	const weights = workoutExerciseData.map((set) => set.weight);
+	const uniqueWeights = [...new Set(weights)];
+	const weightDisplay =
+		uniqueWeights.length === 1
+			? `${uniqueWeights[0]} kg`
+			: `${Math.min(...weights)}-${Math.max(...weights)} kg`;
+
+	let valueDisplay = "";
+	if (isTimeBased) {
+		const durations = workoutExerciseData
+			.map((set) => set.durationSeconds)
+			.filter((d) => d !== null);
+		const uniqueDurations = [...new Set(durations)];
+		valueDisplay =
+			uniqueDurations.length === 1
+				? `${uniqueDurations[0]}s`
+				: `${Math.min(...durations)}-${Math.max(...durations)}s`;
+	} else {
+		const reps = workoutExerciseData
+			.map((set) => set.reps)
+			.filter((r) => r !== null);
+		const uniqueReps = [...new Set(reps)];
+		valueDisplay =
+			uniqueReps.length === 1
+				? `${uniqueReps[0]} ${i18n.t("reps")}`
+				: `${Math.min(...reps)}-${Math.max(...reps)} ${i18n.t("reps")}`;
+	}
 
 	return (
 		<View className="flex flex-row items-center justify-between gap-3">
@@ -547,10 +645,8 @@ const WorkoutExerciseListItem = ({
 								<View className="flex-1">
 									<Text className="text-lg">{exerciseName}</Text>
 									<Text className="text-muted-foreground text-sm">
-										{workoutExerciseSets} sets • {workoutExerciseReps} reps{" "}
-										{workoutExerciseWeight > 0
-											? `• ${workoutExerciseWeight} kg`
-											: ""}
+										{totalSets} {i18n.t("sets")} • {valueDisplay}
+										{weightDisplay !== "0 kg" ? ` • ${weightDisplay}` : ""}
 									</Text>
 								</View>
 							</View>
@@ -561,11 +657,11 @@ const WorkoutExerciseListItem = ({
 				<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
 					<WorkoutExerciseForm
 						currentExercisesAmount={totalExercises}
-						currentReps={workoutExerciseReps}
-						currentSets={workoutExerciseSets}
-						currentWeight={workoutExerciseWeight}
+						exerciseId={exerciseId}
 						exerciseName={exerciseName}
+						existingExerciseData={workoutExerciseData}
 						isUpdate={true}
+						locale={locale}
 						setOpen={setOpenUpdateForm}
 						workoutExerciseId={workoutExerciseId}
 					/>

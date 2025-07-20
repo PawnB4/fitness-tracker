@@ -356,18 +356,14 @@ export function UserForm({
 					if (exerciseId) {
 						// Sort sets by set number and build the JSON array
 						const sortedSets = exerciseData.sets.sort(
-							(a: any, b: any) => a.setNumber - b.setNumber,
+							(a: schema.WorkoutExerciseData, b: schema.WorkoutExerciseData) =>
+								a.setNumber - b.setNumber,
 						);
 
 						await db.insert(schema.workoutExercises).values({
 							workoutId,
 							exerciseId,
 							workoutExerciseData: sortedSets,
-							// Legacy columns - will be removed later
-							sets: sortedSets.length,
-							reps: sortedSets[0]?.reps || null,
-							durationSeconds: sortedSets[0]?.durationSeconds || null,
-							weight: sortedSets[0]?.weight || 0,
 							notes: exerciseData.notes || null,
 							completed: exerciseData.completed,
 							sortOrder: exerciseData.sortOrder,

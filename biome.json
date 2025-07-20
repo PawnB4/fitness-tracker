@@ -30,7 +30,8 @@
 				"noUselessFragments": {
 					"fix": "safe",
 					"level": "error"
-				}
+				},
+				"useLiteralKeys": "off"
 			},
 			"correctness": {
 				"noUnusedFunctionParameters": {
