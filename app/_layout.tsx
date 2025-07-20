@@ -13,6 +13,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
 	configureReanimatedLogger,
 	ReanimatedLogLevel,
@@ -99,75 +100,77 @@ export default function RootLayout() {
 	}
 
 	return (
-		<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-			<StatusBar
-				backgroundColor={
-					isDarkColorScheme
-						? NAV_THEME.dark.background
-						: NAV_THEME.light.background
-				}
-				style={isDarkColorScheme ? "light" : "dark"}
-				translucent={false}
-			/>
-			<Stack>
-				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-				<Stack.Screen
-					name="workout/[id]"
-					options={{
-						headerTitle: "",
-						headerRight: () => <UserButton />,
-						headerStyle: {
-							backgroundColor: isDarkColorScheme
-								? NAV_THEME.dark.background
-								: NAV_THEME.light.background,
-						},
-						headerTintColor: isDarkColorScheme
-							? NAV_THEME.dark.text
-							: NAV_THEME.light.text,
-					}}
+		<GestureHandlerRootView>
+			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+				<StatusBar
+					backgroundColor={
+						isDarkColorScheme
+							? NAV_THEME.dark.background
+							: NAV_THEME.light.background
+					}
+					style={isDarkColorScheme ? "light" : "dark"}
+					translucent={false}
 				/>
-				<Stack.Screen
-					name="workout/history"
-					options={{
-						headerTitle: "Workout History",
-						headerTitleStyle: { fontFamily: "FunnelSans_500Medium" },
-						headerRight: () => <UserButton />,
-						headerStyle: {
-							backgroundColor: isDarkColorScheme
-								? NAV_THEME.dark.background
-								: NAV_THEME.light.background,
-						},
-						headerTintColor: isDarkColorScheme
-							? NAV_THEME.dark.text
-							: NAV_THEME.light.text,
-					}}
-				/>
+				<Stack>
+					<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+					<Stack.Screen
+						name="workout/[id]"
+						options={{
+							headerTitle: "",
+							headerRight: () => <UserButton />,
+							headerStyle: {
+								backgroundColor: isDarkColorScheme
+									? NAV_THEME.dark.background
+									: NAV_THEME.light.background,
+							},
+							headerTintColor: isDarkColorScheme
+								? NAV_THEME.dark.text
+								: NAV_THEME.light.text,
+						}}
+					/>
+					<Stack.Screen
+						name="workout/history"
+						options={{
+							headerTitle: "Workout History",
+							headerTitleStyle: { fontFamily: "FunnelSans_500Medium" },
+							headerRight: () => <UserButton />,
+							headerStyle: {
+								backgroundColor: isDarkColorScheme
+									? NAV_THEME.dark.background
+									: NAV_THEME.light.background,
+							},
+							headerTintColor: isDarkColorScheme
+								? NAV_THEME.dark.text
+								: NAV_THEME.light.text,
+						}}
+					/>
 
-				<Stack.Screen
-					name="workout-plan/[id]"
-					options={{
-						headerTitle: "",
-						headerRight: () => <UserButton />,
-						headerStyle: {
-							backgroundColor: isDarkColorScheme
-								? NAV_THEME.dark.background
-								: NAV_THEME.light.background,
-						},
-						headerTintColor: isDarkColorScheme
-							? NAV_THEME.dark.text
-							: NAV_THEME.light.text,
-					}}
-				/>
-				<Stack.Screen
-					name="welcome/index"
-					options={{
-						headerTitle: "",
-						headerShown: false,
-					}}
-				/>
-			</Stack>
-			<PortalHost />
-		</ThemeProvider>
+					<Stack.Screen
+						name="workout-plan/[id]"
+						options={{
+							headerTitle: "",
+							headerRight: () => <UserButton />,
+							headerStyle: {
+								backgroundColor: isDarkColorScheme
+									? NAV_THEME.dark.background
+									: NAV_THEME.light.background,
+							},
+							headerTintColor: isDarkColorScheme
+								? NAV_THEME.dark.text
+								: NAV_THEME.light.text,
+						}}
+					/>
+					<Stack.Screen
+						name="welcome/index"
+						options={{
+							headerTitle: "",
+							headerShown: false,
+						}}
+					/>
+				</Stack>
+				<PortalHost />
+			</ThemeProvider>
+		</GestureHandlerRootView>
 	);
 }
 

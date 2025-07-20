@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import { I18n } from "i18n-js";
 import { Triangle } from "lucide-react-native";
@@ -8,9 +9,15 @@ import {
 	ActivityIndicator,
 	Pressable,
 	ScrollView,
+	StyleSheet,
 	TouchableOpacity,
 	View,
 } from "react-native";
+import DraggableFlatList, {
+	type DragEndParams,
+	type RenderItemParams,
+	ScaleDecorator,
+} from "react-native-draggable-flatlist";
 import { ExerciseForm } from "~/components/exercises/exercise-form";
 import {
 	AlertDialog,
@@ -101,48 +108,6 @@ const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
 	}
 };
 
-// Function to swap the order of two exercises
-const swapExerciseOrder = async (
-	exercise1Id: number,
-	exercise1Order: number,
-	exercise2Id: number,
-	exercise2Order: number,
-) => {
-	try {
-		// Use a transaction to ensure both updates succeed or both fail
-		await db.transaction(async (tx) => {
-			// First update exercise1 to a temporary order (to avoid unique constraint issues)
-			await tx
-				.update(schema.workoutExercises)
-				.set({
-					sortOrder: -1,
-				})
-				.where(eq(schema.workoutExercises.id, exercise1Id));
-
-			// Update exercise2 to exercise1's old order
-			await tx
-				.update(schema.workoutExercises)
-				.set({
-					sortOrder: exercise1Order,
-				})
-				.where(eq(schema.workoutExercises.id, exercise2Id));
-
-			// Finally update exercise1 to exercise2's old order
-			await tx
-				.update(schema.workoutExercises)
-				.set({
-					sortOrder: exercise2Order,
-				})
-				.where(eq(schema.workoutExercises.id, exercise1Id));
-		});
-
-		return true;
-	} catch (error) {
-		alert(`Error updating exercise order: ${error}`);
-		return false;
-	}
-};
-
 const deleteWorkoutPlanExercise = async (id: number) => {
 	try {
 		await db
@@ -221,53 +186,6 @@ export default function Page() {
 			.orderBy(schema.workoutExercises.sortOrder),
 	);
 
-	// Function to move an exercise up
-	const moveExerciseUp = async (index: number) => {
-		if (!workoutExercises || index <= 0 || isUpdating) return;
-
-		setIsUpdating(true);
-
-		const currentExercise = workoutExercises[index];
-		const prevExercise = workoutExercises[index - 1];
-
-		try {
-			await swapExerciseOrder(
-				currentExercise.workoutExerciseId,
-				currentExercise.workoutExerciseSortOrder,
-				prevExercise.workoutExerciseId,
-				prevExercise.workoutExerciseSortOrder,
-			);
-		} catch (error) {
-			alert(`Error updating exercise order: ${error}`);
-		} finally {
-			setIsUpdating(false);
-		}
-	};
-
-	// Function to move an exercise down
-	const moveExerciseDown = async (index: number) => {
-		if (!workoutExercises || index >= workoutExercises.length - 1 || isUpdating)
-			return;
-
-		setIsUpdating(true);
-
-		const currentExercise = workoutExercises[index];
-		const nextExercise = workoutExercises[index + 1];
-
-		try {
-			await swapExerciseOrder(
-				currentExercise.workoutExerciseId,
-				currentExercise.workoutExerciseSortOrder,
-				nextExercise.workoutExerciseId,
-				nextExercise.workoutExerciseSortOrder,
-			);
-		} catch (error) {
-			alert(`Error updating exercise order: ${error}`);
-		} finally {
-			setIsUpdating(false);
-		}
-	};
-
 	const handleNotesChange = async (text: string) => {
 		try {
 			await db
@@ -324,6 +242,28 @@ export default function Page() {
 		}
 	};
 
+	// Drag and drop
+	const onExerciseDropped = async (
+		params: DragEndParams<WorkoutExerciseListItemProps>,
+	) => {
+		if (isUpdating) return;
+
+		setIsUpdating(true);
+
+		try {
+			// Update each exercise's sort order in the database
+			await Promise.all(
+				params.data.map((item, index) =>
+					updateExerciseOrder(item.workoutExerciseId, index + 1),
+				),
+			);
+		} catch (error) {
+			alert(`Error updating exercise order: ${error}`);
+		} finally {
+			setIsUpdating(false);
+		}
+	};
+
 	if (workoutError) {
 		return <Text>Error: {workoutError.message}</Text>;
 	}
@@ -339,7 +279,8 @@ export default function Page() {
 	const workout = workoutArray[0];
 
 	return (
-		<ScrollView className="flex-1 bg-secondary/30">
+		// This was to be a scroll view
+		<View className="flex-1 bg-secondary/30">
 			{/* Header */}
 			<View className="rounded-b-3xl bg-primary p-6">
 				<Text className="mb-4 text-center text-4xl text-primary-foreground">
@@ -457,44 +398,50 @@ export default function Page() {
 
 					{/* Exercise Cards */}
 
-					<View className="flex flex-1 flex-col gap-3">
-						{!workoutExercises || workoutExercises.length === 0 ? (
-							<View className="items-center rounded-lg bg-card p-6">
-								<Dumbbell className="mb-4 size-10 text-muted-foreground" />
-								<Text className="text-center text-muted-foreground">
-									{i18n.t("noExercisesYet")}
-								</Text>
-								<Text className="text-center text-muted-foreground">
-									{i18n.t("tapAddExerciseToGetStarted")}
-								</Text>
-							</View>
-						) : (
-							workoutExercises.map((item, index) => (
-								<WorkoutExerciseListItem
-									completed={item.workoutExerciseCompleted || false}
-									exerciseId={item.exerciseId}
-									exerciseName={item.exerciseName}
-									exercisePrimaryMuscleGroup={item.exercisePrimaryMuscleGroup}
-									exerciseType={item.exerciseType}
-									isUpdating={isUpdating}
-									key={item.workoutExerciseId}
-									locale={i18n.locale}
-									onDelete={() =>
-										handleDeleteExercise(
-											item.workoutExerciseId,
-											item.workoutExerciseSortOrder,
-										)
-									}
-									onMoveDown={() => moveExerciseDown(index)}
-									onMoveUp={() => moveExerciseUp(index)}
-									totalExercises={workoutExercises.length}
-									workoutExerciseData={item.workoutExerciseData}
-									workoutExerciseId={item.workoutExerciseId}
-									workoutExerciseSortOrder={item.workoutExerciseSortOrder}
-								/>
-							))
-						)}
-					</View>
+					{!workoutExercises || workoutExercises.length === 0 ? (
+						<View className="items-center rounded-lg bg-card p-6">
+							<Dumbbell className="mb-4 size-10 text-muted-foreground" />
+							<Text className="text-center text-muted-foreground">
+								{i18n.t("noExercisesYet")}
+							</Text>
+							<Text className="text-center text-muted-foreground">
+								{i18n.t("tapAddExerciseToGetStarted")}
+							</Text>
+						</View>
+					) : (
+						<DraggableFlatList
+							className="w-full"
+							contentContainerStyle={{
+								gap: 4,
+							}}
+							data={workoutExercises.map((item, index) => ({
+								workoutExerciseId: item.workoutExerciseId,
+								exerciseId: item.exerciseId,
+								exerciseName: item.exerciseName,
+								exerciseType: item.exerciseType,
+								exercisePrimaryMuscleGroup: item.exercisePrimaryMuscleGroup,
+								workoutExerciseData: item.workoutExerciseData,
+								workoutExerciseSortOrder: item.workoutExerciseSortOrder,
+								totalExercises: workoutExercises.length,
+								onMoveUp: () => {}, // Not used with drag and drop
+								onMoveDown: () => {}, // Not used with drag and drop
+								onDelete: () =>
+									handleDeleteExercise(
+										item.workoutExerciseId,
+										item.workoutExerciseSortOrder,
+									),
+								isUpdating: isUpdating,
+								completed: item.workoutExerciseCompleted || false,
+								locale: i18n.locale,
+							}))}
+							keyExtractor={(item) => item.workoutExerciseId.toString()}
+							onDragBegin={() =>
+								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+							}
+							onDragEnd={onExerciseDropped}
+							renderItem={WorkoutExerciseListItem}
+						/>
+					)}
 				</View>
 			</View>
 
@@ -542,7 +489,7 @@ export default function Page() {
 					</AlertDialogContent>
 				</AlertDialog>
 			</View>
-		</ScrollView>
+		</View>
 	);
 }
 
@@ -564,30 +511,20 @@ type WorkoutExerciseListItemProps = {
 };
 
 const WorkoutExerciseListItem = ({
-	workoutExerciseId,
-	exerciseId,
-	exerciseName,
-	exerciseType,
-	workoutExerciseData,
-	workoutExerciseSortOrder,
-	totalExercises,
-	onMoveUp,
-	onMoveDown,
-	onDelete,
-	isUpdating,
-	completed,
-	locale,
-}: WorkoutExerciseListItemProps) => {
+	item,
+	drag,
+	isActive,
+}: RenderItemParams<WorkoutExerciseListItemProps>) => {
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
 
 	// Calculate display values from the JSON data
-	const totalSets = workoutExerciseData.length;
-	const firstSet = workoutExerciseData[0];
+	const totalSets = item.workoutExerciseData.length;
+	const firstSet = item.workoutExerciseData[0];
 	const isTimeBased =
 		firstSet?.reps === null && firstSet?.durationSeconds !== null;
 
 	// For display, show range if values vary, otherwise show single value
-	const weights = workoutExerciseData.map((set) => set.weight);
+	const weights = item.workoutExerciseData.map((set) => set.weight);
 	const uniqueWeights = [...new Set(weights)];
 	const weightDisplay =
 		uniqueWeights.length === 1
@@ -596,7 +533,7 @@ const WorkoutExerciseListItem = ({
 
 	let valueDisplay = "";
 	if (isTimeBased) {
-		const durations = workoutExerciseData
+		const durations = item.workoutExerciseData
 			.map((set) => set.durationSeconds)
 			.filter((d) => d !== null);
 		const uniqueDurations = [...new Set(durations)];
@@ -605,7 +542,7 @@ const WorkoutExerciseListItem = ({
 				? `${uniqueDurations[0]}s`
 				: `${Math.min(...durations)}-${Math.max(...durations)}s`;
 	} else {
-		const reps = workoutExerciseData
+		const reps = item.workoutExerciseData
 			.map((set) => set.reps)
 			.filter((r) => r !== null);
 		const uniqueReps = [...new Set(reps)];
@@ -616,90 +553,76 @@ const WorkoutExerciseListItem = ({
 	}
 
 	return (
-		<View className="flex flex-row items-center justify-between gap-3">
-			<Dialog
-				className="flex-1"
-				onOpenChange={setOpenUpdateForm}
-				open={openUpdateForm}
+		<ScaleDecorator>
+			<TouchableOpacity
+				activeOpacity={0.7}
+				className={`flex w-full flex-row items-center justify-between gap-3 ${isActive ? "opacity-70" : ""}`}
+				disabled={isActive}
+				onLongPress={drag}
+				onPress={() => setOpenUpdateForm(true)}
 			>
-				<DialogTrigger asChild>
-					<Pressable>
-						<View
-							className={`flex-row items-center justify-between p-4 ${workoutExerciseSortOrder < totalExercises ? "border-border border-b" : ""}`}
-							key={workoutExerciseId}
-						>
-							<View className="flex-1 flex-row items-center">
-								<View
-									className={`mr-3 h-8 w-8 items-center justify-center rounded-full ${completed ? "bg-green-100" : "bg-gray-100"}`}
+				<Dialog
+					className="flex-1"
+					onOpenChange={setOpenUpdateForm}
+					open={openUpdateForm}
+				>
+					<View
+						className={`flex-row items-center justify-between p-4 ${item.workoutExerciseSortOrder < item.totalExercises ? "border-border border-b" : ""}`}
+						key={item.workoutExerciseId}
+					>
+						<View className="flex-1 flex-row items-center">
+							<View
+								className={`mr-3 h-8 w-8 items-center justify-center rounded-full ${item.completed ? "bg-green-100" : "bg-gray-100"}`}
+							>
+								<TouchableOpacity
+									className="p-4"
+									onPress={() =>
+										completeWorkoutExercise(item.workoutExerciseId)
+									}
 								>
-									<TouchableOpacity
-										className="p-4"
-										onPress={() => completeWorkoutExercise(workoutExerciseId)}
-									>
-										<Dumbbell
-											color={completed ? "#22c55e" : "#9ca3af"}
-											size={16}
-										/>
-									</TouchableOpacity>
-								</View>
-								<View className="flex-1">
-									<Text className="text-lg">{exerciseName}</Text>
-									<Text className="text-muted-foreground text-sm">
-										{totalSets} {i18n.t("sets")} • {valueDisplay}
-										{weightDisplay !== "0 kg" ? ` • ${weightDisplay}` : ""}
-									</Text>
-								</View>
+									<Dumbbell
+										color={item.completed ? "#22c55e" : "#9ca3af"}
+										size={16}
+									/>
+								</TouchableOpacity>
 							</View>
-							<ChevronRight color="#9ca3af" size={18} />
+							<View className="flex-1">
+								<Text className="text-lg">{item.exerciseName}</Text>
+								<Text className="text-muted-foreground text-sm">
+									{totalSets} {i18n.t("sets")} • {valueDisplay}
+									{weightDisplay !== "0 kg" ? ` • ${weightDisplay}` : ""}
+								</Text>
+							</View>
 						</View>
-					</Pressable>
-				</DialogTrigger>
-				<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
-					<WorkoutExerciseForm
-						currentExercisesAmount={totalExercises}
-						exerciseId={exerciseId}
-						exerciseName={exerciseName}
-						existingExerciseData={workoutExerciseData}
-						isUpdate={true}
-						locale={locale}
-						setOpen={setOpenUpdateForm}
-						workoutExerciseId={workoutExerciseId}
-					/>
-				</DialogContent>
-			</Dialog>
+						<ChevronRight color="#9ca3af" size={18} />
+					</View>
+					<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
+						<WorkoutExerciseForm
+							currentExercisesAmount={item.totalExercises}
+							exerciseId={item.exerciseId}
+							exerciseName={item.exerciseName}
+							existingExerciseData={item.workoutExerciseData}
+							isUpdate={true}
+							locale={item.locale}
+							setOpen={setOpenUpdateForm}
+							workoutExerciseId={item.workoutExerciseId}
+						/>
+					</DialogContent>
+				</Dialog>
 
-			<View className="flex flex-row items-center justify-center gap-2">
-				<TouchableOpacity
-					disabled={isUpdating || workoutExerciseSortOrder === 1}
-					onPress={onMoveUp}
-				>
-					<Triangle
-						className="fill-muted-foreground text-muted-foreground"
-						size={25}
-					/>
-				</TouchableOpacity>
-
-				<Text>#{workoutExerciseSortOrder}</Text>
-
-				<TouchableOpacity
-					disabled={isUpdating || workoutExerciseSortOrder === totalExercises}
-					onPress={onMoveDown}
-				>
-					<Triangle
-						className="rotate-180 fill-muted-foreground text-muted-foreground"
-						size={25}
-					/>
-				</TouchableOpacity>
-			</View>
-			<View className="flex items-center justify-center gap-2">
-				<TouchableOpacity
-					className="rounded-full bg-red-100 p-1.5"
-					disabled={isUpdating}
-					onPress={onDelete}
-				>
-					<Trash2 className="text-destructive" size={22} />
-				</TouchableOpacity>
-			</View>
-		</View>
+				<View className="flex flex-row items-center justify-center gap-2">
+					<Text>#{item.workoutExerciseSortOrder}</Text>
+				</View>
+				<View className="flex items-center justify-center gap-2">
+					<TouchableOpacity
+						className="rounded-full bg-red-100 p-1.5"
+						disabled={item.isUpdating}
+						onPress={item.onDelete}
+					>
+						<Trash2 className="text-destructive" size={22} />
+					</TouchableOpacity>
+				</View>
+			</TouchableOpacity>
+		</ScaleDecorator>
 	);
 };
