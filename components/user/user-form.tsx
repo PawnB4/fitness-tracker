@@ -116,11 +116,10 @@ export function UserForm({
 					id: schema.workoutExercises.id,
 					workoutId: schema.workoutExercises.workoutId,
 					exerciseId: schema.workoutExercises.exerciseId,
-					sets: schema.workoutExercises.sets,
-					reps: schema.workoutExercises.reps,
-					weight: schema.workoutExercises.weight,
+					workoutExerciseData: schema.workoutExercises.workoutExerciseData,
 					notes: schema.workoutExercises.notes,
 					completed: schema.workoutExercises.completed,
+					sortOrder: schema.workoutExercises.sortOrder,
 					exerciseName: schema.exercises.name,
 					exerciseType: schema.exercises.type,
 					exerciseMuscleGroup: schema.exercises.primaryMuscleGroup,
@@ -132,9 +131,9 @@ export function UserForm({
 				)
 				.all();
 
-			// Create CSV headers
+			// Create CSV headers - now including Set Number and Duration
 			let csvContent =
-				"Workout ID,Workout Name,Workout Date,Exercise ID,Exercise Name,Exercise Type,Muscle Group,Sets,Reps,Weight,Notes,Completed\n";
+				"Workout ID,Workout Name,Workout Date,Exercise ID,Exercise Name,Exercise Type,Muscle Group,Set Number,Reps,Duration Seconds,Weight,Notes,Completed,Sort Order\n";
 
 			// Add workout data rows
 			for (const workout of workoutData) {
@@ -145,11 +144,21 @@ export function UserForm({
 
 				// If no exercises, still add the workout with empty exercise data
 				if (exercises.length === 0) {
-					csvContent += `${workout.id},"${workout.name}",${workout.createdAt},,,,,,,,\n`;
+					csvContent += `${workout.id},"${workout.name}",${workout.createdAt},,,,,,,,,,,\n`;
 				} else {
-					// Add a row for each exercise in this workout
+					// Add a row for each set in each exercise
 					for (const exercise of exercises) {
-						csvContent += `${workout.id},"${workout.name}",${workout.createdAt},${exercise.exerciseId},"${exercise.exerciseName}","${exercise.exerciseType}","${exercise.exerciseMuscleGroup}",${exercise.sets},${exercise.reps},${exercise.weight},"${exercise.notes || ""}",${exercise.completed ? "Yes" : "No"}\n`;
+						const exerciseSets = exercise.workoutExerciseData || [];
+
+						if (exerciseSets.length === 0) {
+							// If no sets data, add one row with empty set data
+							csvContent += `${workout.id},"${workout.name}",${workout.createdAt},${exercise.exerciseId},"${exercise.exerciseName}","${exercise.exerciseType}","${exercise.exerciseMuscleGroup}",1,,,,"${exercise.notes || ""}",${exercise.completed ? "Yes" : "No"},${exercise.sortOrder}\n`;
+						} else {
+							// Add a row for each set
+							for (const set of exerciseSets) {
+								csvContent += `${workout.id},"${workout.name}",${workout.createdAt},${exercise.exerciseId},"${exercise.exerciseName}","${exercise.exerciseType}","${exercise.exerciseMuscleGroup}",${set.setNumber},${set.reps || ""},${set.durationSeconds || ""},${set.weight},"${exercise.notes || ""}",${exercise.completed ? "Yes" : "No"},${exercise.sortOrder}\n`;
+							}
+						}
 					}
 				}
 			}
@@ -234,10 +243,11 @@ export function UserForm({
 			const lines = csvContent.split("\n").filter((line) => line.trim());
 			const headers = lines[0].split(",");
 
-			// Expected headers: Workout ID,Workout Name,Workout Date,Exercise ID,Exercise Name,Exercise Type,Muscle Group,Sets,Reps,Weight,Notes,Completed
+			// Expected headers: Workout ID,Workout Name,Workout Date,Exercise ID,Exercise Name,Exercise Type,Muscle Group,Set Number,Reps,Duration Seconds,Weight,Notes,Completed,Sort Order
 			if (
 				!headers.includes("Workout ID") ||
-				!headers.includes("Exercise Name")
+				!headers.includes("Exercise Name") ||
+				!headers.includes("Set Number")
 			) {
 				Alert.alert("Error", "Invalid CSV format");
 				return;
@@ -284,7 +294,7 @@ export function UserForm({
 				}
 			}
 
-			// Group rows by workout
+			// Group rows by workout and exercise
 			const workoutGroups = new Map();
 			for (const row of rows) {
 				const workoutKey = `${row["Workout Name"]}-${row["Workout Date"]}`;
@@ -292,11 +302,34 @@ export function UserForm({
 					workoutGroups.set(workoutKey, {
 						name: row["Workout Name"],
 						date: row["Workout Date"],
-						exercises: [],
+						exercises: new Map(),
 					});
 				}
+
 				if (row["Exercise Name"]) {
-					workoutGroups.get(workoutKey).exercises.push(row);
+					const exerciseKey = `${row["Exercise ID"]}-${row["Sort Order"] || "0"}`;
+					const workout = workoutGroups.get(workoutKey);
+
+					if (!workout.exercises.has(exerciseKey)) {
+						workout.exercises.set(exerciseKey, {
+							exerciseId: row["Exercise ID"],
+							exerciseName: row["Exercise Name"],
+							notes: row["Notes"],
+							completed: row["Completed"] === "Yes",
+							sortOrder: Number.parseInt(row["Sort Order"] || "0"),
+							sets: [],
+						});
+					}
+
+					// Add this set to the exercise
+					workout.exercises.get(exerciseKey).sets.push({
+						setNumber: Number.parseInt(row["Set Number"] || "1"),
+						reps: row["Reps"] ? Number.parseInt(row["Reps"]) : null,
+						durationSeconds: row["Duration Seconds"]
+							? Number.parseInt(row["Duration Seconds"])
+							: null,
+						weight: Number.parseFloat(row["Weight"] || "0"),
+					});
 				}
 			}
 
@@ -317,20 +350,27 @@ export function UserForm({
 				const workoutId = newWorkout[0].id;
 
 				// Add exercises to workout
-				for (let i = 0; i < workoutData.exercises.length; i++) {
-					const exerciseRow = workoutData.exercises[i];
-					const exerciseId = exerciseNameToId.get(exerciseRow["Exercise Name"]);
+				for (const [, exerciseData] of workoutData.exercises) {
+					const exerciseId = exerciseNameToId.get(exerciseData.exerciseName);
 
 					if (exerciseId) {
+						// Sort sets by set number and build the JSON array
+						const sortedSets = exerciseData.sets.sort(
+							(a: any, b: any) => a.setNumber - b.setNumber,
+						);
+
 						await db.insert(schema.workoutExercises).values({
 							workoutId,
 							exerciseId,
-							sets: Number.parseInt(exerciseRow.Sets) || 1,
-							reps: Number.parseInt(exerciseRow.Reps) || 1,
-							weight: Number.parseFloat(exerciseRow.Weight) || 0,
-							notes: exerciseRow.Notes || null,
-							completed: exerciseRow.Completed === "Yes",
-							sortOrder: i,
+							workoutExerciseData: sortedSets,
+							// Legacy columns - will be removed later
+							sets: sortedSets.length,
+							reps: sortedSets[0]?.reps || null,
+							durationSeconds: sortedSets[0]?.durationSeconds || null,
+							weight: sortedSets[0]?.weight || 0,
+							notes: exerciseData.notes || null,
+							completed: exerciseData.completed,
+							sortOrder: exerciseData.sortOrder,
 						});
 						importedExercises++;
 					}

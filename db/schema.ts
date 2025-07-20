@@ -30,10 +30,17 @@ export const workoutExercises = sqliteTable("workout_exercises", {
 	exerciseId: integer()
 		.notNull()
 		.references(() => exercises.id, { onDelete: "cascade" }),
-	sets: integer().notNull(),
-	reps: integer(),
-	durationSeconds: integer(),
-	weight: real().notNull(), // Using real for decimal weights
+	workoutExerciseData: text({ mode: "json" })
+		.$type<
+			Array<{
+				setNumber: number;
+				reps: number | null;
+				durationSeconds: number | null;
+				weight: number;
+			}>
+		>()
+		.notNull()
+		.default(sql`'[]'`),
 	notes: text(), // For workout-specific notes about this exercise
 	sortOrder: integer().notNull(), // For ordering exercises within a workout
 	completed: integer({ mode: "boolean" }).default(false),
@@ -59,10 +66,17 @@ export const workoutPlanExercises = sqliteTable("workout_plan_exercises", {
 	exerciseId: integer()
 		.notNull()
 		.references(() => exercises.id, { onDelete: "cascade" }),
-	defaultSets: integer().notNull(),
-	defaultReps: integer(),
-	defaultDurationSeconds: integer(),
-	defaultWeight: real().notNull(),
+	workoutPlanExerciseData: text({ mode: "json" })
+		.$type<
+			Array<{
+				defaultSetNumber: number;
+				defaultReps: number | null;
+				defaultDurationSeconds: number | null;
+				defaultWeight: number;
+			}>
+		>()
+		.notNull()
+		.default(sql`'[]'`),
 	sortOrder: integer().notNull(), // To maintain exercise order in plan
 	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
 	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
@@ -215,12 +229,16 @@ export type WorkoutExercise = {
 	updatedAt: string | null;
 	workoutId: number;
 	exerciseId: number;
-	sets: number;
+	workoutExerciseData: WorkoutExerciseData[];
+	sortOrder: number;
+	completed: boolean | null;
+};
+
+export type WorkoutExerciseData = {
+	setNumber: number;
 	reps: number | null;
 	durationSeconds: number | null;
 	weight: number;
-	sortOrder: number;
-	completed: boolean | null;
 };
 export type NewWorkoutExercise = z.infer<typeof insertWorkoutExerciseSchema>;
 
@@ -240,7 +258,11 @@ export type WorkoutPlanExercise = {
 	exerciseId: number;
 	sortOrder: number;
 	planId: number;
-	defaultSets: number;
+	workoutPlanExerciseData: WorkoutPlanExerciseData[];
+};
+
+export type WorkoutPlanExerciseData = {
+	defaultSetNumber: number;
 	defaultReps: number | null;
 	defaultDurationSeconds: number | null;
 	defaultWeight: number;

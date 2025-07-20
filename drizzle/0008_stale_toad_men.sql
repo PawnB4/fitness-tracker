@@ -1,0 +1,2 @@
+ALTER TABLE `workout_exercises` ADD `workout_exercise_data` text DEFAULT '[]' NOT NULL;--> statement-breakpoint
+ALTER TABLE `workout_plan_exercises` ADD `workout_plan_exercise_data` text DEFAULT '[]' NOT NULL;

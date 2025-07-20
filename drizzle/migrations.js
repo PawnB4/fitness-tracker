@@ -8,6 +8,8 @@ import m0004 from "./0004_nervous_miek.sql";
 import m0005 from "./0005_friendly_red_ghost.sql";
 import m0006 from "./0006_jittery_abomination.sql";
 import m0007 from "./0007_wonderful_the_santerians.sql";
+import m0008 from "./0008_stale_toad_men.sql";
+import m0009 from "./0009_lucky_reavers.sql";
 import journal from "./meta/_journal.json";
 
 export default {
@@ -21,5 +23,7 @@ export default {
 		m0005,
 		m0006,
 		m0007,
+		m0008,
+		m0009,
 	},
 };

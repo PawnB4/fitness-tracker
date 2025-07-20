@@ -208,9 +208,8 @@ export default function Page() {
 			const workoutPlanExercises = await db
 				.select({
 					exerciseId: schema.workoutPlanExercises.exerciseId,
-					defaultSets: schema.workoutPlanExercises.defaultSets,
-					defaultReps: schema.workoutPlanExercises.defaultReps,
-					defaultWeight: schema.workoutPlanExercises.defaultWeight,
+					workoutPlanExerciseData:
+						schema.workoutPlanExercises.workoutPlanExerciseData,
 					sortOrder: schema.workoutPlanExercises.sortOrder,
 				})
 				.from(schema.workoutPlanExercises)
@@ -228,12 +227,20 @@ export default function Page() {
 
 			// Add all exercises from the plan to the workout
 			for (const exercise of workoutPlanExercises) {
+				// Transform workoutPlan data format to workout data format
+				const workoutExerciseData = exercise.workoutPlanExerciseData.map(
+					(planSet) => ({
+						setNumber: planSet.defaultSetNumber,
+						reps: planSet.defaultReps,
+						durationSeconds: planSet.defaultDurationSeconds,
+						weight: planSet.defaultWeight,
+					}),
+				);
+
 				await db.insert(schema.workoutExercises).values({
 					workoutId: workoutId,
 					exerciseId: exercise.exerciseId,
-					sets: exercise.defaultSets,
-					reps: exercise.defaultReps,
-					weight: exercise.defaultWeight,
+					workoutExerciseData: workoutExerciseData,
 					sortOrder: exercise.sortOrder,
 				});
 			}

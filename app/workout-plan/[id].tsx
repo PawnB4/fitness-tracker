@@ -168,12 +168,8 @@ export default function Page() {
 				exerciseName: schema.exercises.name,
 				exerciseType: schema.exercises.type,
 				exercisePrimaryMuscleGroup: schema.exercises.primaryMuscleGroup,
-				workoutPlanExerciseDefaultSets: schema.workoutPlanExercises.defaultSets,
-				workoutPlanExerciseDefaultReps: schema.workoutPlanExercises.defaultReps,
-				workoutPlanExerciseDefaultDurationSeconds:
-					schema.workoutPlanExercises.defaultDurationSeconds,
-				workoutPlanExerciseDefaultWeight:
-					schema.workoutPlanExercises.defaultWeight,
+				workoutPlanExerciseData:
+					schema.workoutPlanExercises.workoutPlanExerciseData,
 				workoutPlanExerciseSortOrder: schema.workoutPlanExercises.sortOrder,
 			})
 			.from(schema.workoutPlanExercises)
@@ -376,18 +372,7 @@ export default function Page() {
 									onMoveDown={() => moveExerciseDown(index)}
 									onMoveUp={() => moveExerciseUp(index)}
 									totalExercises={planExercises.length}
-									workoutPlanExerciseDefaultDurationSeconds={
-										item.workoutPlanExerciseDefaultDurationSeconds
-									}
-									workoutPlanExerciseDefaultReps={
-										item.workoutPlanExerciseDefaultReps ?? 0
-									}
-									workoutPlanExerciseDefaultSets={
-										item.workoutPlanExerciseDefaultSets
-									}
-									workoutPlanExerciseDefaultWeight={
-										item.workoutPlanExerciseDefaultWeight
-									}
+									workoutPlanExerciseData={item.workoutPlanExerciseData}
 									workoutPlanExerciseId={item.workoutPlanExerciseId}
 									workoutPlanExerciseSortOrder={
 										item.workoutPlanExerciseSortOrder
@@ -452,10 +437,7 @@ type WorkoutPlanExerciseListItemProps = {
 	exerciseName: string;
 	exerciseType: string;
 	exercisePrimaryMuscleGroup: string | null;
-	workoutPlanExerciseDefaultSets: number;
-	workoutPlanExerciseDefaultReps: number | null;
-	workoutPlanExerciseDefaultDurationSeconds: number | null;
-	workoutPlanExerciseDefaultWeight: number;
+	workoutPlanExerciseData: schema.WorkoutPlanExerciseData[];
 	workoutPlanExerciseSortOrder: number;
 	totalExercises: number;
 	onMoveUp: () => void;
@@ -469,10 +451,7 @@ const WorkoutPlanExerciseListItem = ({
 	exerciseName,
 	exerciseType,
 	exercisePrimaryMuscleGroup,
-	workoutPlanExerciseDefaultSets,
-	workoutPlanExerciseDefaultReps,
-	workoutPlanExerciseDefaultDurationSeconds,
-	workoutPlanExerciseDefaultWeight,
+	workoutPlanExerciseData,
 	workoutPlanExerciseSortOrder,
 	totalExercises,
 	onMoveUp,
@@ -481,6 +460,41 @@ const WorkoutPlanExerciseListItem = ({
 	isUpdating,
 }: WorkoutPlanExerciseListItemProps) => {
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
+
+	// Calculate display values from the JSON data
+	const totalSets = workoutPlanExerciseData.length;
+	const firstSet = workoutPlanExerciseData[0];
+	const isTimeBased =
+		firstSet?.defaultReps === null && firstSet?.defaultDurationSeconds !== null;
+
+	// For display, show range if values vary, otherwise show single value
+	const weights = workoutPlanExerciseData.map((set) => set.defaultWeight);
+	const uniqueWeights = [...new Set(weights)];
+	const weightDisplay =
+		uniqueWeights.length === 1
+			? `${uniqueWeights[0]} kg`
+			: `${Math.min(...weights)}-${Math.max(...weights)} kg`;
+
+	let valueDisplay = "";
+	if (isTimeBased) {
+		const durations = workoutPlanExerciseData
+			.map((set) => set.defaultDurationSeconds)
+			.filter((d) => d !== null);
+		const uniqueDurations = [...new Set(durations)];
+		valueDisplay =
+			uniqueDurations.length === 1
+				? `${uniqueDurations[0]}s`
+				: `${Math.min(...durations)}-${Math.max(...durations)}s`;
+	} else {
+		const reps = workoutPlanExerciseData
+			.map((set) => set.defaultReps)
+			.filter((r) => r !== null);
+		const uniqueReps = [...new Set(reps)];
+		valueDisplay =
+			uniqueReps.length === 1
+				? `${uniqueReps[0]} reps`
+				: `${Math.min(...reps)}-${Math.max(...reps)} reps`;
+	}
 
 	return (
 		<View className="flex flex-row items-center justify-between gap-3">
@@ -533,19 +547,13 @@ const WorkoutPlanExerciseListItem = ({
 										<View className="mt-1 flex-row justify-between">
 											<View className="flex-row items-center">
 												<Badge className="mr-1" variant="secondary">
-													<Text className="text-xs">
-														{workoutPlanExerciseDefaultSets} sets
-													</Text>
+													<Text className="text-xs">{totalSets} sets</Text>
 												</Badge>
 												<Badge className="mr-1" variant="secondary">
-													<Text className="text-xs">
-														{workoutPlanExerciseDefaultReps} reps
-													</Text>
+													<Text className="text-xs">{valueDisplay}</Text>
 												</Badge>
 												<Badge variant="secondary">
-													<Text className="text-xs">
-														{workoutPlanExerciseDefaultWeight} kg
-													</Text>
+													<Text className="text-xs">{weightDisplay}</Text>
 												</Badge>
 											</View>
 											<View className="flex-row items-center">
@@ -560,13 +568,11 @@ const WorkoutPlanExerciseListItem = ({
 				</DialogTrigger>
 				<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
 					<WorkoutPlanExerciseForm
-						currentDurationSeconds={
-							workoutPlanExerciseDefaultDurationSeconds ?? 0
-						}
+						currentDurationSeconds={firstSet?.defaultDurationSeconds ?? 0}
 						currentExercisesAmount={totalExercises}
-						currentReps={workoutPlanExerciseDefaultReps ?? 0}
-						currentSets={workoutPlanExerciseDefaultSets}
-						currentWeight={workoutPlanExerciseDefaultWeight}
+						currentReps={firstSet?.defaultReps ?? 0}
+						currentSets={totalSets}
+						currentWeight={firstSet?.defaultWeight ?? 0}
 						exerciseName={exerciseName}
 						isUpdate={true}
 						locale={i18n.locale}
