@@ -31,46 +31,13 @@ import {
 import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
+import { repsSchema, setsSchema, weightSchema } from "~/db/schema";
 import { EXERCISES_TYPES } from "~/lib/constants";
 import { Clock } from "~/lib/icons/Clock";
 import { Hash } from "~/lib/icons/Hash";
 import { Plus } from "~/lib/icons/Plus";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { minutesSecondsToTotalSeconds } from "~/utils/date";
-
-const repsSchema = z
-	.string()
-	.min(1, { message: "Reps is required" })
-	.refine((val) => !isNaN(Number(val)), {
-		message: "Reps must be a number",
-	})
-	.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
-	.refine((val) => Number.isInteger(Number(val)), {
-		message: "Reps must be a whole number",
-	});
-
-const weightSchema = z
-	.string()
-	.min(0, { message: "Weight is required" })
-	.refine((val) => !isNaN(Number(val)), {
-		message: "Weight must be a number",
-	})
-	.refine((val) => Number(val) >= 0, {
-		message: "Weight cannot be negative",
-	});
-
-const setsSchema = z
-	.string()
-	.min(1, { message: "Sets is required" })
-	.refine((val) => !isNaN(Number(val)), {
-		message: "Sets must be a number",
-	})
-	.refine((val) => Number(val) >= 1, {
-		message: "Sets must be at least 1",
-	})
-	.refine((val) => Number.isInteger(Number(val)), {
-		message: "Sets must be a whole number",
-	});
 
 export const WorkoutPlanExerciseForm = ({
 	setOpen,
@@ -79,10 +46,6 @@ export const WorkoutPlanExerciseForm = ({
 	currentExercisesAmount,
 	isUpdate = false,
 	workoutPlanExerciseId,
-	currentSets,
-	currentReps,
-	currentDurationSeconds,
-	currentWeight,
 	exerciseName,
 	exerciseId,
 	locale,
@@ -95,10 +58,6 @@ export const WorkoutPlanExerciseForm = ({
 	currentExercisesAmount: number;
 	isUpdate?: boolean;
 	workoutPlanExerciseId?: number;
-	currentSets?: number;
-	currentReps?: number;
-	currentDurationSeconds?: number;
-	currentWeight?: number;
 	exerciseName?: string;
 	exerciseId?: number;
 	locale: string;
@@ -126,25 +85,16 @@ export const WorkoutPlanExerciseForm = ({
 	// Initialize form values and state from existing data
 	const initializeFromExistingData = () => {
 		if (!existingExerciseData || existingExerciseData.length === 0) {
+			// Default values for new exercises
 			return {
-				valueType:
-					currentReps !== undefined && currentReps !== null
-						? "reps"
-						: currentDurationSeconds !== undefined &&
-								currentDurationSeconds !== null
-							? "time"
-							: "reps",
-				defaultSets: currentSets?.toString() ?? "",
-				defaultReps: currentReps?.toString() ?? "",
-				defaultDurationSeconds: currentDurationSeconds?.toString() ?? "",
-				defaultWeight: currentWeight?.toString() ?? "",
+				valueType: "reps", // Default to reps mode
+				defaultSets: "",
+				defaultReps: "",
+				defaultDurationSeconds: "",
+				defaultWeight: "",
 				initialDropSets: [],
-				initialDurationMinutes: currentDurationSeconds
-					? Math.floor(currentDurationSeconds / 60)
-					: 0,
-				initialDurationSeconds: currentDurationSeconds
-					? currentDurationSeconds % 60
-					: 30,
+				initialDurationMinutes: 0,
+				initialDurationSeconds: 30,
 			};
 		}
 
@@ -152,28 +102,34 @@ export const WorkoutPlanExerciseForm = ({
 		const isTimeBased =
 			firstSet?.defaultReps === null &&
 			firstSet?.defaultDurationSeconds !== null;
-		
+
 		// Helper function to check if sets have variable values
 		const hasVariableValues = (sets: schema.WorkoutPlanExerciseData[]) => {
 			if (sets.length <= 1) return false;
-			
+
 			const firstSet = sets[0];
-			return sets.some(set => {
+			return sets.some((set) => {
 				// For time-based exercises, check duration and weight
 				if (isTimeBased) {
-					return set.defaultDurationSeconds !== firstSet.defaultDurationSeconds ||
-						   set.defaultWeight !== firstSet.defaultWeight;
+					return (
+						set.defaultDurationSeconds !== firstSet.defaultDurationSeconds ||
+						set.defaultWeight !== firstSet.defaultWeight
+					);
 				}
 				// For reps-based exercises, check reps and weight
 				else {
-					return set.defaultReps !== firstSet.defaultReps ||
-						   set.defaultWeight !== firstSet.defaultWeight;
+					return (
+						set.defaultReps !== firstSet.defaultReps ||
+						set.defaultWeight !== firstSet.defaultWeight
+					);
 				}
 			});
 		};
 
 		// Only treat as drop sets if there are multiple sets AND values actually vary
-		const isDropSets = existingExerciseData.length > 1 && hasVariableValues(existingExerciseData);
+		const isDropSets =
+			existingExerciseData.length > 1 &&
+			hasVariableValues(existingExerciseData);
 
 		let initialDropSets: Array<{
 			setNumber: number;
@@ -618,7 +574,7 @@ export const WorkoutPlanExerciseForm = ({
 												: "bg-transparent"
 										}`}
 										onPress={() => {
-											if(form.getFieldValue("valueType") === "reps") return;
+											if (form.getFieldValue("valueType") === "reps") return;
 											field.handleChange("reps");
 											setDropSets([]); // Reset drop sets when switching
 											setDropSetsErrors(""); // Clear any drop sets errors
@@ -657,7 +613,7 @@ export const WorkoutPlanExerciseForm = ({
 												: "bg-transparent"
 										}`}
 										onPress={() => {
-											if(form.getFieldValue("valueType") === "time") return;
+											if (form.getFieldValue("valueType") === "time") return;
 											field.handleChange("time");
 											setDropSets([]); // Reset drop sets when switching
 											setDropSetsErrors(""); // Clear any drop sets errors

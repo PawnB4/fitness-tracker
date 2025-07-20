@@ -116,57 +116,41 @@ export const insertExerciseSchema = z.object({
 		.optional(),
 });
 
-// Workout exercises
-export const insertWorkoutExerciseSchema = z.object({
-	exerciseId: z.object({
-		value: z.string(),
-		label: z.string(),
-	}),
-	sets: z
-		.string()
-		.min(1, { message: "Sets is required" })
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Sets must be a number",
-		})
-		.refine((val) => Number(val) >= 1, { message: "Sets must be at least 1" })
-		.refine((val) => Number.isInteger(Number(val)), {
-			message: "Sets must be a whole number",
-		}),
-	reps: z
-		.string()
-		.min(1, { message: "Reps is required" })
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Reps must be a number",
-		})
-		.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
-		.refine((val) => Number.isInteger(Number(val)), {
-			message: "Reps must be a whole number",
-		})
-		.optional(),
-	durationSeconds: z
-		.string()
-		.min(1, { message: "Duration is required" })
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Duration must be a number",
-		})
-		.refine((val) => Number(val) >= 1, {
-			message: "Duration must be at least 1",
-		})
-		.refine((val) => Number.isInteger(Number(val)), {
-			message: "Duration must be a whole number",
-		})
-		.optional(),
-	weight: z
-		.string()
-		.min(0, { message: "Weight is required" })
-		.refine((val) => !isNaN(Number(val)), {
-			message: "Weight must be a number",
-		})
-		.refine((val) => Number(val) >= 0, {
-			message: "Weight cannot be negative",
-		}),
-	notes: z.string().optional(),
-});
+// Workout exercises (and plan exercises)
+
+export const repsSchema = z
+	.string()
+	.min(1, { message: "Reps is required" })
+	.refine((val) => !isNaN(Number(val)), {
+		message: "Reps must be a number",
+	})
+	.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
+	.refine((val) => Number.isInteger(Number(val)), {
+		message: "Reps must be a whole number",
+	});
+
+export const weightSchema = z
+	.string()
+	.min(0, { message: "Weight is required" })
+	.refine((val) => !isNaN(Number(val)), {
+		message: "Weight must be a number",
+	})
+	.refine((val) => Number(val) >= 0, {
+		message: "Weight cannot be negative",
+	});
+
+export const setsSchema = z
+	.string()
+	.min(1, { message: "Sets is required" })
+	.refine((val) => !isNaN(Number(val)), {
+		message: "Sets must be a number",
+	})
+	.refine((val) => Number(val) >= 1, {
+		message: "Sets must be at least 1",
+	})
+	.refine((val) => Number.isInteger(Number(val)), {
+		message: "Sets must be a whole number",
+	});
 
 // Workout plans
 export const insertWorkoutPlansSchema = z.object({
@@ -240,7 +224,6 @@ export type WorkoutExerciseData = {
 	durationSeconds: number | null;
 	weight: number;
 };
-export type NewWorkoutExercise = z.infer<typeof insertWorkoutExerciseSchema>;
 
 export type WorkoutPlan = {
 	id: number;
