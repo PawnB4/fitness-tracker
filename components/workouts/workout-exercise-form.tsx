@@ -245,13 +245,6 @@ export const WorkoutExerciseForm = ({
 					}
 				}
 
-				console.log(
-					"Workout Exercise Data:",
-					JSON.stringify(workoutExerciseData, null, 2),
-				);
-				console.log("Form can submit:", form.state.canSubmit);
-				console.log("Form errors:", form.state.errors);
-
 				if (isUpdate && workoutExerciseId) {
 					await db
 						.update(schema.workoutExercises)
@@ -440,14 +433,9 @@ export const WorkoutExerciseForm = ({
 		const hasDropSetsErrors = dropSetsError.length > 0;
 
 		if (hasMainRowErrors || hasDropSetsErrors) {
-			console.log("❌ Validation failed");
-			console.log("Main row errors:", mainRowValidationErrors);
-			console.log("Drop sets errors:", dropSetsError);
 			return; // Don't submit if there are errors
 		}
 
-		console.log("✅ All validation passed, submitting form");
-		console.log(form.state.errors);
 		form.handleSubmit();
 	};
 
