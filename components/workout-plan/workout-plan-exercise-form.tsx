@@ -617,7 +617,57 @@ export const WorkoutPlanExerciseForm = ({
 							<form.Field
 								name="defaultReps"
 								validators={{
-									onChange: repsSchema,
+									onChange: z.string().superRefine((val, ctx) => {
+										// Only validate if we're in reps mode
+										if (form.getFieldValue("valueType") === "reps") {
+											// Check if field is required
+											if (val.length < 1) {
+												ctx.addIssue({
+													code: z.ZodIssueCode.too_small,
+													minimum: 1,
+													type: "string",
+													message: "Reps is required",
+													inclusive: true,
+												});
+											}
+											// Check if it's a valid number (only if not empty)
+											if (val.length > 0 && isNaN(Number(val))) {
+												ctx.addIssue({
+													code: z.ZodIssueCode.invalid_type,
+													message: "Reps must be a number",
+													expected: "number",
+													received: typeof val,
+												});
+											}
+											// Check minimum value (only if it's a valid number)
+											if (
+												val.length > 0 &&
+												!isNaN(Number(val)) &&
+												Number(val) < 1
+											) {
+												ctx.addIssue({
+													code: z.ZodIssueCode.too_small,
+													minimum: 1,
+													type: "number",
+													message: "Reps must be at least 1",
+													inclusive: true,
+												});
+											}
+											// Check if it's a whole number (only if it's a valid number)
+											if (
+												val.length > 0 &&
+												!isNaN(Number(val)) &&
+												!Number.isInteger(Number(val))
+											) {
+												ctx.addIssue({
+													code: z.ZodIssueCode.invalid_type,
+													message: "Reps must be a whole number",
+													expected: "integer",
+													received: "float",
+												});
+											}
+										}
+									}),
 								}}
 							>
 								{(field) => (
