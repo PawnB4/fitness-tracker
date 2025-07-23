@@ -21,7 +21,11 @@ import { WorkoutPlanExerciseForm } from "~/components/workout-plan/workout-plan-
 import { WorkoutPlanForm } from "~/components/workout-plan/workout-plan-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import { DIALOG_CONTENT_MAP, EXERCISES_TYPES } from "~/lib/constants";
+import {
+	DIALOG_CONTENT_MAP,
+	EXERCISE_TYPES_COLOR_MAP,
+	EXERCISES_TYPES,
+} from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
@@ -339,7 +343,8 @@ export default function Page() {
 				<View className="mb-6">
 					<View className="mb-4 flex-row items-center justify-between">
 						<Text className="font-funnel-bold text-2xl">
-							{i18n.t("exercises")}
+							{i18n.t("exercises").charAt(0).toUpperCase() +
+								i18n.t("exercises").slice(1)}
 						</Text>
 					</View>
 
@@ -515,20 +520,7 @@ const WorkoutPlanExerciseListItem = ({
 									<View
 										className="w-2"
 										style={{
-											backgroundColor:
-												EXERCISES_TYPES[i18n.locale][exerciseType] ===
-												EXERCISES_TYPES[i18n.locale].upper_body
-													? "#16a34a"
-													: EXERCISES_TYPES[i18n.locale][exerciseType] ===
-															EXERCISES_TYPES[i18n.locale].lower_body
-														? "#8b5cf6"
-														: EXERCISES_TYPES[i18n.locale][exerciseType] ===
-																EXERCISES_TYPES[i18n.locale].cardio
-															? "#eab308"
-															: EXERCISES_TYPES[i18n.locale][exerciseType] ===
-																	EXERCISES_TYPES[i18n.locale].core
-																? "#ef4444"
-																: "#0284c7",
+											backgroundColor: EXERCISE_TYPES_COLOR_MAP[exerciseType],
 										}}
 									/>
 
@@ -538,7 +530,9 @@ const WorkoutPlanExerciseListItem = ({
 												{exerciseName}
 											</Text>
 											<Badge className="bg-muted" variant="outline">
-												<Text className="text-xs">{exerciseType}</Text>
+												<Text className="text-xs">
+													{EXERCISES_TYPES[i18n.locale][exerciseType]}
+												</Text>
 											</Badge>
 										</View>
 

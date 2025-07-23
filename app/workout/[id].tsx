@@ -3,10 +3,10 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import { I18n } from "i18n-js";
-import { Triangle } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
+	Animated,
 	Pressable,
 	ScrollView,
 	StyleSheet,
@@ -15,10 +15,18 @@ import {
 } from "react-native";
 import DraggableFlatList, {
 	type DragEndParams,
+	NestableDraggableFlatList,
+	NestableScrollContainer,
 	type RenderItemParams,
 	ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { ExerciseForm } from "~/components/exercises/exercise-form";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "~/components/ui/accordion";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -31,17 +39,24 @@ import {
 	AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
+import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
 import { Textarea } from "~/components/ui/textarea";
 import { WorkoutExerciseForm } from "~/components/workouts/workout-exercise-form";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import { DIALOG_CONTENT_MAP, EXERCISES_TYPES } from "~/lib/constants";
+import {
+	DIALOG_CONTENT_MAP,
+	EXERCISE_TYPES_COLOR_MAP,
+	EXERCISES_TYPES,
+} from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Clock } from "~/lib/icons/Clock";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
+import { Pencil } from "~/lib/icons/Pencil";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { formatDate, formatTime } from "~/utils/date";
 
@@ -279,8 +294,8 @@ export default function Page() {
 	const workout = workoutArray[0];
 
 	return (
-		// This was to be a scroll view
-		<View className="flex-1 bg-secondary/30">
+		// This used to be a scroll view
+		<NestableScrollContainer className="flex-1 bg-secondary/30">
 			{/* Header */}
 			<View className="rounded-b-3xl bg-primary p-6">
 				<Text className="mb-4 text-center text-4xl text-primary-foreground">
@@ -409,38 +424,40 @@ export default function Page() {
 							</Text>
 						</View>
 					) : (
-						<DraggableFlatList
-							className="w-full"
-							contentContainerStyle={{
-								gap: 4,
-							}}
-							data={workoutExercises.map((item, index) => ({
-								workoutExerciseId: item.workoutExerciseId,
-								exerciseId: item.exerciseId,
-								exerciseName: item.exerciseName,
-								exerciseType: item.exerciseType,
-								exercisePrimaryMuscleGroup: item.exercisePrimaryMuscleGroup,
-								workoutExerciseData: item.workoutExerciseData,
-								workoutExerciseSortOrder: item.workoutExerciseSortOrder,
-								totalExercises: workoutExercises.length,
-								onMoveUp: () => {}, // Not used with drag and drop
-								onMoveDown: () => {}, // Not used with drag and drop
-								onDelete: () =>
-									handleDeleteExercise(
-										item.workoutExerciseId,
-										item.workoutExerciseSortOrder,
-									),
-								isUpdating: isUpdating,
-								completed: item.workoutExerciseCompleted || false,
-								locale: i18n.locale,
-							}))}
-							keyExtractor={(item) => item.workoutExerciseId.toString()}
-							onDragBegin={() =>
-								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-							}
-							onDragEnd={onExerciseDropped}
-							renderItem={WorkoutExerciseListItem}
-						/>
+						<Accordion className="w-full" collapsible type="multiple">
+							<NestableDraggableFlatList
+								className="w-full"
+								contentContainerStyle={{
+									gap: 12,
+								}}
+								data={workoutExercises.map((item, index) => ({
+									workoutExerciseId: item.workoutExerciseId,
+									exerciseId: item.exerciseId,
+									exerciseName: item.exerciseName,
+									exerciseType: item.exerciseType,
+									exercisePrimaryMuscleGroup: item.exercisePrimaryMuscleGroup,
+									workoutExerciseData: item.workoutExerciseData,
+									workoutExerciseSortOrder: item.workoutExerciseSortOrder,
+									totalExercises: workoutExercises.length,
+									onMoveUp: () => {}, // Not used with drag and drop
+									onMoveDown: () => {}, // Not used with drag and drop
+									onDelete: () =>
+										handleDeleteExercise(
+											item.workoutExerciseId,
+											item.workoutExerciseSortOrder,
+										),
+									isUpdating: isUpdating,
+									completed: item.workoutExerciseCompleted || false,
+									locale: i18n.locale,
+								}))}
+								keyExtractor={(item) => item.workoutExerciseId.toString()}
+								onDragBegin={() =>
+									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+								}
+								onDragEnd={onExerciseDropped}
+								renderItem={WorkoutExerciseListItem}
+							/>
+						</Accordion>
 					)}
 				</View>
 			</View>
@@ -459,10 +476,10 @@ export default function Page() {
 				</View>
 			</View>
 
-			<View className="mt-2 mb-8 flex-row px-4">
-				<AlertDialog className="w-full">
+			<View className="w-full flex-1 flex-row px-4 py-8 pt-2">
+				<AlertDialog className=" w-full">
 					<AlertDialogTrigger asChild>
-						<Button className="ml-2 flex-1" variant="destructive">
+						<Button className="flex-1" variant="destructive">
 							<Text className="font-funnel-bold text-destructive-foreground">
 								{i18n.t("deleteWorkout")}
 							</Text>
@@ -489,7 +506,7 @@ export default function Page() {
 					</AlertDialogContent>
 				</AlertDialog>
 			</View>
-		</View>
+		</NestableScrollContainer>
 	);
 }
 
@@ -516,12 +533,45 @@ const WorkoutExerciseListItem = ({
 	isActive,
 }: RenderItemParams<WorkoutExerciseListItemProps>) => {
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
+	const [isExpanded, setIsExpanded] = useState(false);
+
+	// Animation for exercise name size
+	const fontSizeAnim = useRef(new Animated.Value(0)).current;
+
+	// Handle expansion animation
+	useEffect(() => {
+		if (isExpanded) {
+			// Only animate when expanding
+			Animated.timing(fontSizeAnim, {
+				toValue: 1,
+				duration: 175,
+				useNativeDriver: false,
+			}).start();
+		} else {
+			// Immediately set back to small size without animation
+			fontSizeAnim.setValue(0);
+		}
+	}, [isExpanded, fontSizeAnim]);
+
+	// Interpolate font size from 18px (text-lg) to 20px (text-xl)
+	const animatedFontSize = fontSizeAnim.interpolate({
+		inputRange: [0, 1],
+		outputRange: [18, 20],
+	});
 
 	// Calculate display values from the JSON data
 	const totalSets = item.workoutExerciseData.length;
 	const firstSet = item.workoutExerciseData[0];
 	const isTimeBased =
 		firstSet?.reps === null && firstSet?.durationSeconds !== null;
+
+	// Check if all sets are identical (for condensed view)
+	const allSetsIdentical = item.workoutExerciseData.every(
+		(set) =>
+			set.reps === firstSet?.reps &&
+			set.weight === firstSet?.weight &&
+			set.durationSeconds === firstSet?.durationSeconds,
+	);
 
 	// For display, show range if values vary, otherwise show single value
 	const weights = item.workoutExerciseData.map((set) => set.weight);
@@ -553,49 +603,211 @@ const WorkoutExerciseListItem = ({
 	}
 
 	return (
-		<ScaleDecorator>
-			<TouchableOpacity
-				activeOpacity={0.7}
-				className={`flex w-full flex-row items-center justify-between gap-3 ${isActive ? "opacity-70" : ""}`}
-				disabled={isActive}
-				onLongPress={drag}
-				onPress={() => setOpenUpdateForm(true)}
-			>
-				<Dialog
-					className="flex-1"
-					onOpenChange={setOpenUpdateForm}
-					open={openUpdateForm}
+		<AccordionItem
+			className="border-0"
+			value={item.workoutExerciseId.toString()}
+		>
+			<ScaleDecorator activeScale={1.02}>
+				<Card
+					className={`rounded-lg ${isActive ? "scale-105 opacity-70" : ""}`}
 				>
-					<View
-						className={`flex-row items-center justify-between p-4 ${item.workoutExerciseSortOrder < item.totalExercises ? "border-border border-b" : ""}`}
-						key={item.workoutExerciseId}
+					{/* Main exercise row */}
+					<AccordionTrigger
+						className="flex-row items-center gap-4 px-4 py-3"
+						disabled={isActive}
+						onLongPress={() => {
+							if (isExpanded) return;
+							drag();
+						}}
+						onPress={() => setIsExpanded(!isExpanded)}
 					>
-						<View className="flex-1 flex-row items-center">
-							<View
-								className={`mr-3 h-8 w-8 items-center justify-center rounded-full ${item.completed ? "bg-green-100" : "bg-gray-100"}`}
+						{/* Sort order badge on the left */}
+						<View className="h-8 w-8 items-center justify-center rounded-full bg-primary">
+							<Text className="font-funnel-bold text-primary-foreground text-sm">
+								{item.workoutExerciseSortOrder}
+							</Text>
+						</View>
+
+						{/* Exercise info - takes up most space */}
+						<View className="flex-1">
+							<Animated.Text
+								className={`font-semibold text-foreground`}
+								style={{ fontSize: animatedFontSize }}
 							>
-								<TouchableOpacity
-									className="p-4"
-									onPress={() =>
-										completeWorkoutExercise(item.workoutExerciseId)
-									}
-								>
-									<Dumbbell
-										color={item.completed ? "#22c55e" : "#9ca3af"}
-										size={16}
-									/>
-								</TouchableOpacity>
+								{item.exerciseName}
+							</Animated.Text>
+							{!isExpanded && (
+								<>
+									<Text className="text-muted-foreground text-sm">
+										{totalSets} {i18n.t("sets")} • {valueDisplay}
+										{weightDisplay !== "0 kg" ? ` • ${weightDisplay}` : ""}
+									</Text>
+									<Text className="text-muted-foreground text-xs capitalize">
+										{item.exerciseType} •{" "}
+										{item.exercisePrimaryMuscleGroup || "General"}
+									</Text>
+								</>
+							)}
+						</View>
+
+						{/* Complete button on the right */}
+						<TouchableOpacity
+							className={`h-10 w-10 items-center justify-center rounded-full ${
+								item.completed
+									? "border-2 border-green-200 bg-green-100"
+									: "border-2 border-gray-200 bg-gray-100"
+							}`}
+							onPress={() => completeWorkoutExercise(item.workoutExerciseId)}
+						>
+							<Dumbbell
+								color={item.completed ? "#22c55e" : "#9ca3af"}
+								size={18}
+							/>
+						</TouchableOpacity>
+					</AccordionTrigger>
+
+					{/* Accordion content with detailed set information */}
+					<AccordionContent className="bg-slate-50/50 dark:bg-slate-900/20">
+						<View className="gap-4 p-4 pt-3">
+							{/* Sets display */}
+							<View className="gap-3">
+								<View>
+									{/* Table header */}
+									<View
+										className="flex-row rounded-t-lg p-3"
+										style={{
+											backgroundColor:
+												item.exerciseType === "upper_body"
+													? "#16a34a10"
+													: item.exerciseType === "lower_body"
+														? "#8b5cf610"
+														: item.exerciseType === "cardio"
+															? "#eab30810"
+															: item.exerciseType === "core"
+																? "#ef444410"
+																: "#0284c710",
+										}}
+									>
+										<Text
+											className="flex-1 text-center font-medium text-xs uppercase tracking-wide"
+											style={{
+												color: EXERCISE_TYPES_COLOR_MAP[item.exerciseType],
+											}}
+										>
+											Set{allSetsIdentical && "s"}
+										</Text>
+										<Text
+											className="flex-1 text-center font-medium text-xs uppercase tracking-wide"
+											style={{
+												color: EXERCISE_TYPES_COLOR_MAP[item.exerciseType],
+											}}
+										>
+											{isTimeBased ? "Duration" : "Reps"}
+										</Text>
+										<Text
+											className="flex-1 text-center font-medium text-xs uppercase tracking-wide"
+											style={{
+												color: EXERCISE_TYPES_COLOR_MAP[item.exerciseType],
+											}}
+										>
+											Weight
+										</Text>
+									</View>
+
+									{allSetsIdentical ? (
+										<View className="flex-row border-gray-200 border-x border-b bg-white p-3 dark:border-gray-700 dark:bg-gray-80">
+											<Text className="flex-1 text-center font-medium text-sm">
+												{item.workoutExerciseData.length}
+											</Text>
+											<Text className="flex-1 text-center text-sm">
+												{isTimeBased
+													? `${item.workoutExerciseData[0].durationSeconds}s`
+													: `${item.workoutExerciseData[0].reps} reps`}
+											</Text>
+											<Text className="flex-1 text-center text-sm">
+												{item.workoutExerciseData[0].weight} kg
+											</Text>
+										</View>
+									) : (
+										<>
+											{/* Table rows */}
+											{item.workoutExerciseData.map((set, index) => (
+												<View
+													className={`flex-row border-gray-200 border-x border-b bg-white p-3 dark:border-gray-700 dark:bg-gray-800 ${
+														index === item.workoutExerciseData.length - 1
+															? "rounded-b-lg"
+															: ""
+													}`}
+													key={`${item.workoutExerciseId}-${index}`}
+												>
+													<Text className="flex-1 text-center font-medium text-sm">
+														{index + 1}
+													</Text>
+													<Text className="flex-1 text-center text-sm">
+														{isTimeBased
+															? `${set.durationSeconds}s`
+															: `${set.reps} reps`}
+													</Text>
+													<Text className="flex-1 text-center text-sm">
+														{set.weight} kg
+													</Text>
+												</View>
+											))}
+										</>
+									)}
+								</View>
 							</View>
-							<View className="flex-1">
-								<Text className="text-lg">{item.exerciseName}</Text>
-								<Text className="text-muted-foreground text-sm">
-									{totalSets} {i18n.t("sets")} • {valueDisplay}
-									{weightDisplay !== "0 kg" ? ` • ${weightDisplay}` : ""}
-								</Text>
+
+							{/* Exercise details section here */}
+							<View className="flex gap-2">
+								<View className="flex-row items-center gap-2">
+									<Text className="font-funnel-bold text-lg tracking-wide">
+										Exercise type:
+									</Text>
+									<Text className="text-lg">{item.exerciseType}</Text>
+								</View>
+								<View className="flex-row items-center gap-2">
+									<Text className="font-funnel-bold text-lg tracking-wide">
+										Primary muscle:
+									</Text>
+									<Text className="text-lg">
+										{item.exercisePrimaryMuscleGroup || "General"}
+									</Text>
+								</View>
+							</View>
+							<Separator className="my-2" />
+
+							{/* Exercise actions section */}
+							<View className="flex-row gap-3">
+								<Button
+									className="flex-1 flex-row items-center justify-center gap-2"
+									disabled={item.isUpdating}
+									onPress={() => setOpenUpdateForm(true)}
+									variant="outline"
+								>
+									<Pencil className="text-primary" size={16} />
+									<Text className="font-medium text-primary text-sm">
+										Edit Exercise
+									</Text>
+								</Button>
+								<Button
+									className="flex-1 flex-row items-center justify-center gap-2"
+									disabled={item.isUpdating}
+									onPress={item.onDelete}
+									variant="destructive"
+								>
+									<Trash2 className="text-primary-foreground" size={16} />
+									<Text className="font-medium text-primary-foreground text-sm">
+										Delete
+									</Text>
+								</Button>
 							</View>
 						</View>
-						<ChevronRight color="#9ca3af" size={18} />
-					</View>
+					</AccordionContent>
+				</Card>
+
+				{/* Update form dialog */}
+				<Dialog onOpenChange={setOpenUpdateForm} open={openUpdateForm}>
 					<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center px-2">
 						<WorkoutExerciseForm
 							currentExercisesAmount={item.totalExercises}
@@ -609,20 +821,7 @@ const WorkoutExerciseListItem = ({
 						/>
 					</DialogContent>
 				</Dialog>
-
-				<View className="flex flex-row items-center justify-center gap-2">
-					<Text>#{item.workoutExerciseSortOrder}</Text>
-				</View>
-				<View className="flex items-center justify-center gap-2">
-					<TouchableOpacity
-						className="rounded-full bg-red-100 p-1.5"
-						disabled={item.isUpdating}
-						onPress={item.onDelete}
-					>
-						<Trash2 className="text-destructive" size={22} />
-					</TouchableOpacity>
-				</View>
-			</TouchableOpacity>
-		</ScaleDecorator>
+			</ScaleDecorator>
+		</AccordionItem>
 	);
 };

@@ -56,6 +56,13 @@ export const CHART_THEME = {
 	},
 };
 
+export const EXERCISE_TYPES_COLOR_MAP: Record<string, string> = {
+	upper_body: "#16a34a",
+	lower_body: "#8b5cf6",
+	core: "#ef4444",
+	cardio: "#0284c7",
+};
+
 export const EXERCISES_TYPES: Record<string, Record<string, string>> = {
 	en: {
 		upper_body: "Upper Body",
