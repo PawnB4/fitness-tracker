@@ -183,7 +183,6 @@ export const insertUserSchema = z.object({
 		.refine((val) => Number.isInteger(Number(val)), {
 			message: "Weekly target must be a whole number",
 		}),
-	locale: z.string(),
 });
 
 // Types

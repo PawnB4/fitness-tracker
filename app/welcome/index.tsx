@@ -138,11 +138,7 @@ export default function Page() {
 
 				<Button
 					className="h-14 w-full shadow-foreground/10 shadow-lg"
-					onPress={() => {
-						console.log(form.state.fieldMeta.name.errors);
-						console.log(form.state.fieldMeta.weeklyTarget.errors);
-						form.handleSubmit();
-					}}
+					onPress={form.handleSubmit}
 				>
 					<Text className="font-funnel-semibold text-lg">
 						{i18n.t("beginButton")}
