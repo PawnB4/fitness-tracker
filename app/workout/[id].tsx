@@ -51,6 +51,7 @@ import {
 	DIALOG_CONTENT_MAP,
 	EXERCISE_TYPES_COLOR_MAP,
 	EXERCISES_TYPES,
+	MUSCLE_GROUPS,
 } from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
@@ -58,14 +59,20 @@ import { Clock } from "~/lib/icons/Clock";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { Pencil } from "~/lib/icons/Pencil";
 import { Trash2 } from "~/lib/icons/Trash2";
-import { formatDate, formatTime } from "~/utils/date";
+import {
+	formatDate,
+	formatDurationFromSeconds,
+	formatTime,
+	minutesSecondsToTotalSeconds,
+} from "~/utils/date";
 
 const i18n = new I18n({
 	en: {
-		exercises: "exercises",
 		exercise: "exercise",
-		sets: "sets",
-		reps: "reps",
+		set: "set",
+		rep: "rep",
+		duration: "time",
+		weight: "weight",
 		addExercise: "Add exercise",
 		workoutDetails: "Workout Details",
 		notes: "Notes",
@@ -82,12 +89,17 @@ const i18n = new I18n({
 			"No notes for this workout. Tap to add notes about how you felt, what went well, or improvements for next time",
 		noDate: "No date",
 		noTime: "No time",
+		exerciseType: "Exercise type",
+		primaryMuscle: "Primary muscle",
+		editExercise: "Edit",
+		deleteExercise: "Delete",
 	},
 	es: {
-		exercises: "ejercicios",
 		exercise: "ejercicio",
-		sets: "series",
-		reps: "repeticiones",
+		set: "serie",
+		rep: "rep",
+		duration: "tiempo",
+		weight: "peso",
 		addExercise: "Agregar ejercicio",
 		workoutDetails: "Detalles del entrenamiento",
 		notes: "Notas",
@@ -104,6 +116,10 @@ const i18n = new I18n({
 			"Sin notas para este entrenamiento. Tocá para agregar notas sobre cómo te sentiste, qué salió bien, o mejoras para la próxima vez",
 		noDate: "Sin fecha",
 		noTime: "Sin hora",
+		exerciseType: "Tipo de ejercicio",
+		primaryMuscle: "Músculo principal",
+		editExercise: "Editar",
+		deleteExercise: "Eliminar",
 	},
 });
 
@@ -133,11 +149,17 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 	}
 };
 
-const completeWorkoutExercise = async (id: number) => {
+const toggleCompleted = async (id: number) => {
+	const result = await db
+		.select()
+		.from(schema.workoutExercises)
+		.where(eq(schema.workoutExercises.id, id));
+	const completed = result?.[0]?.completed ?? false;
+
 	try {
 		await db
 			.update(schema.workoutExercises)
-			.set({ completed: true })
+			.set({ completed: !completed })
 			.where(eq(schema.workoutExercises.id, id));
 	} catch (error) {
 		alert("Error completing exercise");
@@ -294,7 +316,6 @@ export default function Page() {
 	const workout = workoutArray[0];
 
 	return (
-		// This used to be a scroll view
 		<NestableScrollContainer className="flex-1 bg-secondary/30">
 			{/* Header */}
 			<View className="rounded-b-3xl bg-primary p-6">
@@ -322,43 +343,56 @@ export default function Page() {
 			</View>
 
 			{/* Stats Summary */}
-			<View className="mx-4 my-4 flex-row justify-between rounded-xl bg-card px-4 py-5 shadow-sm">
-				<View className="flex items-center justify-center">
-					<Text className="font-funnel-bold text-lg">
-						{workoutExercises?.length}
-					</Text>
-					<Text className="text-muted-foreground text-sm">
-						{i18n.t("exercises")}
-					</Text>
-				</View>
-				<View className="flex items-center justify-center">
-					<Text className="font-funnel-bold text-lg">
-						{workoutExercises?.reduce(
-							(acc, ex) => acc + (ex.workoutExerciseData?.length || 0),
-							0,
-						)}
-					</Text>
-					<Text className="text-muted-foreground text-sm">
-						{i18n.t("sets")}
-					</Text>
-				</View>
-				<View className="flex items-center justify-center">
-					<Text className="font-funnel-bold text-lg">
-						{workoutExercises?.length > 0
-							? Math.round(
-									(workoutExercises?.reduce(
-										(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
-										0,
-									) /
-										workoutExercises?.length) *
-										100,
-								)
-							: 0}
-						%
-					</Text>
-					<Text className="text-muted-foreground text-sm">
-						{i18n.t("completed")}
-					</Text>
+			<View className="px-4 pt-4">
+				<View className="flex-row gap-3 rounded-xl p-4">
+					<Card className="flex-1 items-center gap-1 rounded-lg bg-sky-50 p-3 shadow-none dark:bg-sky-900/20">
+						<Text className="font-funnel-bold text-sky-700 text-xl dark:text-sky-300">
+							{workoutExercises?.length}
+						</Text>
+						<Text className="text-center font-medium text-sky-600 text-xs uppercase tracking-wide dark:text-sky-400">
+							{i18n.t("exercise").charAt(0).toUpperCase() +
+								i18n.t("exercise").slice(1) +
+								(workoutExercises?.length === 1 ? "" : "s")}
+						</Text>
+					</Card>
+
+					<Card className="flex-1 items-center gap-1 rounded-lg bg-sky-50 p-3 shadow-none dark:bg-sky-900/20">
+						<Text className="font-funnel-bold text-sky-700 text-xl dark:text-sky-300">
+							{workoutExercises?.reduce(
+								(acc, ex) => acc + (ex.workoutExerciseData?.length || 0),
+								0,
+							)}
+						</Text>
+						<Text className="text-center font-medium text-sky-600 text-xs uppercase tracking-wide dark:text-sky-400">
+							{i18n.t("set").charAt(0).toUpperCase() +
+								i18n.t("set").slice(1) +
+								(workoutExercises?.reduce(
+									(acc, ex) => acc + (ex.workoutExerciseData?.length || 0),
+									0,
+								) === 1
+									? ""
+									: "s")}
+						</Text>
+					</Card>
+
+					<Card className="flex-1 items-center gap-1 rounded-lg bg-sky-50 p-3 shadow-none dark:bg-sky-900/20">
+						<Text className="font-funnel-bold text-sky-700 text-xl dark:text-sky-300">
+							{workoutExercises?.length > 0
+								? Math.round(
+										(workoutExercises?.reduce(
+											(acc, ex) => acc + (ex.workoutExerciseCompleted ? 1 : 0),
+											0,
+										) /
+											workoutExercises?.length) *
+											100,
+									)
+								: 0}
+							%
+						</Text>
+						<Text className="text-center font-medium text-sky-600 text-xs uppercase tracking-wide dark:text-sky-400">
+							{i18n.t("completed")}
+						</Text>
+					</Card>
 				</View>
 			</View>
 
@@ -366,7 +400,11 @@ export default function Page() {
 				{/* Exercises Section */}
 				<View className="mb-6">
 					<View className="mb-4 flex-row items-center justify-between">
-						<Text className="font-funnel-bold text-2xl">Exercises</Text>
+						<Text className="font-funnel-bold text-2xl">
+							{i18n.t("exercise").charAt(0).toUpperCase() +
+								i18n.t("exercise").slice(1)}
+							s
+						</Text>
 						<Button
 							className="ml-auto flex-row items-center justify-center gap-2"
 							onPress={openWorkoutExerciseForm}
@@ -439,8 +477,6 @@ export default function Page() {
 									workoutExerciseData: item.workoutExerciseData,
 									workoutExerciseSortOrder: item.workoutExerciseSortOrder,
 									totalExercises: workoutExercises.length,
-									onMoveUp: () => {}, // Not used with drag and drop
-									onMoveDown: () => {}, // Not used with drag and drop
 									onDelete: () =>
 										handleDeleteExercise(
 											item.workoutExerciseId,
@@ -479,7 +515,7 @@ export default function Page() {
 			<View className="w-full flex-1 flex-row px-4 py-8 pt-2">
 				<AlertDialog className=" w-full">
 					<AlertDialogTrigger asChild>
-						<Button className="flex-1" variant="destructive">
+						<Button className="flex-1" size="lg" variant="destructive">
 							<Text className="font-funnel-bold text-destructive-foreground">
 								{i18n.t("deleteWorkout")}
 							</Text>
@@ -519,8 +555,6 @@ type WorkoutExerciseListItemProps = {
 	workoutExerciseData: schema.WorkoutExerciseData[];
 	workoutExerciseSortOrder: number;
 	totalExercises: number;
-	onMoveUp: () => void;
-	onMoveDown: () => void;
 	onDelete: () => void;
 	isUpdating: boolean;
 	completed: boolean;
@@ -598,8 +632,8 @@ const WorkoutExerciseListItem = ({
 		const uniqueReps = [...new Set(reps)];
 		valueDisplay =
 			uniqueReps.length === 1
-				? `${uniqueReps[0]} ${i18n.t("reps")}`
-				: `${Math.min(...reps)}-${Math.max(...reps)} ${i18n.t("reps")}`;
+				? `${uniqueReps[0]} ${i18n.t("rep").charAt(0).toUpperCase() + i18n.t("rep").slice(1) + (uniqueReps.length === 1 ? "" : "s")}`
+				: `${Math.min(...reps)}-${Math.max(...reps)} ${i18n.t("rep").charAt(0).toUpperCase() + i18n.t("rep").slice(1) + (uniqueReps.length === 1 ? "" : "s")}`;
 	}
 
 	return (
@@ -638,13 +672,24 @@ const WorkoutExerciseListItem = ({
 							</Animated.Text>
 							{!isExpanded && (
 								<>
-									<Text className="text-muted-foreground text-sm">
-										{totalSets} {i18n.t("sets")} • {valueDisplay}
+									<Text
+										className="text-muted-foreground"
+										ellipsizeMode="tail"
+										numberOfLines={1}
+									>
+										{totalSets}{" "}
+										{i18n.t("set").charAt(0).toUpperCase() +
+											i18n.t("set").slice(1) +
+											(totalSets === 1 ? "" : "s")}{" "}
+										• {valueDisplay}
 										{weightDisplay !== "0 kg" ? ` • ${weightDisplay}` : ""}
 									</Text>
 									<Text className="text-muted-foreground text-xs capitalize">
-										{item.exerciseType} •{" "}
-										{item.exercisePrimaryMuscleGroup || "General"}
+										{EXERCISES_TYPES[item.locale][item.exerciseType]}
+										{" - "}
+										{MUSCLE_GROUPS[item.locale][
+											item.exercisePrimaryMuscleGroup ?? ""
+										] ?? "General"}
 									</Text>
 								</>
 							)}
@@ -657,7 +702,7 @@ const WorkoutExerciseListItem = ({
 									? "border-2 border-green-200 bg-green-100"
 									: "border-2 border-gray-200 bg-gray-100"
 							}`}
-							onPress={() => completeWorkoutExercise(item.workoutExerciseId)}
+							onPress={() => toggleCompleted(item.workoutExerciseId)}
 						>
 							<Dumbbell
 								color={item.completed ? "#22c55e" : "#9ca3af"}
@@ -694,7 +739,8 @@ const WorkoutExerciseListItem = ({
 												color: EXERCISE_TYPES_COLOR_MAP[item.exerciseType],
 											}}
 										>
-											Set{allSetsIdentical && "s"}
+											{i18n.t("set")}
+											{allSetsIdentical && "s"}
 										</Text>
 										<Text
 											className="flex-1 text-center font-medium text-xs uppercase tracking-wide"
@@ -702,7 +748,7 @@ const WorkoutExerciseListItem = ({
 												color: EXERCISE_TYPES_COLOR_MAP[item.exerciseType],
 											}}
 										>
-											{isTimeBased ? "Duration" : "Reps"}
+											{isTimeBased ? i18n.t("duration") : `${i18n.t("rep")}s`}
 										</Text>
 										<Text
 											className="flex-1 text-center font-medium text-xs uppercase tracking-wide"
@@ -710,19 +756,19 @@ const WorkoutExerciseListItem = ({
 												color: EXERCISE_TYPES_COLOR_MAP[item.exerciseType],
 											}}
 										>
-											Weight
+											{i18n.t("weight")}
 										</Text>
 									</View>
 
 									{allSetsIdentical ? (
-										<View className="flex-row border-gray-200 border-x border-b bg-white p-3 dark:border-gray-700 dark:bg-gray-80">
+										<View className="flex-row rounded-b-lg border-gray-200 border-x border-b bg-white p-3 dark:border-gray-700 dark:bg-gray-80">
 											<Text className="flex-1 text-center font-medium text-sm">
 												{item.workoutExerciseData.length}
 											</Text>
 											<Text className="flex-1 text-center text-sm">
 												{isTimeBased
-													? `${item.workoutExerciseData[0].durationSeconds}s`
-													: `${item.workoutExerciseData[0].reps} reps`}
+													? `${formatDurationFromSeconds(item.workoutExerciseData[0].durationSeconds ?? 0)}`
+													: `${item.workoutExerciseData[0].reps}`}
 											</Text>
 											<Text className="flex-1 text-center text-sm">
 												{item.workoutExerciseData[0].weight} kg
@@ -733,11 +779,13 @@ const WorkoutExerciseListItem = ({
 											{/* Table rows */}
 											{item.workoutExerciseData.map((set, index) => (
 												<View
-													className={`flex-row border-gray-200 border-x border-b bg-white p-3 dark:border-gray-700 dark:bg-gray-800 ${
+													className={`flex-row border-gray-200 border-x bg-white p-3 dark:border-gray-700 dark:bg-gray-800 ${
 														index === item.workoutExerciseData.length - 1
-															? "rounded-b-lg"
+															? "rounded-b-lg border-b"
 															: ""
-													}`}
+													}
+													${index > 0 ? "border-t" : ""}		
+													`}
 													key={`${item.workoutExerciseId}-${index}`}
 												>
 													<Text className="flex-1 text-center font-medium text-sm">
@@ -745,8 +793,8 @@ const WorkoutExerciseListItem = ({
 													</Text>
 													<Text className="flex-1 text-center text-sm">
 														{isTimeBased
-															? `${set.durationSeconds}s`
-															: `${set.reps} reps`}
+															? `${formatDurationFromSeconds(set.durationSeconds ?? 0)}`
+															: `${set.reps}`}
 													</Text>
 													<Text className="flex-1 text-center text-sm">
 														{set.weight} kg
@@ -762,16 +810,20 @@ const WorkoutExerciseListItem = ({
 							<View className="flex gap-2">
 								<View className="flex-row items-center gap-2">
 									<Text className="font-funnel-bold text-lg tracking-wide">
-										Exercise type:
+										{i18n.t("exerciseType")}:
 									</Text>
-									<Text className="text-lg">{item.exerciseType}</Text>
+									<Text className="text-lg">
+										{EXERCISES_TYPES[item.locale][item.exerciseType]}
+									</Text>
 								</View>
 								<View className="flex-row items-center gap-2">
 									<Text className="font-funnel-bold text-lg tracking-wide">
-										Primary muscle:
+										{i18n.t("primaryMuscle")}:
 									</Text>
 									<Text className="text-lg">
-										{item.exercisePrimaryMuscleGroup || "General"}
+										{MUSCLE_GROUPS[item.locale][
+											item.exercisePrimaryMuscleGroup ?? ""
+										] ?? "General"}
 									</Text>
 								</View>
 							</View>
@@ -787,7 +839,7 @@ const WorkoutExerciseListItem = ({
 								>
 									<Pencil className="text-primary" size={16} />
 									<Text className="font-medium text-primary text-sm">
-										Edit Exercise
+										{i18n.t("editExercise")}
 									</Text>
 								</Button>
 								<Button
@@ -798,7 +850,7 @@ const WorkoutExerciseListItem = ({
 								>
 									<Trash2 className="text-primary-foreground" size={16} />
 									<Text className="font-medium text-primary-foreground text-sm">
-										Delete
+										{i18n.t("deleteExercise")}
 									</Text>
 								</Button>
 							</View>

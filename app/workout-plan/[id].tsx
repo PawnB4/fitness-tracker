@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
 import { I18n } from "i18n-js";
 import { useState } from "react";
@@ -10,6 +11,13 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
+import {
+	type DragEndParams,
+	NestableDraggableFlatList,
+	NestableScrollContainer,
+	type RenderItemParams,
+	ScaleDecorator,
+} from "react-native-draggable-flatlist";
 import { ExerciseForm } from "~/components/exercises/exercise-form";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -25,6 +33,7 @@ import {
 	DIALOG_CONTENT_MAP,
 	EXERCISE_TYPES_COLOR_MAP,
 	EXERCISES_TYPES,
+	MUSCLE_GROUPS,
 } from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
@@ -57,7 +66,6 @@ const i18n = new I18n({
 	},
 });
 
-// Function to update exercise order in database - this is the direct implementation
 const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
 	try {
 		await db
@@ -73,47 +81,6 @@ const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
 	}
 };
 
-// Function to swap the order of two exercises
-const swapExerciseOrder = async (
-	exercise1Id: number,
-	exercise1Order: number,
-	exercise2Id: number,
-	exercise2Order: number,
-) => {
-	try {
-		// Use a transaction to ensure both updates succeed or both fail
-		await db.transaction(async (tx) => {
-			// First update exercise1 to a temporary order (to avoid unique constraint issues)
-			await tx
-				.update(schema.workoutPlanExercises)
-				.set({
-					sortOrder: -1,
-				})
-				.where(eq(schema.workoutPlanExercises.id, exercise1Id));
-
-			// Update exercise2 to exercise1's old order
-			await tx
-				.update(schema.workoutPlanExercises)
-				.set({
-					sortOrder: exercise1Order,
-				})
-				.where(eq(schema.workoutPlanExercises.id, exercise2Id));
-
-			// Finally update exercise1 to exercise2's old order
-			await tx
-				.update(schema.workoutPlanExercises)
-				.set({
-					sortOrder: exercise2Order,
-				})
-				.where(eq(schema.workoutPlanExercises.id, exercise1Id));
-		});
-
-		return true;
-	} catch (error) {
-		alert(`Error updating exercise order: ${error}`);
-		return false;
-	}
-};
 
 const deleteWorkoutPlanExercise = async (id: number) => {
 	try {
@@ -186,45 +153,20 @@ export default function Page() {
 			.orderBy(schema.workoutPlanExercises.sortOrder),
 	);
 
-	// Function to move an exercise up
-	const moveExerciseUp = async (index: number) => {
-		if (!planExercises || index <= 0 || isUpdating) return;
+	// Drag and drop
+	const onExerciseDropped = async (
+		params: DragEndParams<WorkoutPlanExerciseListItemProps>,
+	) => {
+		if (isUpdating) return;
 
 		setIsUpdating(true);
 
-		const currentExercise = planExercises[index];
-		const prevExercise = planExercises[index - 1];
-
 		try {
-			await swapExerciseOrder(
-				currentExercise.workoutPlanExerciseId,
-				currentExercise.workoutPlanExerciseSortOrder,
-				prevExercise.workoutPlanExerciseId,
-				prevExercise.workoutPlanExerciseSortOrder,
-			);
-		} catch (error) {
-			alert(`Error updating exercise order: ${error}`);
-		} finally {
-			setIsUpdating(false);
-		}
-	};
-
-	// Function to move an exercise down
-	const moveExerciseDown = async (index: number) => {
-		if (!planExercises || index >= planExercises.length - 1 || isUpdating)
-			return;
-
-		setIsUpdating(true);
-
-		const currentExercise = planExercises[index];
-		const nextExercise = planExercises[index + 1];
-
-		try {
-			await swapExerciseOrder(
-				currentExercise.workoutPlanExerciseId,
-				currentExercise.workoutPlanExerciseSortOrder,
-				nextExercise.workoutPlanExerciseId,
-				nextExercise.workoutPlanExerciseSortOrder,
+			// Update each exercise's sort order in the database
+			await Promise.all(
+				params.data.map((item, index) =>
+					updateExerciseOrder(item.workoutPlanExerciseId, index + 1),
+				),
 			);
 		} catch (error) {
 			alert(`Error updating exercise order: ${error}`);
@@ -284,7 +226,7 @@ export default function Page() {
 	const plan = workoutPlan[0];
 
 	return (
-		<ScrollView className="flex-1 bg-secondary/30">
+		<NestableScrollContainer className="flex-1 bg-secondary/30">
 			{/* Header Section */}
 			<View className="flex flex-col gap-2 rounded-b-3xl bg-primary p-6 shadow-md">
 				<View className="flex-row items-center">
@@ -362,30 +304,34 @@ export default function Page() {
 								</Text>
 							</View>
 						) : (
-							planExercises.map((item, index) => (
-								<WorkoutPlanExerciseListItem
-									exerciseId={item.exerciseId}
-									exerciseName={item.exerciseName}
-									exercisePrimaryMuscleGroup={item.exercisePrimaryMuscleGroup}
-									exerciseType={item.exerciseType}
-									isUpdating={isUpdating}
-									key={item.workoutPlanExerciseId}
-									onDelete={() =>
+							<NestableDraggableFlatList
+								className="w-full"
+								contentContainerStyle={{
+									gap: 12,
+								}}
+								data={planExercises.map((item) => ({
+									workoutPlanExerciseId: item.workoutPlanExerciseId,
+									exerciseId: item.exerciseId,
+									exerciseName: item.exerciseName,
+									exerciseType: item.exerciseType,
+									exercisePrimaryMuscleGroup: item.exercisePrimaryMuscleGroup,
+									workoutPlanExerciseData: item.workoutPlanExerciseData,
+									workoutPlanExerciseSortOrder: item.workoutPlanExerciseSortOrder,
+									totalExercises: planExercises.length,
+									onDelete: () =>
 										handleDeleteExercise(
 											item.workoutPlanExerciseId,
 											item.workoutPlanExerciseSortOrder,
-										)
-									}
-									onMoveDown={() => moveExerciseDown(index)}
-									onMoveUp={() => moveExerciseUp(index)}
-									totalExercises={planExercises.length}
-									workoutPlanExerciseData={item.workoutPlanExerciseData}
-									workoutPlanExerciseId={item.workoutPlanExerciseId}
-									workoutPlanExerciseSortOrder={
-										item.workoutPlanExerciseSortOrder
-									}
-								/>
-							))
+										),
+									isUpdating: isUpdating,
+								}))}
+								keyExtractor={(item) => item.workoutPlanExerciseId.toString()}
+								onDragBegin={() =>
+									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+								}
+								onDragEnd={onExerciseDropped}
+								renderItem={WorkoutPlanExerciseListItemRender}
+							/>
 						)}
 						<Button
 							className="flex-row items-center justify-center gap-2 bg-sky-500/70"
@@ -434,7 +380,7 @@ export default function Page() {
 					</View>
 				</View>
 			</View>
-		</ScrollView>
+		</NestableScrollContainer>
 	);
 }
 
@@ -447,11 +393,25 @@ type WorkoutPlanExerciseListItemProps = {
 	workoutPlanExerciseData: schema.WorkoutPlanExerciseData[];
 	workoutPlanExerciseSortOrder: number;
 	totalExercises: number;
-	onMoveUp: () => void;
-	onMoveDown: () => void;
 	onDelete: () => void;
 	isUpdating: boolean;
 	exerciseId: number;
+};
+
+const WorkoutPlanExerciseListItemRender = ({
+	item,
+	drag,
+	isActive,
+}: RenderItemParams<WorkoutPlanExerciseListItemProps>) => {
+	return (
+		<ScaleDecorator activeScale={1.02}>
+			<WorkoutPlanExerciseListItem
+				{...item}
+				drag={drag}
+				isActive={isActive}
+			/>
+		</ScaleDecorator>
+	);
 };
 
 const WorkoutPlanExerciseListItem = ({
@@ -462,12 +422,15 @@ const WorkoutPlanExerciseListItem = ({
 	workoutPlanExerciseData,
 	workoutPlanExerciseSortOrder,
 	totalExercises,
-	onMoveUp,
-	onMoveDown,
 	onDelete,
 	isUpdating,
 	exerciseId,
-}: WorkoutPlanExerciseListItemProps) => {
+	drag,
+	isActive,
+}: WorkoutPlanExerciseListItemProps & {
+	drag?: () => void;
+	isActive?: boolean;
+}) => {
 	const [openUpdateForm, setOpenUpdateForm] = useState(false);
 
 	// Calculate display values from the JSON data
@@ -513,8 +476,10 @@ const WorkoutPlanExerciseListItem = ({
 				open={openUpdateForm}
 			>
 				<DialogTrigger asChild>
-					<Pressable>
-						<Card className="overflow-hidden">
+					<Pressable
+						onLongPress={drag}
+					>
+						<Card className={`overflow-hidden ${isActive ? "scale-105 opacity-70" : ""}`}>
 							<CardContent className="p-0">
 								<View className="flex-row">
 									<View
@@ -525,37 +490,66 @@ const WorkoutPlanExerciseListItem = ({
 									/>
 
 									<View className="flex-1 p-4">
-										<View className="flex-row items-center justify-between">
-											<Text className="font-funnel-bold text-lg">
-												{exerciseName}
-											</Text>
-											<Badge className="bg-muted" variant="outline">
-												<Text className="text-xs">
-													{EXERCISES_TYPES[i18n.locale][exerciseType]}
+										<View className="flex flex-row justify-between">
+											<View className="flex-1 items-start gap-2">
+												<Text className="text-lg text-muted-foreground">
+													{workoutPlanExerciseSortOrder}
 												</Text>
-											</Badge>
-										</View>
+												<View className="flex items-center justify-center gap-2">
+													<Text className="font-funnel-bold text-xl">
+														{exerciseName}
+													</Text>
+												</View>
+											</View>
 
-										<Text className="mb-2 text-muted-foreground text-sm">
-											{exercisePrimaryMuscleGroup}
-										</Text>
+											<View className="flex items-center gap-2">
+												<TouchableOpacity
+													className="rounded-full bg-red-100 p-1.5"
+													disabled={isUpdating}
+													onPress={onDelete}
+												>
+													<Trash2 className="text-destructive" size={22} />
+												</TouchableOpacity>
+											</View>
+										</View>
 
 										<Separator className="my-2" />
 
-										<View className="mt-1 flex-row justify-between">
-											<View className="flex-row items-center">
-												<Badge className="mr-1" variant="secondary">
-													<Text className="text-xs">{totalSets} sets</Text>
-												</Badge>
-												<Badge className="mr-1" variant="secondary">
-													<Text className="text-xs">{valueDisplay}</Text>
-												</Badge>
+										<View className="flex flex-col gap-2">
+											<View className="flex-row items-center gap-2">
 												<Badge variant="secondary">
-													<Text className="text-xs">{weightDisplay}</Text>
+													<Text className="text-xs">
+														{EXERCISES_TYPES[i18n.locale][exerciseType]}
+													</Text>
 												</Badge>
+												{exercisePrimaryMuscleGroup && (
+												<Badge variant="secondary">
+													<Text className="text-xs">
+														{
+															MUSCLE_GROUPS[i18n.locale][
+																exercisePrimaryMuscleGroup
+															]
+														}
+														</Text>
+													</Badge>
+												)}
 											</View>
-											<View className="flex-row items-center">
-												<ChevronRight className="size-5 text-muted-foreground" />
+
+											<View className="flex-row justify-between">
+												<View className="flex-row items-center gap-2">
+													<Badge variant="secondary">
+														<Text className="text-xs">{totalSets} sets</Text>
+													</Badge>
+													<Badge variant="secondary">
+														<Text className="text-xs">{valueDisplay}</Text>
+													</Badge>
+													<Badge variant="secondary">
+														<Text className="text-xs">{weightDisplay}</Text>
+													</Badge>
+												</View>
+												<View className="flex-row items-center">
+													<ChevronRight className="size-5 text-muted-foreground" />
+												</View>
 											</View>
 										</View>
 									</View>
@@ -577,37 +571,6 @@ const WorkoutPlanExerciseListItem = ({
 					/>
 				</DialogContent>
 			</Dialog>
-
-			<View className="flex items-center justify-center gap-2">
-				{workoutPlanExerciseSortOrder !== 1 && (
-					<TouchableOpacity disabled={isUpdating} onPress={onMoveUp}>
-						<Triangle
-							className="fill-muted-foreground text-muted-foreground"
-							size={30}
-						/>
-					</TouchableOpacity>
-				)}
-
-				<Text>#{workoutPlanExerciseSortOrder}</Text>
-
-				{workoutPlanExerciseSortOrder !== totalExercises && (
-					<TouchableOpacity disabled={isUpdating} onPress={onMoveDown}>
-						<Triangle
-							className="rotate-180 fill-muted-foreground text-muted-foreground"
-							size={30}
-						/>
-					</TouchableOpacity>
-				)}
-			</View>
-			<View className="flex items-center justify-center gap-2">
-				<TouchableOpacity
-					className="rounded-full bg-red-100 p-1.5"
-					disabled={isUpdating}
-					onPress={onDelete}
-				>
-					<Trash2 className="text-destructive" size={22} />
-				</TouchableOpacity>
-			</View>
 		</View>
 	);
 };

@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { I18n } from "i18n-js";
 import { useEffect, useState } from "react";
 import {
 	Keyboard,
@@ -39,6 +40,51 @@ import { Plus } from "~/lib/icons/Plus";
 import { Trash2 } from "~/lib/icons/Trash2";
 import { minutesSecondsToTotalSeconds } from "~/utils/date";
 
+const i18n = new I18n({
+	en: {
+		addTitle: "Add exercise",
+		updateTitle: "Update exercise",
+		exercise: "Exercise",
+		sets: "sets",
+		reps: "reps",
+		weight: "weight",
+		duration: "duration",
+		updateTitleDescription: "Update exercise of your workout plan",
+		addTitleDescription: "Add an exercise to your workout plan",
+		selectExercise: "Select an exercise",
+		new: "New",
+		lastStatsForThisExercise: "Last stats for this exercise",
+		addMore: "add more",
+		specifyTheNumberOfSets: "Specify the number of sets",
+		andWeightForTheExercise: "and weight for the exercise",
+		measureBy: "Measure by",
+		time: "time",
+		update: "Update",
+		add: "Add",
+	},
+	es: {
+		addTitle: "Agregar ejercicio",
+		updateTitle: "Actualizar ejercicio",
+		exercise: "Ejercicio",
+		sets: "series",
+		reps: "repeticiones",
+		weight: "peso",
+		duration: "duración",
+		updateTitleDescription: "Actualizar ejercicio de tu rutina",
+		addTitleDescription: "Agregar un ejercicio a tu rutina",
+		selectExercise: "Seleccionar un ejercicio",
+		new: "Nuevo",
+		lastStatsForThisExercise: "Últimas estadísticas para este ejercicio",
+		addMore: "agregar más",
+		specifyTheNumberOfSets: "Especifica el número de series",
+		andWeightForTheExercise: "y peso para el ejercicio",
+		measureBy: "Medir por",
+		time: "tiempo",
+		update: "Actualizar",
+		add: "Agregar",
+	},
+});
+
 export const WorkoutPlanExerciseForm = ({
 	setOpen,
 	openExerciseForm,
@@ -65,6 +111,9 @@ export const WorkoutPlanExerciseForm = ({
 	existingExerciseData?: schema.WorkoutPlanExerciseData[];
 }) => {
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
+
+	i18n.locale = locale;
+
 
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
@@ -450,11 +499,11 @@ export const WorkoutPlanExerciseForm = ({
 		<TouchableWithoutFeedback>
 			<View className="p-2">
 				<DialogHeader>
-					<DialogTitle>{isUpdate ? "Update" : "Add"} exercise</DialogTitle>
+					<DialogTitle>{isUpdate ? i18n.t("updateTitle") : i18n.t("addTitle")}</DialogTitle>
 					<DialogDescription>
 						{isUpdate
-							? "Update exercise of your workout plan"
-							: "Add an exercise to your workout plan"}
+							? i18n.t("updateTitleDescription")
+							: i18n.t("addTitleDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				<View className="flex flex-col py-3">
@@ -464,7 +513,7 @@ export const WorkoutPlanExerciseForm = ({
 								{(field) => (
 									<View className="">
 										<Label className="mb-1" nativeID={field.name}>
-											Exercise:
+											{i18n.t("exercise")}:
 										</Label>
 										<Select
 											// @ts-ignore
@@ -479,7 +528,7 @@ export const WorkoutPlanExerciseForm = ({
 											>
 												<SelectValue
 													className="native:text-lg text-foreground text-sm"
-													placeholder="Select an exercise"
+													placeholder={i18n.t("selectExercise")}
 												/>
 											</SelectTrigger>
 											<SelectContent
@@ -527,12 +576,12 @@ export const WorkoutPlanExerciseForm = ({
 								}}
 							>
 								<Plus className="text-primary" />
-								<Text className="font-funnel-bold text-primary">New</Text>
+								<Text className="font-funnel-bold text-primary">{i18n.t("new")}</Text>
 							</Button>
 						</View>
 					) : (
 						<View className="pb-2">
-							<Label>Exercise:</Label>
+							<Label>{i18n.t("exercise")}:</Label>
 							<Select
 								value={{
 									value: exerciseName ?? "",
@@ -553,7 +602,7 @@ export const WorkoutPlanExerciseForm = ({
 					<form.Field name="valueType">
 						{(field) => (
 							<View className="py-3">
-								<Label className="mb-2">Measure By:</Label>
+								<Label className="mb-2">{i18n.t("measureBy")}:</Label>
 								<View className="flex flex-row rounded-lg border border-border p-1">
 									<Pressable
 										className={`flex-1 flex-row items-center justify-center gap-2 rounded-md px-3 py-2 ${
@@ -591,7 +640,8 @@ export const WorkoutPlanExerciseForm = ({
 													: "text-muted-foreground"
 											}`}
 										>
-											Reps
+											{i18n.t("reps").charAt(0).toUpperCase() +
+												i18n.t("reps").slice(1)}
 										</Text>
 									</Pressable>
 									<Pressable
@@ -630,7 +680,8 @@ export const WorkoutPlanExerciseForm = ({
 													: "text-muted-foreground"
 											}`}
 										>
-											Time
+											{i18n.t("time").charAt(0).toUpperCase() +
+												i18n.t("time").slice(1)}
 										</Text>
 									</Pressable>
 								</View>
@@ -640,28 +691,32 @@ export const WorkoutPlanExerciseForm = ({
 
 					{!isUpdate && (
 						<Text className="text-muted-foreground text-sm">
-							Specify the number of sets,{" "}
-							{form.getFieldValue("valueType") === "reps" ? "reps" : "duration"}{" "}
-							and weight for the exercise.
+							{i18n.t("specifyTheNumberOfSets")},{" "}
+							{form.getFieldValue("valueType") === "reps" ? i18n.t("reps") : i18n.t("duration")}{" "}
+							{i18n.t("andWeightForTheExercise")}.
 						</Text>
 					)}
 
 					{/* Column Headers */}
 					<View className="flex flex-row justify-around py-2">
 						<View className="flex w-1/3 items-center justify-center ">
-							<Label className="text-center">Sets</Label>
+							<Label className="text-center">{i18n.t("sets").charAt(0).toUpperCase() +
+												i18n.t("sets").slice(1)}</Label>
 						</View>
 						{form.getFieldValue("valueType") === "reps" ? (
 							<View className="flex w-1/3 items-center justify-center">
-								<Label className="text-center">Reps</Label>
+								<Label className="text-center">{i18n.t("reps").charAt(0).toUpperCase() +
+												i18n.t("reps").slice(1)}</Label>
 							</View>
 						) : (
 							<View className="flex w-1/3 items-center justify-center">
-								<Label className="text-center">Duration</Label>
+										<Label className="text-center">{i18n.t("duration").charAt(0).toUpperCase() +
+												i18n.t("duration").slice(1)}</Label>
 							</View>
 						)}
 						<View className="flex w-1/3 items-center justify-center">
-							<Label className="text-center">Weight (kg)</Label>
+							<Label className="text-center">{i18n.t("weight").charAt(0).toUpperCase() +
+												i18n.t("weight").slice(1)} (kg)</Label>
 						</View>
 					</View>
 
@@ -934,7 +989,7 @@ export const WorkoutPlanExerciseForm = ({
 								onPress={addDropSet}
 							>
 								<Text className="text-center font-medium text-sky-600 text-sm">
-									+ add more
+									{i18n.t("addMore")}
 								</Text>
 							</Pressable>
 						)}
@@ -947,20 +1002,20 @@ export const WorkoutPlanExerciseForm = ({
 							<>
 								{mainRowErrors.sets && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">Sets: </Text>
+										<Text className="font-funnel-bold">{i18n.t("sets")}: </Text>
 										{mainRowErrors.sets}
 									</Text>
 								)}
 								{form.getFieldValue("valueType") === "reps" &&
 									mainRowErrors.reps && (
 										<Text className="text-red-500 text-sm">
-											<Text className="font-funnel-bold">Reps: </Text>
+											<Text className="font-funnel-bold">{i18n.t("reps")}: </Text>
 											{mainRowErrors.reps}
 										</Text>
 									)}
 								{mainRowErrors.weight && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">Weight: </Text>
+										<Text className="font-funnel-bold">{i18n.t("weight")}: </Text>
 										{mainRowErrors.weight}
 									</Text>
 								)}
@@ -970,7 +1025,7 @@ export const WorkoutPlanExerciseForm = ({
 							<>
 								{dropSetsErrors && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">Drop Sets: </Text>
+										<Text className="font-funnel-bold">{i18n.t("dropSets")}: </Text>
 										{dropSetsErrors}
 									</Text>
 								)}
@@ -979,7 +1034,7 @@ export const WorkoutPlanExerciseForm = ({
 					</View>
 				</View>
 				<Button onPress={handleSubmit}>
-					<Text>{isUpdate ? "Update" : "Add"}</Text>
+					<Text>{isUpdate ? i18n.t("update") : i18n.t("add")}</Text>
 				</Button>
 			</View>
 		</TouchableWithoutFeedback>

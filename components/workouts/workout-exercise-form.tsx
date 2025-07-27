@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { I18n } from "i18n-js";
 import { useEffect, useState } from "react";
 import {
 	Keyboard,
@@ -35,9 +36,55 @@ import { repsSchema, setsSchema, weightSchema } from "~/db/schema";
 import { EXERCISES_TYPES } from "~/lib/constants";
 import { Clock } from "~/lib/icons/Clock";
 import { Hash } from "~/lib/icons/Hash";
+import { Info } from "~/lib/icons/Info";
 import { Plus } from "~/lib/icons/Plus";
 import { Trash2 } from "~/lib/icons/Trash2";
-import { minutesSecondsToTotalSeconds } from "~/utils/date";
+import { formatDate, minutesSecondsToTotalSeconds } from "~/utils/date";
+
+const i18n = new I18n({
+	en: {
+		addTitle: "Add exercise",
+		updateTitle: "Update exercise",
+		exercise: "Exercise",
+		sets: "sets",
+		reps: "reps",
+		weight: "weight",
+		duration: "duration",
+		updateTitleDescription: "Update exercise of your workout",
+		addTitleDescription: "Add an exercise to your workout",
+		selectExercise: "Select an exercise",
+		new: "New",
+		lastStatsForThisExercise: "Last stats for this exercise",
+		addMore: "add more",
+		specifyTheNumberOfSets: "Specify the number of sets",
+		andWeightForTheExercise: "and weight for the exercise",
+		measureBy: "Measure by",
+		time: "time",
+		update: "Update",
+		add: "Add",
+	},
+	es: {
+		addTitle: "Agregar ejercicio",
+		updateTitle: "Actualizar ejercicio",
+		exercise: "Ejercicio",
+		sets: "series",
+		reps: "repeticiones",
+		weight: "peso",
+		duration: "duración",
+		updateTitleDescription: "Actualizar ejercicio de tu entrenamiento",
+		addTitleDescription: "Agregar un ejercicio a tu entrenamiento",
+		selectExercise: "Seleccionar un ejercicio",
+		new: "Nuevo",
+		lastStatsForThisExercise: "Últimas estadísticas para este ejercicio",
+		addMore: "agregar más",
+		specifyTheNumberOfSets: "Especifica el número de series",
+		andWeightForTheExercise: "y peso para el ejercicio",
+		measureBy: "Medir por",
+		time: "tiempo",
+		update: "Actualizar",
+		add: "Agregar",
+	},
+});
 
 export const WorkoutExerciseForm = ({
 	setOpen,
@@ -65,6 +112,15 @@ export const WorkoutExerciseForm = ({
 	existingExerciseData?: schema.WorkoutExerciseData[];
 }) => {
 	const { data: exercises } = useLiveQuery(db.select().from(schema.exercises));
+
+	i18n.locale = locale;
+
+	const [lastExercise, setLastExercise] = useState<{
+		createdAt: string;
+		totalSets: number;
+		weightDisplay: string;
+		valueDisplay: string;
+	} | null>(null);
 
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
@@ -439,93 +495,206 @@ export const WorkoutExerciseForm = ({
 		form.handleSubmit();
 	};
 
+	const fetchLastExercise = async () => {
+		try {
+			const result = await db
+				.select()
+				.from(schema.workoutExercises)
+				.where(
+					eq(
+						schema.workoutExercises.exerciseId,
+						Number(form.state.values.exerciseId.value),
+					),
+				)
+				.orderBy(desc(schema.workoutExercises.createdAt))
+				.limit(1);
+			const [exercise] = result;
+			if (!exercise) {
+				setLastExercise(null);
+				return;
+			}
+			const createdAt = exercise.createdAt ?? "";
+			// Calculate display values from the JSON data
+			const totalSets = exercise.workoutExerciseData.length;
+			const firstSet = exercise.workoutExerciseData[0];
+			const isTimeBased =
+				firstSet?.reps === null && firstSet?.durationSeconds !== null;
+
+			// Check if all sets are identical (for condensed view)
+			const allSetsIdentical = exercise.workoutExerciseData.every(
+				(set) =>
+					set.reps === firstSet?.reps &&
+					set.weight === firstSet?.weight &&
+					set.durationSeconds === firstSet?.durationSeconds,
+			);
+
+			// For display, show range if values vary, otherwise show single value
+			const weights = exercise.workoutExerciseData.map((set) => set.weight);
+			const uniqueWeights = [...new Set(weights)];
+			const weightDisplay =
+				uniqueWeights.length === 1
+					? `${uniqueWeights[0]} kg`
+					: `${Math.min(...weights)}-${Math.max(...weights)} kg`;
+
+			let valueDisplay = "";
+			if (isTimeBased) {
+				const durations = exercise.workoutExerciseData
+					.map((set) => set.durationSeconds)
+					.filter((d) => d !== null);
+				const uniqueDurations = [...new Set(durations)];
+				valueDisplay =
+					uniqueDurations.length === 1
+						? `${uniqueDurations[0]}s`
+						: `${Math.min(...durations)}-${Math.max(...durations)}s`;
+			} else {
+				const reps = exercise.workoutExerciseData
+					.map((set) => set.reps)
+					.filter((r) => r !== null);
+				const uniqueReps = [...new Set(reps)];
+				valueDisplay =
+					uniqueReps.length === 1
+						? `${uniqueReps[0]}`
+						: `${Math.min(...reps)}-${Math.max(...reps)}`;
+			}
+
+			setLastExercise({
+				createdAt,
+				totalSets,
+				weightDisplay,
+				valueDisplay,
+			});
+		} catch (error) {
+			console.error("Error fetching last exercise:", error);
+			setLastExercise(null);
+		}
+	};
+
 	return (
 		<TouchableWithoutFeedback>
 			<View className="p-2">
 				<DialogHeader>
-					<DialogTitle>{isUpdate ? "Update" : "Add"} exercise</DialogTitle>
+					<DialogTitle>
+						{isUpdate ? i18n.t("updateTitle") : i18n.t("addTitle")}
+					</DialogTitle>
 					<DialogDescription>
 						{isUpdate
-							? "Update exercise of your workout plan"
-							: "Add an exercise to your workout plan"}
+							? i18n.t("updateTitleDescription")
+							: i18n.t("addTitleDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				<View className="flex flex-col py-3">
 					{!isUpdate ? (
-						<View className="flex flex-row items-center justify-stretch gap-2 pb-2">
-							<form.Field name="exerciseId">
-								{(field) => (
-									<View className="">
-										<Label className="mb-1" nativeID={field.name}>
-											Exercise:
-										</Label>
-										<Select
-											// @ts-ignore
-											onValueChange={field.handleChange}
-											value={field.state.value}
-										>
-											<SelectTrigger
-												className="w-[220px]"
-												onPressIn={() => {
-													Keyboard.dismiss();
-												}}
+						<View className="flex">
+							<View className="flex flex-row items-center justify-stretch gap-2 pb-2">
+								<form.Field name="exerciseId">
+									{(field) => (
+										<View className="">
+											<Label className="mb-1" nativeID={field.name}>
+												{i18n.t("exercise")}:
+											</Label>
+											<Select
+												// @ts-ignore
+												onValueChange={field.handleChange}
+												value={field.state.value}
 											>
-												<SelectValue
-													className="native:text-lg text-foreground text-sm"
-													placeholder="Select an exercise"
-												/>
-											</SelectTrigger>
-											<SelectContent
-												className="w-[220px]"
-												insets={contentInsets}
-											>
-												<ScrollView className="max-h-72">
-													{Object.entries(EXERCISES_TYPES[locale]).map(
-														([typeKey, typeDisplayName]) => {
-															const filteredExercises = exercises
-																.filter((exercise) => exercise.type === typeKey)
-																.sort((a, b) => a.name.localeCompare(b.name));
+												<SelectTrigger
+													className="w-[220px]"
+													onPressIn={() => {
+														Keyboard.dismiss();
+													}}
+												>
+													<SelectValue
+														className="native:text-lg text-foreground text-sm"
+														placeholder={i18n.t("selectExercise")}
+													/>
+												</SelectTrigger>
+												<SelectContent
+													className="w-[220px]"
+													insets={contentInsets}
+												>
+													<ScrollView className="max-h-72">
+														{Object.entries(EXERCISES_TYPES[locale]).map(
+															([typeKey, typeDisplayName]) => {
+																const filteredExercises = exercises
+																	.filter(
+																		(exercise) => exercise.type === typeKey,
+																	)
+																	.sort((a, b) => a.name.localeCompare(b.name));
 
-															return (
-																filteredExercises.length > 0 && (
-																	<SelectGroup key={typeKey}>
-																		<SelectLabel className="-ml-4 font-funnel-extrabold">
-																			{typeDisplayName}
-																		</SelectLabel>
-																		{filteredExercises.map((exercise) => (
-																			<SelectItem
-																				key={exercise.id}
-																				label={exercise.name}
-																				value={exercise.id.toString()}
-																			>
-																				{exercise.name}
-																			</SelectItem>
-																		))}
-																	</SelectGroup>
-																)
-															);
-														},
-													)}
-												</ScrollView>
-											</SelectContent>
-										</Select>
+																return (
+																	filteredExercises.length > 0 && (
+																		<SelectGroup key={typeKey}>
+																			<SelectLabel className="-ml-4 font-funnel-extrabold">
+																				{typeDisplayName}
+																			</SelectLabel>
+																			{filteredExercises.map((exercise) => (
+																				<SelectItem
+																					key={exercise.id}
+																					label={exercise.name}
+																					onPress={() => {
+																						fetchLastExercise();
+																					}}
+																					value={exercise.id.toString()}
+																				>
+																					{exercise.name}
+																				</SelectItem>
+																			))}
+																		</SelectGroup>
+																	)
+																);
+															},
+														)}
+													</ScrollView>
+												</SelectContent>
+											</Select>
+										</View>
+									)}
+								</form.Field>
+								<Button
+									className="mt-auto grow flex-row items-center justify-center gap-1 bg-sky-500/70"
+									onPress={() => {
+										openExerciseForm?.();
+										setOpen(false);
+									}}
+								>
+									<Plus className="text-primary" />
+									<Text className="font-funnel-bold text-primary">
+										{i18n.t("new")}
+									</Text>
+								</Button>
+							</View>
+							{lastExercise && (
+								<View className="flex gap-1 rounded-md bg-primary/10 p-2">
+									<View className="flex flex-row items-center gap-2">
+										<Info className="text-primary" />
+										<Text className="text-primary">
+											{i18n.t("lastStatsForThisExercise")} (
+											{formatDate(lastExercise.createdAt ?? "")}):
+										</Text>
 									</View>
-								)}
-							</form.Field>
-							<Button
-								className="mt-auto grow flex-row items-center justify-center gap-2 bg-sky-500/70"
-								onPress={() => {
-									openExerciseForm?.();
-									setOpen(false);
-								}}
-							>
-								<Plus className="text-primary" />
-								<Text className="font-funnel-bold text-primary">New</Text>
-							</Button>
+									<View className="flex flex-row justify-around gap-8 self-center">
+										<Text className="font-funnel-bold text-primary">
+											{i18n.t("sets").charAt(0).toUpperCase() +
+												i18n.t("sets").slice(1)}
+											: {lastExercise.totalSets}
+										</Text>
+										<Text className="font-funnel-bold text-primary">
+											{i18n.t("reps").charAt(0).toUpperCase() +
+												i18n.t("reps").slice(1)}
+											: {lastExercise.valueDisplay}
+										</Text>
+										<Text className="font-funnel-bold text-primary">
+											{i18n.t("weight").charAt(0).toUpperCase() +
+												i18n.t("weight").slice(1)}
+											: {lastExercise.weightDisplay}
+										</Text>
+									</View>
+								</View>
+							)}
 						</View>
 					) : (
 						<View className="pb-2">
-							<Label>Exercise:</Label>
+							<Label>{i18n.t("exercise")}:</Label>
 							<Select
 								value={{
 									value: exerciseName ?? "",
@@ -546,7 +715,7 @@ export const WorkoutExerciseForm = ({
 					<form.Field name="valueType">
 						{(field) => (
 							<View className="py-3">
-								<Label className="mb-2">Measure By:</Label>
+								<Label className="mb-2">{i18n.t("measureBy")}:</Label>
 								<View className="flex flex-row rounded-lg border border-border p-1">
 									<Pressable
 										className={`flex-1 flex-row items-center justify-center gap-2 rounded-md px-3 py-2 ${
@@ -584,7 +753,8 @@ export const WorkoutExerciseForm = ({
 													: "text-muted-foreground"
 											}`}
 										>
-											Reps
+											{i18n.t("reps").charAt(0).toUpperCase() +
+												i18n.t("reps").slice(1)}
 										</Text>
 									</Pressable>
 									<Pressable
@@ -623,7 +793,8 @@ export const WorkoutExerciseForm = ({
 													: "text-muted-foreground"
 											}`}
 										>
-											Time
+											{i18n.t("time").charAt(0).toUpperCase() +
+												i18n.t("time").slice(1)}
 										</Text>
 									</Pressable>
 								</View>
@@ -633,28 +804,43 @@ export const WorkoutExerciseForm = ({
 
 					{!isUpdate && (
 						<Text className="text-muted-foreground text-sm">
-							Specify the number of sets,{" "}
-							{form.getFieldValue("valueType") === "reps" ? "reps" : "duration"}{" "}
-							and weight for the exercise.
+							{i18n.t("specifyTheNumberOfSets")},{" "}
+							{form.getFieldValue("valueType") === "reps"
+								? i18n.t("reps")
+								: i18n.t("duration")}{" "}
+							{i18n.t("andWeightForTheExercise")}
 						</Text>
 					)}
 
 					{/* Column Headers */}
 					<View className="flex flex-row justify-around py-2">
 						<View className="flex w-1/3 items-center justify-center ">
-							<Label className="text-center">Sets</Label>
+							<Label className="text-center">
+								{i18n.t("sets").charAt(0).toUpperCase() +
+									i18n.t("sets").slice(1)}
+							</Label>
 						</View>
 						{form.getFieldValue("valueType") === "reps" ? (
 							<View className="flex w-1/3 items-center justify-center">
-								<Label className="text-center">Reps</Label>
+								<Label className="text-center">
+									{i18n.t("reps").charAt(0).toUpperCase() +
+										i18n.t("reps").slice(1)}
+								</Label>
 							</View>
 						) : (
 							<View className="flex w-1/3 items-center justify-center">
-								<Label className="text-center">Duration</Label>
+								<Label className="text-center">
+									{i18n.t("duration").charAt(0).toUpperCase() +
+										i18n.t("duration").slice(1)}
+								</Label>
 							</View>
 						)}
 						<View className="flex w-1/3 items-center justify-center">
-							<Label className="text-center">Weight (kg)</Label>
+							<Label className="text-center">
+								{i18n.t("weight").charAt(0).toUpperCase() +
+									i18n.t("weight").slice(1)}{" "}
+								(kg)
+							</Label>
 						</View>
 					</View>
 
@@ -927,7 +1113,7 @@ export const WorkoutExerciseForm = ({
 								onPress={addDropSet}
 							>
 								<Text className="text-center font-medium text-sky-600 text-sm">
-									+ add more
+									+ {i18n.t("addMore")}
 								</Text>
 							</Pressable>
 						)}
@@ -940,20 +1126,24 @@ export const WorkoutExerciseForm = ({
 							<>
 								{mainRowErrors.sets && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">Sets: </Text>
+										<Text className="font-funnel-bold">{i18n.t("sets")}: </Text>
 										{mainRowErrors.sets}
 									</Text>
 								)}
 								{form.getFieldValue("valueType") === "reps" &&
 									mainRowErrors.reps && (
 										<Text className="text-red-500 text-sm">
-											<Text className="font-funnel-bold">Reps: </Text>
+											<Text className="font-funnel-bold">
+												{i18n.t("reps")}:{" "}
+											</Text>
 											{mainRowErrors.reps}
 										</Text>
 									)}
 								{mainRowErrors.weight && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">Weight: </Text>
+										<Text className="font-funnel-bold">
+											{i18n.t("weight")}:{" "}
+										</Text>
 										{mainRowErrors.weight}
 									</Text>
 								)}
@@ -972,7 +1162,7 @@ export const WorkoutExerciseForm = ({
 					</View>
 				</View>
 				<Button onPress={handleSubmit}>
-					<Text>{isUpdate ? "Update" : "Add"}</Text>
+					<Text>{isUpdate ? i18n.t("update") : i18n.t("add")}</Text>
 				</Button>
 			</View>
 		</TouchableWithoutFeedback>
