@@ -60,7 +60,7 @@ const i18n = new I18n({
 		created: "Creado",
 		noDate: "Sin fecha",
 		noExercisesAddedToThisPlanYet:
-			"No hay ejercicios agregados a este plan todavía.",
+			"No hay ejercicios agregados a esta rutina todavía.",
 		addExercise: "Agregar ejercicio",
 		tapAddExerciseToGetStarted: "Tocá 'Agregar ejercicio' para empezar!",
 	},
