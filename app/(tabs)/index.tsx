@@ -93,11 +93,11 @@ const i18n = new I18n({
 		noWorkoutsYet: "No hay entrenamientos todavía",
 		createYourFirstWorkout: "Crea tu primer entrenamiento para empezar!",
 		exercise: "ejercicio",
-		selectPlan: "Seleccionar una plan",
-		noWorkoutPlansFound: "No hay planes de entrenamiento encontrados",
+		selectPlan: "Seleccionar una rutina",
+		noWorkoutPlansFound: "No hay rutinas encontradas",
 		create: "Crear",
 		workout: "entrenamiento",
-		selectPlanFirst: "Seleccionar un plan primero",
+		selectPlanFirst: "Seleccionar una rutina primero",
 	},
 });
 
@@ -392,7 +392,7 @@ export default function Page() {
 						</Text>
 						{workoutPlans?.length > 0 ? (
 							<Select
-								className="mb-3 w-full"
+								className="mx-auto mb-3 w-[75vw]"
 								onValueChange={(e) => setSelectedWorkoutPlan(e)}
 								value={selectedWorkoutPlan}
 							>
@@ -402,7 +402,7 @@ export default function Page() {
 										placeholder={i18n.t("selectPlan")}
 									/>
 								</SelectTrigger>
-								<SelectContent className="w-[80vw]" insets={contentInsets}>
+								<SelectContent className="w-[75vw]" insets={contentInsets}>
 									<ScrollView className="max-h-[300px]">
 										{workoutPlans?.map((plan) => (
 											<SelectItem
@@ -418,13 +418,13 @@ export default function Page() {
 							</Select>
 						) : (
 							<Select
-								className="mb-3 w-full"
-								value={{
-									value: "No workout plans found",
-									label: "No workout plans found",
-								}}
+								className="mx-auto mb-3 w-[75vw]"
+								// value={{
+								// 	value: "No workout plans found",
+								// 	label: "No workout plans found",
+								// }}
 							>
-								<SelectTrigger className="w-[275px] cursor-not-allowed opacity-50">
+								<SelectTrigger className="w-[75vw] cursor-not-allowed opacity-50">
 									<SelectValue
 										className="native:text-lg text-foreground/50 text-sm"
 										placeholder={i18n.t("noWorkoutPlansFound")}
@@ -434,7 +434,7 @@ export default function Page() {
 						)}
 
 						<Button
-							className="w-full"
+							className="mx-auto w-[75vw]"
 							disabled={!selectedWorkoutPlan}
 							onPress={createWorkoutFromPlan}
 						>
@@ -459,7 +459,7 @@ export default function Page() {
 							{i18n.t("startWithEmptyWorkout")}
 						</Text>
 						<Button
-							className="w-full"
+							className="mx-auto w-[75vw]"
 							onPress={createWorkoutFromScratch}
 							variant="outline"
 						>
