@@ -87,7 +87,7 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 			.delete(schema.workoutPlanExercises)
 			.where(eq(schema.workoutPlanExercises.id, id));
 	} catch (error) {
-		alert("Error deleting exercise");
+		alert(`Error deleting exercise: ${error}`);
 	}
 };
 

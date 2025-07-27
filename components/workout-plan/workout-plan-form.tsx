@@ -47,6 +47,8 @@ const i18n = new I18n({
 		deleteWorkoutPlanConfirmationTitle: "Confirm Delete",
 		cancel: "Cancel",
 		continue: "Continue",
+		workoutPlanAlreadyExists: "Workout plan already exists",
+		workoutPlanNotFound: "Workout plan not found",
 	},
 	es: {
 		updateWorkoutPlan: "Actualizar rutina",
@@ -66,6 +68,8 @@ const i18n = new I18n({
 		deleteWorkoutPlanConfirmationTitle: "Confirmar eliminación",
 		cancel: "Cancelar",
 		continue: "Continuar",
+		workoutPlanAlreadyExists: "La rutina ya existe",
+		workoutPlanNotFound: "La rutina no fue encontrada",
 	},
 });
 const deleteWorkoutPlan = async (planId: number) => {
@@ -76,7 +80,7 @@ const deleteWorkoutPlan = async (planId: number) => {
 		router.replace("/(tabs)/workout-plans");
 	} catch (error) {
 		console.log(error);
-		alert("Error: Workout plan not found");
+		alert(i18n.t("workoutPlanNotFound"));
 	}
 };
 
@@ -121,7 +125,7 @@ export const WorkoutPlanForm = ({
 				}
 			} catch (error) {
 				console.log(error);
-				alert("Error: Workout plan already exists");
+				alert(i18n.t("workoutPlanAlreadyExists"));
 			}
 		},
 		validators: {

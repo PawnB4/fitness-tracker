@@ -145,7 +145,7 @@ const deleteWorkoutPlanExercise = async (id: number) => {
 			.delete(schema.workoutExercises)
 			.where(eq(schema.workoutExercises.id, id));
 	} catch (error) {
-		alert("Error deleting exercise");
+		alert(`Error deleting exercise: ${error}`);
 	}
 };
 
@@ -162,7 +162,7 @@ const toggleCompleted = async (id: number) => {
 			.set({ completed: !completed })
 			.where(eq(schema.workoutExercises.id, id));
 	} catch (error) {
-		alert("Error completing exercise");
+		alert(`Error completing exercise: ${error}`);
 	}
 };
 
@@ -275,7 +275,7 @@ export default function Page() {
 				.where(eq(schema.workouts.id, Number(id)));
 			router.replace("/");
 		} catch (error) {
-			alert("Error deleting workout");
+			alert(`Error deleting workout: ${error}`);
 		}
 	};
 

@@ -1043,9 +1043,7 @@ export const WorkoutPlanExerciseForm = ({
 							<>
 								{dropSetsErrors && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">
-											{i18n.t("dropSets")}:{" "}
-										</Text>
+										<Text className="font-funnel-bold">Drop Sets: </Text>
 										{dropSetsErrors}
 									</Text>
 								)}

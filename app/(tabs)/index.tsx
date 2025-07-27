@@ -72,6 +72,9 @@ const i18n = new I18n({
 		create: "Create",
 		workout: "workout",
 		selectPlanFirst: "Select a plan first",
+		pleaseSelectPlan: "Please select a workout plan",
+		maxWorkoutsPerWeek: "You can't have more than 14 workouts per week",
+		minWorkoutsPerWeek: "You can't have less than 1 workout per week",
 	},
 	es: {
 		hello: "Hola",
@@ -98,6 +101,9 @@ const i18n = new I18n({
 		create: "Crear",
 		workout: "entrenamiento",
 		selectPlanFirst: "Seleccionar una rutina primero",
+		pleaseSelectPlan: "Por favor, selecciona una rutina",
+		maxWorkoutsPerWeek: "No podés tener más de 14 entrenamientos por semana",
+		minWorkoutsPerWeek: "No podés tener menos de 1 entrenamiento por semana",
 	},
 });
 
@@ -200,7 +206,7 @@ export default function Page() {
 	const createWorkoutFromPlan = async () => {
 		try {
 			if (!selectedWorkoutPlan) {
-				alert("Please select a workout plan");
+				alert(i18n.t("pleaseSelectPlan"));
 				return;
 			}
 
@@ -251,7 +257,7 @@ export default function Page() {
 			router.push(`/workout/${workoutId}`);
 		} catch (error) {
 			console.error(error);
-			alert("Error creating workout");
+			alert(`Error creating workout: ${error}`);
 		}
 	};
 
@@ -269,7 +275,7 @@ export default function Page() {
 			setOpenDialog(false);
 			router.push(`/workout/${res[0].id}`);
 		} catch (error) {
-			alert("Error creating workout");
+			alert(`Error creating workout: ${error}`);
 		}
 	};
 	const increaseWeeklyTarget = async () => {
@@ -281,7 +287,7 @@ export default function Page() {
 				.update(schema.user)
 				.set({ weeklyTarget: weeklyTargetQuery?.[0]?.weeklyTarget + 1 });
 		} else {
-			alert("You can't have more than 7 workouts per week");
+			alert(i18n.t("maxWorkoutsPerWeek"));
 		}
 	};
 	const decreaseWeeklyTarget = async () => {
@@ -293,7 +299,7 @@ export default function Page() {
 				.update(schema.user)
 				.set({ weeklyTarget: weeklyTargetQuery?.[0]?.weeklyTarget - 1 });
 		} else {
-			alert("You can't have less than 1 workout per week");
+			alert(i18n.t("minWorkoutsPerWeek"));
 		}
 	};
 

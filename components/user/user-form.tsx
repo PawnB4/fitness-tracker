@@ -35,6 +35,12 @@ const i18n = new I18n({
 		exportWorkoutData: "Export workout data",
 		importWorkoutData: "Import workout data",
 		save: "Save",
+		exportSuccessful: "Export Successful",
+		exportSuccessfulDescription:
+			"Your workout data has been exported. Would you like to share the file?",
+		no: "No",
+		share: "Share",
+		failedToShareFile: "Failed to share the file. Please try again.",
 	},
 	es: {
 		title: "Configuración",
@@ -47,6 +53,13 @@ const i18n = new I18n({
 		exportWorkoutData: "Exportar datos de entrenamiento",
 		importWorkoutData: "Importar datos de entrenamiento",
 		save: "Guardar",
+		exportSuccessful: "Exportación exitosa",
+		exportSuccessfulDescription:
+			"Tus datos de entrenamiento han sido exportados. ¿Te gustaría compartir el archivo?",
+		no: "No",
+		share: "Compartir",
+		failedToShareFile:
+			"Error al compartir el archivo. Por favor, inténtalo de nuevo.",
 	},
 });
 
@@ -185,15 +198,15 @@ export function UserForm({
 			if (isAvailable) {
 				// Show success alert with option to share
 				Alert.alert(
-					"Export Successful",
-					"Your workout data has been exported. Would you like to share the file?",
+					i18n.t("exportSuccessful"),
+					i18n.t("exportSuccessfulDescription"),
 					[
 						{
 							text: "No",
 							style: "cancel",
 						},
 						{
-							text: "Share",
+							text: i18n.t("share"),
 							onPress: async () => {
 								try {
 									await Sharing.shareAsync(file.uri, {
@@ -203,7 +216,7 @@ export function UserForm({
 									});
 								} catch (error) {
 									console.error("Error sharing file:", error);
-									alert("Failed to share the file. Please try again.");
+									alert(i18n.t("failedToShareFile"));
 								}
 							},
 						},
@@ -219,8 +232,7 @@ export function UserForm({
 			console.log(`File exported to: ${file.uri}`);
 			return file.uri;
 		} catch (error) {
-			console.error("Error exporting workouts:", error);
-			alert("Failed to export workout data. See logs for details.");
+			alert(i18n.t("failedToExportWorkoutData"));
 		}
 	};
 

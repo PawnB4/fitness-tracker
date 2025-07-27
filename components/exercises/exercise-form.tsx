@@ -41,6 +41,7 @@ const i18n = new I18n({
 		primaryMuscleGroup: "Primary muscle group",
 		primaryMuscleGroupPlaceholder: "Select muscle group",
 		create: "Create",
+		exerciseAlreadyExists: "Exercise already exists",
 	},
 	es: {
 		newExercise: "Nuevo ejercicio",
@@ -53,6 +54,7 @@ const i18n = new I18n({
 		primaryMuscleGroup: "Grupo muscular principal",
 		primaryMuscleGroupPlaceholder: "Seleccionar grupo muscular",
 		create: "Crear",
+		exerciseAlreadyExists: "El ejercicio ya existe",
 	},
 });
 
@@ -132,7 +134,7 @@ export const ExerciseForm = ({
 				}
 			} catch (error) {
 				console.log(error);
-				alert("Error: Exercise already exists");
+				alert(i18n.t("exerciseAlreadyExists"));
 			}
 		},
 		validators: {
