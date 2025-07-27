@@ -114,7 +114,6 @@ export const WorkoutPlanExerciseForm = ({
 
 	i18n.locale = locale;
 
-
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
 		top: insets.top,
@@ -499,7 +498,9 @@ export const WorkoutPlanExerciseForm = ({
 		<TouchableWithoutFeedback>
 			<View className="p-2">
 				<DialogHeader>
-					<DialogTitle>{isUpdate ? i18n.t("updateTitle") : i18n.t("addTitle")}</DialogTitle>
+					<DialogTitle>
+						{isUpdate ? i18n.t("updateTitle") : i18n.t("addTitle")}
+					</DialogTitle>
 					<DialogDescription>
 						{isUpdate
 							? i18n.t("updateTitleDescription")
@@ -576,7 +577,9 @@ export const WorkoutPlanExerciseForm = ({
 								}}
 							>
 								<Plus className="text-primary" />
-								<Text className="font-funnel-bold text-primary">{i18n.t("new")}</Text>
+								<Text className="font-funnel-bold text-primary">
+									{i18n.t("new")}
+								</Text>
 							</Button>
 						</View>
 					) : (
@@ -692,7 +695,9 @@ export const WorkoutPlanExerciseForm = ({
 					{!isUpdate && (
 						<Text className="text-muted-foreground text-sm">
 							{i18n.t("specifyTheNumberOfSets")},{" "}
-							{form.getFieldValue("valueType") === "reps" ? i18n.t("reps") : i18n.t("duration")}{" "}
+							{form.getFieldValue("valueType") === "reps"
+								? i18n.t("reps")
+								: i18n.t("duration")}{" "}
 							{i18n.t("andWeightForTheExercise")}.
 						</Text>
 					)}
@@ -700,23 +705,32 @@ export const WorkoutPlanExerciseForm = ({
 					{/* Column Headers */}
 					<View className="flex flex-row justify-around py-2">
 						<View className="flex w-1/3 items-center justify-center ">
-							<Label className="text-center">{i18n.t("sets").charAt(0).toUpperCase() +
-												i18n.t("sets").slice(1)}</Label>
+							<Label className="text-center">
+								{i18n.t("sets").charAt(0).toUpperCase() +
+									i18n.t("sets").slice(1)}
+							</Label>
 						</View>
 						{form.getFieldValue("valueType") === "reps" ? (
 							<View className="flex w-1/3 items-center justify-center">
-								<Label className="text-center">{i18n.t("reps").charAt(0).toUpperCase() +
-												i18n.t("reps").slice(1)}</Label>
+								<Label className="text-center">
+									{i18n.t("reps").charAt(0).toUpperCase() +
+										i18n.t("reps").slice(1)}
+								</Label>
 							</View>
 						) : (
 							<View className="flex w-1/3 items-center justify-center">
-										<Label className="text-center">{i18n.t("duration").charAt(0).toUpperCase() +
-												i18n.t("duration").slice(1)}</Label>
+								<Label className="text-center">
+									{i18n.t("duration").charAt(0).toUpperCase() +
+										i18n.t("duration").slice(1)}
+								</Label>
 							</View>
 						)}
 						<View className="flex w-1/3 items-center justify-center">
-							<Label className="text-center">{i18n.t("weight").charAt(0).toUpperCase() +
-												i18n.t("weight").slice(1)} (kg)</Label>
+							<Label className="text-center">
+								{i18n.t("weight").charAt(0).toUpperCase() +
+									i18n.t("weight").slice(1)}{" "}
+								(kg)
+							</Label>
 						</View>
 					</View>
 
@@ -1009,13 +1023,17 @@ export const WorkoutPlanExerciseForm = ({
 								{form.getFieldValue("valueType") === "reps" &&
 									mainRowErrors.reps && (
 										<Text className="text-red-500 text-sm">
-											<Text className="font-funnel-bold">{i18n.t("reps")}: </Text>
+											<Text className="font-funnel-bold">
+												{i18n.t("reps")}:{" "}
+											</Text>
 											{mainRowErrors.reps}
 										</Text>
 									)}
 								{mainRowErrors.weight && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">{i18n.t("weight")}: </Text>
+										<Text className="font-funnel-bold">
+											{i18n.t("weight")}:{" "}
+										</Text>
 										{mainRowErrors.weight}
 									</Text>
 								)}
@@ -1025,7 +1043,9 @@ export const WorkoutPlanExerciseForm = ({
 							<>
 								{dropSetsErrors && (
 									<Text className="text-red-500 text-sm">
-										<Text className="font-funnel-bold">{i18n.t("dropSets")}: </Text>
+										<Text className="font-funnel-bold">
+											{i18n.t("dropSets")}:{" "}
+										</Text>
 										{dropSetsErrors}
 									</Text>
 								)}

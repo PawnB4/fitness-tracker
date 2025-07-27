@@ -1,6 +1,7 @@
 import { FlashList } from "@shopify/flash-list";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { I18n } from "i18n-js";
 import { useMemo } from "react";
 import { ActivityIndicator, SafeAreaView, View } from "react-native";
 import { Card } from "~/components/ui/card";
@@ -9,6 +10,17 @@ import { WorkoutCard } from "~/components/workouts/workout-card";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
+
+const i18n = new I18n({
+	en: {
+		noWorkoutsYet: "No workouts yet",
+		createYourFirstWorkout: "Create your first workout to get started!",
+	},
+	es: {
+		noWorkoutsYet: "No hay entrenamientos todavía",
+		createYourFirstWorkout: "Crea tu primer entrenamiento para empezar!",
+	},
+});
 
 // Define the structure for the processed data passed to WorkoutCard
 type ProcessedWorkoutData = schema.Workout & {
@@ -21,6 +33,10 @@ export default function Page() {
 	const { data: workouts, error: workoutsError } = useLiveQuery(
 		db.select().from(schema.workouts).orderBy(desc(schema.workouts.createdAt)),
 	);
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 
 	// Fetch all workout exercises to process them
 	// Note: This fetches ALL exercises. For large datasets, optimizing this might be needed.
@@ -93,10 +109,10 @@ export default function Page() {
 					<Dumbbell className="text-muted-foreground" size={40} />
 					<View className="flex flex-col items-center gap-1">
 						<Text className="font-funnel-bold text-muted-foreground text-xl">
-							No workouts yet
+							{i18n.t("noWorkoutsYet")}
 						</Text>
 						<Text className="text-center text-muted-foreground">
-							Create your first workout to get started!
+							{i18n.t("createYourFirstWorkout")}
 						</Text>
 					</View>
 				</Card>
@@ -112,6 +128,7 @@ export default function Page() {
 						createdAt={item.createdAt}
 						id={item.id}
 						isCompleted={item.isCompleted}
+						locale={i18n.locale}
 						totalExercises={item.totalExercises}
 					/>
 				)}

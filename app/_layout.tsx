@@ -11,6 +11,7 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { I18n } from "i18n-js";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -28,6 +29,15 @@ import migrations from "~/drizzle/migrations";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
+
+const i18n = new I18n({
+	en: {
+		workoutHistory: "Workout History",
+	},
+	es: {
+		workoutHistory: "Historial de entrenamientos",
+	},
+});
 
 configureReanimatedLogger({
 	level: ReanimatedLogLevel.warn,
@@ -59,6 +69,9 @@ export default function RootLayout() {
 		db.select().from(schema.user).limit(1),
 	);
 	const userConfig = userSettings[0]?.config;
+	const userLocale = userSettings[0]?.locale;
+
+	i18n.locale = userLocale ?? "en";
 
 	// Apply user's theme preference when it loads from DB
 	useEffect(() => {
@@ -131,7 +144,7 @@ export default function RootLayout() {
 					<Stack.Screen
 						name="workout/history"
 						options={{
-							headerTitle: "Workout History",
+							headerTitle: i18n.t("workoutHistory"),
 							headerTitleStyle: { fontFamily: "FunnelSans_500Medium" },
 							headerRight: () => <UserButton />,
 							headerStyle: {

@@ -1,11 +1,36 @@
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Tabs } from "expo-router";
+import { I18n } from "i18n-js";
 import { Text } from "~/components/ui/text";
 import { UserButton } from "~/components/user/user-button";
+import { db } from "~/db/drizzle";
+import * as schema from "~/db/schema";
 import { BicepsFlexed } from "~/lib/icons/BicepsFlexed";
 import { ChartNoAxesCombined } from "~/lib/icons/ChartNoAxesCombined";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { House } from "~/lib/icons/House";
+
+const i18n = new I18n({
+	en: {
+		home: "Home",
+		progress: "Progress",
+		workoutPlans: "Workout Plans",
+		exercises: "Exercises",
+	},
+	es: {
+		home: "Inicio",
+		progress: "Progreso",
+		workoutPlans: "Rutinas",
+		exercises: "Ejercicios",
+	},
+});
+
 export default function TabLayout() {
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 	return (
 		<Tabs
 			screenOptions={{
@@ -19,7 +44,7 @@ export default function TabLayout() {
 			<Tabs.Screen
 				name="index"
 				options={{
-					title: "Home",
+					title: i18n.t("home"),
 					headerShown: false,
 					tabBarLabel: ({ children, focused }) => (
 						<Text
@@ -39,7 +64,7 @@ export default function TabLayout() {
 			<Tabs.Screen
 				name="progress"
 				options={{
-					title: "Progress",
+					title: i18n.t("progress"),
 					headerTitleStyle: {
 						fontSize: 24,
 						lineHeight: 32,
@@ -64,7 +89,7 @@ export default function TabLayout() {
 			<Tabs.Screen
 				name="workout-plans"
 				options={{
-					title: "Workout Plans",
+					title: i18n.t("workoutPlans"),
 					headerTitleStyle: {
 						fontSize: 24,
 						lineHeight: 32,
@@ -89,7 +114,7 @@ export default function TabLayout() {
 			<Tabs.Screen
 				name="exercises"
 				options={{
-					title: "Exercises",
+					title: i18n.t("exercises"),
 					headerTitleStyle: {
 						fontSize: 24,
 						lineHeight: 32,

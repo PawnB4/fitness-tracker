@@ -17,10 +17,12 @@ export default function Page() {
 			.from(schema.workouts),
 	);
 
-	if (workoutCount?.[0]?.count < 15) {
+	// 15 workouts to see your progress
+	if (workoutCount?.[0]?.count < 999999) {
 		return (
 			<View className="flex flex-1 items-center justify-center">
-				<Text>You need to do at least 15 workouts to see your progress.</Text>
+				{/* <Text>You need to do at least 15 workouts to see your progress.</Text> */}
+				<Text>Nothing to see here yet.</Text>
 			</View>
 		);
 	}

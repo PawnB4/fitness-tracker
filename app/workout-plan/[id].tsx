@@ -81,7 +81,6 @@ const updateExerciseOrder = async (exerciseId: number, newOrder: number) => {
 	}
 };
 
-
 const deleteWorkoutPlanExercise = async (id: number) => {
 	try {
 		await db
@@ -316,7 +315,8 @@ export default function Page() {
 									exerciseType: item.exerciseType,
 									exercisePrimaryMuscleGroup: item.exercisePrimaryMuscleGroup,
 									workoutPlanExerciseData: item.workoutPlanExerciseData,
-									workoutPlanExerciseSortOrder: item.workoutPlanExerciseSortOrder,
+									workoutPlanExerciseSortOrder:
+										item.workoutPlanExerciseSortOrder,
 									totalExercises: planExercises.length,
 									onDelete: () =>
 										handleDeleteExercise(
@@ -405,11 +405,7 @@ const WorkoutPlanExerciseListItemRender = ({
 }: RenderItemParams<WorkoutPlanExerciseListItemProps>) => {
 	return (
 		<ScaleDecorator activeScale={1.02}>
-			<WorkoutPlanExerciseListItem
-				{...item}
-				drag={drag}
-				isActive={isActive}
-			/>
+			<WorkoutPlanExerciseListItem {...item} drag={drag} isActive={isActive} />
 		</ScaleDecorator>
 	);
 };
@@ -476,10 +472,10 @@ const WorkoutPlanExerciseListItem = ({
 				open={openUpdateForm}
 			>
 				<DialogTrigger asChild>
-					<Pressable
-						onLongPress={drag}
-					>
-						<Card className={`overflow-hidden ${isActive ? "scale-105 opacity-70" : ""}`}>
+					<Pressable onLongPress={drag}>
+						<Card
+							className={`overflow-hidden ${isActive ? "scale-105 opacity-70" : ""}`}
+						>
 							<CardContent className="p-0">
 								<View className="flex-row">
 									<View
@@ -523,13 +519,13 @@ const WorkoutPlanExerciseListItem = ({
 													</Text>
 												</Badge>
 												{exercisePrimaryMuscleGroup && (
-												<Badge variant="secondary">
-													<Text className="text-xs">
-														{
-															MUSCLE_GROUPS[i18n.locale][
-																exercisePrimaryMuscleGroup
-															]
-														}
+													<Badge variant="secondary">
+														<Text className="text-xs">
+															{
+																MUSCLE_GROUPS[i18n.locale][
+																	exercisePrimaryMuscleGroup
+																]
+															}
 														</Text>
 													</Badge>
 												)}
