@@ -105,8 +105,8 @@ export const WorkoutPlanForm = ({
 	const form = useForm({
 		onSubmit: async ({ value }: { value: schema.NewWorkoutPlan }) => {
 			const workoutPlan = {
-				name: value.name,
-				description: value.description ? value.description : null,
+				name: value.name.trim(),
+				description: value.description ? value.description.trim() : null,
 			};
 			try {
 				if (isUpdate && planId) {

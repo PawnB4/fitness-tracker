@@ -49,7 +49,7 @@ export default function Page() {
 	const form = useForm({
 		onSubmit: async ({ value }: { value: schema.NewUser }) => {
 			const newUser = {
-				name: value.name,
+				name: value.name.trim(),
 				weeklyTarget: value.weeklyTarget,
 				locale: locale,
 			};

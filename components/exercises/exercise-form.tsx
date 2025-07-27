@@ -113,7 +113,7 @@ export const ExerciseForm = ({
 	const form = useForm({
 		onSubmit: async ({ value }: { value: schema.NewExercise }) => {
 			const newExercise = {
-				name: value.name,
+				name: value.name.trim(),
 				type: value.type.value,
 				primaryMuscleGroup: value.primaryMuscleGroup?.value ?? null,
 			};
@@ -159,7 +159,7 @@ export const ExerciseForm = ({
 								<Input
 									onChangeText={field.handleChange}
 									placeholder={i18n.t("namePlaceholder")}
-									value={field.state.value as string}
+									value={field.state.value}
 								/>
 								{field.state.meta.errors ? (
 									<Text className="text-red-500">

@@ -3,6 +3,7 @@ import { openDatabaseSync } from "expo-sqlite";
 
 export const fitnessTrackerDb = openDatabaseSync(
 	"fitness-tracker-production.db",
+	// "fitness-tracker-development.db",
 	{
 		enableChangeListener: true,
 	},
