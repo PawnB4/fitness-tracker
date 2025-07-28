@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { z } from "zod";
 
 // Exercise definitions table (reusable exercises)
@@ -125,6 +125,9 @@ export const repsSchema = z
 		message: "Reps must be a number",
 	})
 	.refine((val) => Number(val) >= 1, { message: "Reps must be at least 1" })
+	.refine((val) => Number(val) < 99, {
+		message: "Reps must be less than 99",
+	})
 	.refine((val) => Number.isInteger(Number(val)), {
 		message: "Reps must be a whole number",
 	});
@@ -137,6 +140,9 @@ export const weightSchema = z
 	})
 	.refine((val) => Number(val) >= 0, {
 		message: "Weight cannot be negative",
+	})
+	.refine((val) => Number(val) < 999, {
+		message: "Weight must be less than 999",
 	});
 
 export const setsSchema = z
@@ -147,6 +153,9 @@ export const setsSchema = z
 	})
 	.refine((val) => Number(val) >= 1, {
 		message: "Sets must be at least 1",
+	})
+	.refine((val) => Number(val) < 99, {
+		message: "Sets must be less than 99",
 	})
 	.refine((val) => Number.isInteger(Number(val)), {
 		message: "Sets must be a whole number",
@@ -179,6 +188,9 @@ export const insertUserSchema = z.object({
 		})
 		.refine((val) => Number(val) >= 1, {
 			message: "Weekly target must be at least 1",
+		})
+		.refine((val) => Number(val) <= 14, {
+			message: "Weekly target must be less than 14",
 		})
 		.refine((val) => Number.isInteger(Number(val)), {
 			message: "Weekly target must be a whole number",

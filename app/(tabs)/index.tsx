@@ -6,7 +6,6 @@ import { I18n } from "i18n-js";
 import { useEffect, useMemo, useState } from "react";
 import {
 	ActivityIndicator,
-	Pressable,
 	ScrollView,
 	TouchableOpacity,
 	View,

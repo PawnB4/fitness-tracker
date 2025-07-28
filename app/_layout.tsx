@@ -19,7 +19,6 @@ import {
 	configureReanimatedLogger,
 	ReanimatedLogLevel,
 } from "react-native-reanimated";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SplashScreen } from "~/components/splash-screen";
 import { Text } from "~/components/ui/text";
 import { UserButton } from "~/components/user/user-button";

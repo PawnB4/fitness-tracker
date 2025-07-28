@@ -3,7 +3,7 @@ import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { I18n } from "i18n-js";
 import { useMemo } from "react";
-import { ActivityIndicator, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { Card } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
 import { WorkoutCard } from "~/components/workouts/workout-card";

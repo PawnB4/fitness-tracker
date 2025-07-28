@@ -5,9 +5,8 @@ import * as FileSystem from "expo-file-system";
 import { Directory, File, Paths } from "expo-file-system/next";
 import * as Sharing from "expo-sharing";
 import { I18n } from "i18n-js";
-import { Languages } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, View } from "react-native";
+import { Alert, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DialogTitle } from "~/components/ui/dialog";
 import {

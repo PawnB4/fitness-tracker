@@ -7,13 +7,10 @@ import { useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Animated,
-	Pressable,
-	ScrollView,
-	StyleSheet,
 	TouchableOpacity,
 	View,
 } from "react-native";
-import DraggableFlatList, {
+import {
 	type DragEndParams,
 	NestableDraggableFlatList,
 	NestableScrollContainer,
@@ -40,7 +37,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
+import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
 import { Textarea } from "~/components/ui/textarea";
@@ -54,7 +51,6 @@ import {
 	MUSCLE_GROUPS,
 } from "~/lib/constants";
 import { Calendar } from "~/lib/icons/Calendar";
-import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { Clock } from "~/lib/icons/Clock";
 import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { Pencil } from "~/lib/icons/Pencil";
@@ -63,7 +59,6 @@ import {
 	formatDate,
 	formatDurationFromSeconds,
 	formatTime,
-	minutesSecondsToTotalSeconds,
 } from "~/utils/date";
 
 const i18n = new I18n({
@@ -761,7 +756,7 @@ const WorkoutExerciseListItem = ({
 									</View>
 
 									{allSetsIdentical ? (
-										<View className="flex-row rounded-b-lg border-gray-200 border-x border-b bg-white p-3 dark:border-gray-700 dark:bg-gray-80">
+										<View className="flex-row rounded-b-lg border-gray-200 border-x border-b bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
 											<Text className="flex-1 text-center font-medium text-sm">
 												{item.workoutExerciseData.length}
 											</Text>

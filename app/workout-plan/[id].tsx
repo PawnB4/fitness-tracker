@@ -7,7 +7,6 @@ import { useState } from "react";
 import {
 	ActivityIndicator,
 	Pressable,
-	ScrollView,
 	TouchableOpacity,
 	View,
 } from "react-native";
@@ -41,7 +40,6 @@ import { Dumbbell } from "~/lib/icons/Dumbbell";
 import { Menu } from "~/lib/icons/Menu";
 import { Plus } from "~/lib/icons/Plus";
 import { Trash2 } from "~/lib/icons/Trash2";
-import { Triangle } from "~/lib/icons/Triangle";
 import { formatDate } from "~/utils/date";
 
 const i18n = new I18n({
