@@ -43,11 +43,11 @@ export const WorkoutPlanCard = ({
 			activeOpacity={0.7}
 			onPress={() => router.push(`/workout-plan/${id}`)}
 		>
-			<Card className="flex-1 rounded-2xl ">
-				<CardContent className="px-3 py-4 ">
+			<Card className="flex-1 rounded-2xl">
+				<CardContent className="px-3 py-4">
 					<View className="flex flex-row items-center gap-2 pl-8">
 						<CardTitle className="leading-normal">{name}</CardTitle>
-						<Text className=" ml-auto pr-8 font-funnel-bold text-foreground/70 ">
+						<Text className="ml-auto pr-8 font-funnel-bold text-foreground/70">
 							{workoutPlanExercises?.length}{" "}
 							{workoutPlanExercises?.length === 1
 								? i18n.t("exercise")

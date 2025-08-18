@@ -174,7 +174,7 @@ export const ExerciseForm = ({
 							<>
 								<Label nativeID={field.name}>{i18n.t("type")}:</Label>
 								<Select
-									// @ts-ignore
+									// @ts-expect-error
 									onValueChange={field.handleChange}
 									value={field.state.value}
 								>
@@ -200,7 +200,7 @@ export const ExerciseForm = ({
 									</SelectContent>
 								</Select>
 								{field.state.meta.errors ? (
-									<Text className="text-red-500 ">
+									<Text className="text-red-500">
 										{field.state.meta.errors[0]?.message}
 									</Text>
 								) : null}
@@ -216,7 +216,6 @@ export const ExerciseForm = ({
 								</Label>
 
 								<Select
-									// @ts-ignore
 									onValueChange={field.handleChange}
 									value={field.state.value as Option}
 								>

@@ -508,7 +508,7 @@ export default function Page() {
 			</View>
 
 			<View className="w-full flex-1 flex-row px-4 py-8 pt-2">
-				<AlertDialog className=" w-full">
+				<AlertDialog className="w-full">
 					<AlertDialogTrigger asChild>
 						<Button className="flex-1" size="lg" variant="destructive">
 							<Text className="font-funnel-bold text-destructive-foreground">

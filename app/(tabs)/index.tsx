@@ -328,7 +328,7 @@ export default function Page() {
 		<SafeAreaView className="flex-1 justify-center gap-4 bg-secondary/30 px-4 py-8">
 			<View className="flex flex-row items-center justify-between gap-2 px-2">
 				<View className="flex flex-col gap-2">
-					<Text className="text-4xl ">{i18n.t("hello")},</Text>
+					<Text className="text-4xl">{i18n.t("hello")},</Text>
 					<Text className="font-funnel-bold text-6xl">{user?.[0]?.name}</Text>
 				</View>
 				<UserIcon />

@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
@@ -15,7 +15,8 @@
 	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab"
+		"indentStyle": "tab",
+		"lineEnding": "crlf"
 	},
 	"javascript": {
 		"formatter": {
@@ -40,7 +41,8 @@
 				"noUnusedImports": {
 					"fix": "safe"
 				},
-				"noUnusedVariables": "off"
+				"noUnusedVariables": "off",
+				"useParseIntRadix": "off"
 			},
 			"nursery": {
 				"useSortedClasses": {
@@ -57,7 +59,12 @@
 				}
 			},
 			"suspicious": {
-				"noGlobalIsNan": "off"
+				"noGlobalIsNan": "off",
+				"useIterableCallbackReturn": "off",
+				"noTsIgnore": "off"
+			},
+			"a11y": {
+				"useSemanticElements": "off"
 			}
 		}
 	},

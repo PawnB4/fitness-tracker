@@ -149,7 +149,7 @@ export const ExerciseCard = ({
 							<AlertDialog>
 								<AlertDialogTrigger asChild>
 									<TouchableOpacity className="rounded-full bg-red-100 p-1.5">
-										<Trash2 className="size-3 text-destructive " />
+										<Trash2 className="size-3 text-destructive" />
 									</TouchableOpacity>
 								</AlertDialogTrigger>
 								<AlertDialogContent>

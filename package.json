@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@biomejs/biome": "2.0.6",
+    "@biomejs/biome": "2.2.0",
     "@types/react": "~19.0.14",
     "drizzle-kit": "^0.31.4",
     "typescript": "^5.8.3"

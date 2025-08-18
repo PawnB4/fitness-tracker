@@ -149,7 +149,7 @@ export const MonthlyWorkouts = ({ height }: { height: number }) => {
 	);
 
 	return (
-		<View className="w-full flex-col gap-2 bg-card ">
+		<View className="w-full flex-col gap-2 bg-card">
 			<View className="flex-col gap-2">
 				<Card className="p-2">
 					<Text className="font-funnel-bold text-2xl text-foreground">

@@ -396,7 +396,7 @@ export function UserForm({
 	};
 
 	return (
-		<View className="flex flex-col justify-center gap-4 ">
+		<View className="flex flex-col justify-center gap-4">
 			<DialogTitle className="">{i18n.t("title")}</DialogTitle>
 
 			<View className="mt-4 flex flex-row items-center justify-between gap-2">
@@ -411,10 +411,8 @@ export function UserForm({
 							preferredTheme: e?.value,
 						})
 					}
-					// @ts-ignore
 					value={{
-						// @ts-ignore
-						value: configObject?.preferredTheme,
+						value: configObject?.preferredTheme ?? "light",
 						label:
 							configObject?.preferredTheme === "dark"
 								? i18n.t("dark")

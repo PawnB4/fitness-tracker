@@ -704,7 +704,7 @@ export const WorkoutPlanExerciseForm = ({
 
 					{/* Column Headers */}
 					<View className="flex flex-row justify-around py-2">
-						<View className="flex w-1/3 items-center justify-center ">
+						<View className="flex w-1/3 items-center justify-center">
 							<Label className="text-center">
 								{i18n.t("sets").charAt(0).toUpperCase() +
 									i18n.t("sets").slice(1)}

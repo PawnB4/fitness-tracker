@@ -15,12 +15,14 @@ const i18n = new I18n({
 		completed: "Completed",
 		notCompleted: "Not completed",
 		exercise: "Exercise",
+		noTime: "No time",
 	},
 	es: {
 		workoutOf: "Entrenamiento del",
 		completed: "Completado",
 		notCompleted: "No completado",
 		exercise: "Ejercicio",
+		noTime: "Sin fecha",
 	},
 });
 
@@ -49,25 +51,25 @@ export const WorkoutCard = ({
 					</CardTitle>
 
 					<View className="h-1 rounded bg-sky-500/70" />
-					<View className="mt-2 flex-row justify-evenly">
-						<View className="flex-row items-center gap-2 border-0">
-							<Clock className="mr-1 size-3 text-primary" />
+					<View className="mt-2 flex-row">
+						<View className="w-1/3 flex-row items-center justify-center gap-1 border-0">
+							<Clock className="size-3 text-primary" />
 							<Text className="text-primary text-sm">
-								{createdAt ? formatTime(createdAt) : "No time"}
+								{createdAt ? formatTime(createdAt) : i18n.t("noTime")}
 							</Text>
 						</View>
-						<View className="flex-row items-center gap-2 border-0">
-							<Dumbbell className="mr-1 size-3 text-primary" />
+						<View className="w-1/3 flex-row items-center justify-stretch gap-2 border-0">
+							<Dumbbell className="size-3 text-primary" />
 							<Text className="text-primary text-sm">
 								{totalExercises} {i18n.t("exercise")}
 								{totalExercises === 1 ? "" : "s"}
 							</Text>
 						</View>
-						<View className="flex-row items-center gap-2 border-0">
+						<View className="w-1/3 flex-row items-center justify-stretch gap-1 border-0">
 							{totalExercises > 0 && isCompleted ? (
-								<View className="flex-row items-center gap-2 border-0">
+								<View className="flex-row items-center gap-1 border-0">
 									<CircleCheck
-										className="mr-1 size-3 text-primary"
+										className="size-3 text-primary"
 										fill={"#4ade80"}
 									/>
 									<Text className="text-primary text-sm">
@@ -75,11 +77,8 @@ export const WorkoutCard = ({
 									</Text>
 								</View>
 							) : (
-								<View className="flex-row items-center gap-2 border-0">
-									<CircleX
-										className="mr-1 size-3 text-primary"
-										fill={"#f87171"}
-									/>
+								<View className="flex-row items-center gap-1 border-0">
+									<CircleX className="size-3 text-primary" fill={"#f87171"} />
 									<Text className="text-primary text-sm">
 										{i18n.t("notCompleted")}
 									</Text>

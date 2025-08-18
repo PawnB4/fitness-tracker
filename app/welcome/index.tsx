@@ -59,7 +59,7 @@ export default function Page() {
 					weeklyTarget: Number(newUser.weeklyTarget),
 					locale: newUser.locale,
 				});
-				router.push("/");
+				router.replace("/");
 			} catch (error) {
 				console.log(error);
 				alert(`Something went wrong: ${error}`);
@@ -82,7 +82,7 @@ export default function Page() {
 				</Text>
 			</Pressable>
 			{/* Header Section */}
-			<View className=" items-center justify-center">
+			<View className="items-center justify-center">
 				<View className="mb-8 rounded-full bg-primary/10 p-8">
 					<Dumbbell className="h-16 w-16 text-primary" />
 				</View>
