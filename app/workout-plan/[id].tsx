@@ -47,7 +47,6 @@ const i18n = new I18n({
 		exercises: "exercises",
 		exercise: "exercise",
 		created: "Created",
-		noDate: "No date",
 		noExercisesAddedToThisPlanYet: "No exercises added to this plan yet.",
 		addExercise: "Add Exercise",
 		tapAddExerciseToGetStarted: "Tap 'Add Exercise' to get started!",
@@ -56,7 +55,6 @@ const i18n = new I18n({
 		exercises: "ejercicios",
 		exercise: "ejercicio",
 		created: "Creado",
-		noDate: "Sin fecha",
 		noExercisesAddedToThisPlanYet:
 			"No hay ejercicios agregados a esta rutina todavía.",
 		addExercise: "Agregar ejercicio",
@@ -269,8 +267,7 @@ export default function Page() {
 					<View className="flex-row items-center gap-2 border-0">
 						<Calendar className="mr-1 size-3 text-primary-foreground" />
 						<Text className="font-funnel text-primary-foreground text-sm">
-							{i18n.t("created")}{" "}
-							{plan.createdAt ? formatDate(plan.createdAt) : i18n.t("noDate")}
+							{i18n.t("created")} {formatDate(plan.createdAt)}
 						</Text>
 					</View>
 				</View>

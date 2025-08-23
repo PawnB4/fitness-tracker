@@ -513,7 +513,7 @@ export const WorkoutExerciseForm = ({
 				setLastExercise(null);
 				return;
 			}
-			const createdAt = exercise.createdAt ?? "";
+			const createdAt = exercise.createdAt;
 			// Calculate display values from the JSON data
 			const totalSets = exercise.workoutExerciseData.length;
 			const firstSet = exercise.workoutExerciseData[0];
@@ -669,7 +669,7 @@ export const WorkoutExerciseForm = ({
 										<Info className="text-primary" />
 										<Text className="text-primary">
 											{i18n.t("lastStatsForThisExercise")} (
-											{formatDate(lastExercise.createdAt ?? "")}):
+											{formatDate(lastExercise.createdAt)}):
 										</Text>
 									</View>
 									<View className="flex flex-row justify-around gap-8 self-center">

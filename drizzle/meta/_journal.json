@@ -71,6 +71,13 @@
 			"when": 1752975504907,
 			"tag": "0009_lucky_reavers",
 			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "6",
+			"when": 1755915472677,
+			"tag": "0010_lonely_rawhide_kid",
+			"breakpoints": true
 		}
 	]
 }

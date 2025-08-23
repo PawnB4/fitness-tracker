@@ -492,7 +492,7 @@ export default function Page() {
 											startOfWeek.setDate(now.getDate() - daysToMonday);
 											startOfWeek.setHours(0, 0, 0, 0);
 
-											return new Date(w.createdAt || "") >= startOfWeek;
+											return new Date(w.createdAt) >= startOfWeek;
 										}).length
 									}
 								</Text>
@@ -513,8 +513,7 @@ export default function Page() {
 											startOfWeek.setHours(0, 0, 0, 0);
 
 											return (
-												new Date(w.createdAt || "") >= startOfWeek &&
-												w.isCompleted
+												new Date(w.createdAt) >= startOfWeek && w.isCompleted
 											);
 										}).length
 									}
@@ -545,7 +544,7 @@ export default function Page() {
 											);
 											startOfMonth.setHours(0, 0, 0, 0);
 
-											return new Date(w.createdAt || "") >= startOfMonth;
+											return new Date(w.createdAt) >= startOfMonth;
 										}).length
 									}
 								</Text>
@@ -566,8 +565,7 @@ export default function Page() {
 											startOfMonth.setHours(0, 0, 0, 0);
 
 											return (
-												new Date(w.createdAt || "") >= startOfMonth &&
-												w.isCompleted
+												new Date(w.createdAt) >= startOfMonth && w.isCompleted
 											);
 										}).length
 									}
@@ -598,10 +596,10 @@ export default function Page() {
 
 								<View className="flex flex-row items-center justify-around gap-2">
 									<Text className="text-muted-foreground text-sm">
-										{formatDate(processedWorkouts[0].createdAt ?? "")}
+										{formatDate(processedWorkouts[0].createdAt)}
 									</Text>
 									<Text className="text-muted-foreground text-sm">
-										{formatTime(processedWorkouts[0].createdAt ?? "")}
+										{formatTime(processedWorkouts[0].createdAt)}
 									</Text>
 									<Text className="text-muted-foreground text-sm">
 										{processedWorkouts[0].totalExercises} {i18n.t("exercise")}

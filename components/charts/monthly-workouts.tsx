@@ -78,7 +78,7 @@ export const MonthlyWorkouts = ({ height }: { height: number }) => {
 		const currentYear = new Date().getFullYear();
 
 		workouts?.forEach((workout) => {
-			const workoutDate = new Date(workout.createdAt ?? "");
+			const workoutDate = new Date(workout.createdAt);
 			const workoutYear = workoutDate.getFullYear();
 
 			// Only count workouts from the current year

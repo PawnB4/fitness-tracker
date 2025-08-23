@@ -8,8 +8,11 @@ export const exercises = sqliteTable("exercises", {
 	name: text().notNull().unique(),
 	type: text().notNull(), // "upper body", "lower body", "core", "cardio", etc.
 	primaryMuscleGroup: text(),
-	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: text()
+		.default(sql`(CURRENT_TIMESTAMP)`)
+		.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`)
+		.notNull(),
 });
 
 // Workouts table
@@ -17,8 +20,11 @@ export const workouts = sqliteTable("workouts", {
 	id: integer().primaryKey({ autoIncrement: true }),
 	name: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 	notes: text(),
-	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: text()
+		.default(sql`(CURRENT_TIMESTAMP)`)
+		.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`)
+		.notNull(),
 });
 
 // Workout-specific exercises (junction table with additional data)
@@ -44,8 +50,11 @@ export const workoutExercises = sqliteTable("workout_exercises", {
 	notes: text(), // For workout-specific notes about this exercise
 	sortOrder: integer().notNull(), // For ordering exercises within a workout
 	completed: integer({ mode: "boolean" }).default(false),
-	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: text()
+		.default(sql`(CURRENT_TIMESTAMP)`)
+		.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`)
+		.notNull(),
 });
 
 // Workout plans table
@@ -53,8 +62,8 @@ export const workoutPlans = sqliteTable("workout_plans", {
 	id: integer().primaryKey({ autoIncrement: true }),
 	name: text().notNull().unique(),
 	description: text(),
-	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 });
 
 // Plan exercises (exercises in a plan with their default values)
@@ -78,8 +87,11 @@ export const workoutPlanExercises = sqliteTable("workout_plan_exercises", {
 		.notNull()
 		.default(sql`'[]'`),
 	sortOrder: integer().notNull(), // To maintain exercise order in plan
-	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`),
-	updatedAt: text().default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: text()
+		.default(sql`(CURRENT_TIMESTAMP)`)
+		.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`)
+		.notNull(),
 });
 
 export const user = sqliteTable("user", {
@@ -89,12 +101,14 @@ export const user = sqliteTable("user", {
 			timezone?: string;
 		}>()
 		.default({
-			preferredTheme: "dark",
+			preferredTheme: "light",
 			timezone: "America/Argentina/Buenos_Aires",
-		}),
-	name: text(),
-	weeklyTarget: integer(),
-	locale: text(),
+		})
+		.notNull(),
+	name: text().notNull(),
+	weeklyTarget: integer().notNull(),
+	locale: text().notNull(),
+	bodyweight: integer().notNull(),
 });
 
 // Zod schemas
@@ -195,6 +209,18 @@ export const insertUserSchema = z.object({
 		.refine((val) => Number.isInteger(Number(val)), {
 			message: "Weekly target must be a whole number",
 		}),
+	bodyweight: z
+		.string()
+		.min(1, { message: "Bodyweight is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Bodyweight must be a number",
+		})
+		.refine((val) => Number(val) >= 1, {
+			message: "Bodyweight must be at least 1",
+		})
+		.refine((val) => Number(val) <= 999, {
+			message: "Bodyweight must be less than 999",
+		}),
 });
 
 // Types
@@ -203,8 +229,8 @@ export type Exercise = {
 	id: number;
 	name: string;
 	type: string;
-	createdAt: string | null;
-	updatedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 	primaryMuscleGroup: string | null;
 };
 export type NewExercise = z.infer<typeof insertExerciseSchema>;
@@ -213,15 +239,15 @@ export type Workout = {
 	id: number;
 	name: string;
 	notes: string | null;
-	createdAt: string | null;
-	updatedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 };
 
 export type WorkoutExercise = {
 	id: number;
 	notes: string | null;
-	createdAt: string | null;
-	updatedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 	workoutId: number;
 	exerciseId: number;
 	workoutExerciseData: WorkoutExerciseData[];
@@ -240,15 +266,15 @@ export type WorkoutPlan = {
 	id: number;
 	name: string;
 	description: string | null;
-	createdAt: string | null;
-	updatedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 };
 export type NewWorkoutPlan = z.infer<typeof insertWorkoutPlansSchema>;
 
 export type WorkoutPlanExercise = {
 	id: number;
-	createdAt: string | null;
-	updatedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 	exerciseId: number;
 	sortOrder: number;
 	planId: number;
@@ -263,12 +289,13 @@ export type WorkoutPlanExerciseData = {
 };
 
 export type User = {
-	name: string | null;
-	weeklyTarget: number | null;
+	name: string;
+	weeklyTarget: number;
 	config: {
 		preferredTheme?: string;
 		timezone?: string;
 	} | null;
-	locale: string | null;
+	locale: string;
+	bodyweight: number;
 };
 export type NewUser = z.infer<typeof insertUserSchema>;

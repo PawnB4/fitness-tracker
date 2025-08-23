@@ -321,17 +321,13 @@ export default function Page() {
 					<View className="flex-row items-center">
 						<Calendar className="mr-2 text-primary-foreground" size={18} />
 						<Text className="text-md text-primary-foreground">
-							{workout.createdAt
-								? formatDate(workout.createdAt)
-								: i18n.t("noDate")}
+							{formatDate(workout.createdAt)}
 						</Text>
 					</View>
 					<View className="flex-row items-center">
 						<Clock className="mr-2 text-primary-foreground" size={18} />
 						<Text className="text-md text-primary-foreground">
-							{workout.createdAt
-								? formatTime(workout.createdAt)
-								: i18n.t("noTime")}
+							{formatTime(workout.createdAt)}
 						</Text>
 					</View>
 				</View>
@@ -463,7 +459,7 @@ export default function Page() {
 								contentContainerStyle={{
 									gap: 12,
 								}}
-								data={workoutExercises.map((item, index) => ({
+								data={workoutExercises.map((item, _index) => ({
 									workoutExerciseId: item.workoutExerciseId,
 									exerciseId: item.exerciseId,
 									exerciseName: item.exerciseName,

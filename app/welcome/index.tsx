@@ -3,7 +3,7 @@ import { getLocales } from "expo-localization";
 import { router } from "expo-router";
 import { I18n } from "i18n-js";
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Keyboard, Pressable, View } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -22,6 +22,8 @@ const i18n = new I18n({
 		formNamePlaceholder: "Enter your name",
 		formWeeklyTarget: "How many workouts do you want to do per week?",
 		formWeeklyTargetPlaceholder: "Enter your weekly target",
+		formBodyweight: "What is your bodyweight?",
+		formBodyweightPlaceholder: "Enter your bodyweight",
 		beginButton: "Get Started",
 	},
 	es: {
@@ -32,6 +34,8 @@ const i18n = new I18n({
 		formNamePlaceholder: "Ingresá tu nombre",
 		formWeeklyTarget: "¿Cuántos entrenamientos querés hacer por semana?",
 		formWeeklyTargetPlaceholder: "Ingresá tu objetivo semanal",
+		formBodyweight: "¿Cuál es tu peso corporal?",
+		formBodyweightPlaceholder: "Ingresá tu peso corporal",
 		beginButton: "Empezar",
 	},
 });
@@ -40,6 +44,15 @@ export default function Page() {
 	const deviceLanguage = getLocales()[0].languageCode;
 	const [locale, setLocale] = useState(deviceLanguage ?? "en");
 	i18n.locale = locale;
+	const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+	Keyboard.addListener("keyboardDidShow", () => {
+		setIsKeyboardVisible(true);
+	});
+
+	Keyboard.addListener("keyboardDidHide", () => {
+		setIsKeyboardVisible(false);
+	});
 
 	const swapLanguage = () => {
 		const newLocale = locale === "en" ? "es" : "en";
@@ -51,15 +64,19 @@ export default function Page() {
 			const newUser = {
 				name: value.name.trim(),
 				weeklyTarget: value.weeklyTarget,
+				bodyweight: value.bodyweight,
 				locale: locale,
 			};
 			try {
 				await db.insert(schema.user).values({
 					name: newUser.name,
 					weeklyTarget: Number(newUser.weeklyTarget),
+					bodyweight: Number(newUser.bodyweight),
 					locale: newUser.locale,
 				});
 				router.replace("/");
+				Keyboard.removeAllListeners("keyboardDidShow");
+				Keyboard.removeAllListeners("keyboardDidHide");
 			} catch (error) {
 				console.log(error);
 				alert(`Something went wrong: ${error}`);
@@ -82,19 +99,20 @@ export default function Page() {
 				</Text>
 			</Pressable>
 			{/* Header Section */}
-			<View className="items-center justify-center">
-				<View className="mb-8 rounded-full bg-primary/10 p-8">
-					<Dumbbell className="h-16 w-16 text-primary" />
+			{!isKeyboardVisible && (
+				<View className="items-center justify-center">
+					<View className="mb-8 rounded-full bg-primary/10 p-8">
+						<Dumbbell className="h-16 w-16 text-primary" />
+					</View>
+
+					<Text className="mb-4 text-center font-funnel-bold text-4xl text-foreground">
+						{i18n.t("title")}
+					</Text>
+					<Text className="max-w-sm text-center text-lg text-muted-foreground leading-relaxed">
+						{i18n.t("subtitle")}
+					</Text>
 				</View>
-
-				<Text className="mb-4 text-center font-funnel-bold text-4xl text-foreground">
-					{i18n.t("title")}
-				</Text>
-
-				<Text className="max-w-sm text-center text-lg text-muted-foreground leading-relaxed">
-					{i18n.t("subtitle")}
-				</Text>
-			</View>
+			)}
 
 			{/* Form Section */}
 			<View className="flex flex-col gap-2">
@@ -107,6 +125,26 @@ export default function Page() {
 								placeholder={i18n.t("formNamePlaceholder")}
 								value={field.state.value}
 							/>
+							{field.state.meta.errors ? (
+								<Text className="text-red-500">
+									{field.state.meta.errors[0]?.message}
+								</Text>
+							) : null}
+						</>
+					)}
+				</form.Field>
+
+				<form.Field defaultValue={""} name="bodyweight">
+					{(field) => (
+						<>
+							<Label nativeID={field.name}>{i18n.t("formBodyweight")}</Label>
+							<Input
+								inputMode="numeric"
+								onChangeText={field.handleChange}
+								placeholder={i18n.t("formBodyweightPlaceholder")}
+								value={field.state.value}
+							/>
+
 							{field.state.meta.errors ? (
 								<Text className="text-red-500">
 									{field.state.meta.errors[0]?.message}
@@ -137,7 +175,7 @@ export default function Page() {
 				</form.Field>
 
 				<Button
-					className="h-14 w-full shadow-foreground/10 shadow-lg"
+					className="mt-6 w-full shadow-foreground/10 shadow-lg"
 					onPress={form.handleSubmit}
 				>
 					<Text className="font-funnel-semibold text-lg">

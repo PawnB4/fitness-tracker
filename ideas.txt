@@ -3,49 +3,53 @@
 ## 🏋️ EXERCISE PROGRESSION TRACKING
 
 ### Weight Progression
-- **Estimated 1RM progression**: Instead of raw weight, calculate estimated 1RM using formulas (Epley, Brzycki) to compare different set/rep schemes
+- **Estimated 1RM progression**: Instead of raw weight, calculate estimated 1RM using formulas (Epley, Brzycki) to compare different set/rep schemes <!-- PICK ONE formula globally (recommend Epley for <=10 reps); skip duration-only or 0kg sets; take best set per session. -->
   - Example: 3x5 @ 40kg = ~45kg 1RM, 4x12 @ 28kg = ~40kg 1RM (shows regression)
-- **Volume-adjusted progression**: Track weight increases at same rep ranges
+- **Volume-adjusted progression**: Track weight increases at same rep ranges <!-- Feasible using workout_exercises.workoutExerciseData grouped by exercise + rep-range buckets. -->
   - Example: Bench press at 8-10 reps: 60kg → 62.5kg → 65kg over time
-- **Personal Records** dashboard showing max weight achieved for each exercise at different rep ranges (1RM, 3RM, 5RM, 10RM)
-- **Progressive overload tracking**: Show when user increases weight, reps, or sets from previous session
-- **Plateau detection**: Alert when estimated 1RM hasn't improved in 3-4 weeks for same exercise
+- **Personal Records** dashboard showing max weight achieved for each exercise at different rep ranges (1RM, 3RM, 5RM, 10RM) <!-- Use estimated 1RM per exercise + rep range; surface top-N recent PRs. -->
+- **Progressive overload tracking**: Show when user increases weight, reps, or sets from previous session <!-- Feasible session-over-session for same exercise; planned vs completed sets not stored, so compare actuals only. -->
+- **Plateau detection**: Alert when estimated 1RM hasn't improved in 3-4 weeks for same exercise <!-- Define plateau as <1–2% 1RM improvement over 28 days; use 7‑day EMA to smooth. -->
+
+- **Relative strength (1RM/bodyweight)** <!-- Needs user bodyweight in schema/config; useful for bodyweight lifts and comparability. -->
 
 ### Volume Progression
-- Total volume per exercise (sets × reps × weight) over time
+- Total volume per exercise (sets × reps × weight) over time <!-- OK; duration-only sets produce 0 tonnage, consider separate duration metric. -->
 - Volume progression charts comparing current vs previous months
-- Volume per muscle group distribution
+- Volume per muscle group distribution <!-- Use exercises.primaryMuscleGroup; guard nulls with "Unknown" bucket. -->
 - Weekly/monthly volume trends
 - Volume-based personal records
+- Rolling 4-week average volume <!-- Smoother than week-to-week; good for trend. -->
 
 ### Rep & Set Performance Tracking
 **Examples of what this tracks:**
 - **Rep progression**: User does bench press 3x8 @ 60kg, next week does 3x10 @ 60kg (improved endurance)
-- **Set completion**: User plans 4 sets but only completes 3 → 75% completion rate
+- **Set completion**: User plans 4 sets but only completes 3 → 75% completion rate <!-- Not possible with current schema: no planned sets stored. Replace with "exercise completion rate" using workout_exercises.completed, or add planned fields. -->
 
 ## 📊 WORKOUT ANALYTICS
 
 ### Frequency & Consistency
-- Workout frequency heatmap (like GitHub contributions)
-- **Workout streaks**: Track consecutive days with workouts OR consecutive weeks with X workouts
+- Workout frequency heatmap (like GitHub contributions) <!-- Based on workouts.createdAt in local timezone. -->
+- **Workout streaks**: Track consecutive days with workouts OR consecutive weeks with X workouts <!-- Weekly target exists (user.weeklyTarget); compute day streak and week streak. -->
   - Example: "7-day streak" = worked out 7 days in a row
   - Example: "4-week streak" = completed 3+ workouts per week for 4 weeks straight
-- Days between workouts tracking
+- Days between workouts tracking <!-- Simple diffs of sorted workouts.createdAt. -->
+- Rest day stats (avg rest length, longest/shortest) <!-- Easy derivative of days-between. -->
 
 ## 💪 MUSCLE GROUP BALANCE
 
 ### Training Distribution
-- Pie chart of training volume per muscle group
+- Pie chart of training volume per muscle group <!-- primaryMuscleGroup can be null; include "Unknown". -->
 - Weekly muscle group coverage tracking
 - Muscle group imbalance warnings (e.g., "Chest volume 3x higher than back volume")
 - Training frequency per muscle group
 - Recommended muscle groups to focus on
 
 ### Exercise Type Analysis
-- Upper body vs lower body vs core vs cardio distribution
-- Exercise variety tracking (how many different exercises per muscle group)
-- Compound vs isolation exercise ratio
-- Exercise rotation suggestions to prevent staleness
+- Upper body vs lower body vs core vs cardio distribution <!-- Use exercises.type. -->
+- Exercise variety tracking (how many different exercises per muscle group) <!-- Distinct exercise count by period. -->
+- Compound vs isolation exercise ratio <!-- Not in schema; consider exercises.isCompound boolean. -->
+- Exercise rotation suggestions to prevent staleness <!-- Start with heuristic: avoid repeating same exercise >X sessions in a row. -->
 
 ## 🎯 GOAL SETTING & ACHIEVEMENTS
 
@@ -58,10 +62,10 @@
 - Exercise mastery: "Performed squats 50 times", "Bench press specialist (100 sessions)"
 
 ### Progress Predictions
-- Projected timeline to reach weight goals based on current progression
-- Estimated 1RM calculations based on sets/reps/weight
-- Monthly progress forecasting
-- Goal achievement probability based on current consistency
+- Projected timeline to reach weight goals based on current progression <!-- Stretch: start with linear regression on estimated 1RM; show wide CI and "experimental" label. -->
+- Estimated 1RM calculations based on sets/reps/weight <!-- Core metric; standardize on Epley. -->
+- Monthly progress forecasting <!-- Start with rolling averages of volume and 1RM; avoid precise dates. -->
+- Goal achievement probability based on current consistency <!-- Speculative; derive from week streaks vs user.weeklyTarget; label beta. -->
 
 ## 📈 COMPARATIVE ANALYTICS
 
@@ -69,13 +73,13 @@
 - "This month vs last month" performance
 - "This year vs last year" progress
 - "Best month ever" achievements
-- Seasonal performance patterns
+- Seasonal performance patterns <!-- Gate until >=6 months of data. -->
 - Performance after breaks/rest periods
 
 ## 🔥 MOTIVATION & ENGAGEMENT
 
 ### Progress Celebrations
-- Weekly progress summaries
+- Weekly progress summaries <!-- In-app card; avoid email due to offline/local-first. -->
 - Monthly achievement reports
 - "You're stronger than X weeks ago" comparisons
 - Improvement percentage calculations
@@ -83,9 +87,9 @@
 ## 📱 DASHBOARD IDEAS
 
 ### Main Dashboard Widgets
-- Current streak counter
+- Current streak counter <!-- Days and weeks. -->
 - **This week's total volume example**: "This week: 8,450kg total lifted (vs 7,200kg last week)"
-  - Could be helpful to show overall training load and compare week-to-week
+-  - Could be helpful to show overall training load and compare week-to-week <!-- Use Mon–Sun aligned to user's timezone. -->
 - **Recent personal records examples**:
   - "New 5RM: Bench Press 70kg" (3 days ago)
   - "Volume PR: Squat 2,100kg this week"
@@ -109,7 +113,7 @@
 ### Summary Charts
 - Donut charts: Muscle group distribution
 - Heatmaps: Workout frequency calendar
-- Radar charts: Fitness balance across muscle groups
+- Radar charts: Fitness balance across muscle groups <!-- Keep axes few (e.g., 5–7 muscle groups) to reduce noise. -->
 - Progress bars: Goal achievement status
 
 ### Comparison Charts
@@ -127,8 +131,16 @@
 - Interactive exercise history exploration
 
 ### Personalized Insights
-- Weekly progress emails/notifications
+- Weekly progress emails/notifications <!-- Emails conflict with offline; prefer local notifications only. -->
 - "Today you're X% stronger than last month"
-- Personalized workout recommendations
+- Personalized workout recommendations <!-- Start with rules: suggest +2.5kg after hitting top of rep range in 2 consecutive sessions; suggest neglected muscle group next. -->
 - Progress milestone celebrations
-- Custom goal setting with progress tracking
+- Custom goal setting with progress tracking <!-- Leverage user.weeklyTarget; consider per-exercise targets in the future. -->
+
+## 🧱 Data model suggestions (minimal, to unlock analytics)
+
+- Add to `user.config`: `bodyWeightKg?: number`, `units?: "kg" | "lb"`, `bodyWeightUpdatedAt?: string` <!-- Enables relative strength and unit handling. -->
+- Add to `exercises`: `isCompound?: boolean`, `isBodyweight?: boolean` <!-- For compound/isolation ratios and bodyweight handling. -->
+- Extend `workoutExerciseData` items with optional fields: `rpe?: number`, `notes?: string` <!-- For fatigue/effort and richer insights; optional so old data still valid. -->
+- Optional planning fields: `plannedReps?`, `plannedWeight?`, `plannedSets?` or a separate `planned` array <!-- Enables true set completion metrics. -->
+- Cardio/time-based support: `distanceMeters?`, `paceSecPerKm?` on sets where `reps` is null <!-- Lets duration-based analytics live alongside lifting. -->

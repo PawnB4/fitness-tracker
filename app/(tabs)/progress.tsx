@@ -1,12 +1,15 @@
 import { count } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { ScrollView, View } from "react-native";
-import { MonthlyWorkouts } from "~/components/charts/monthly-workouts";
-import { Overview } from "~/components/progress/overview";
-import { Button } from "~/components/ui/button";
+import { router } from "expo-router";
+import { I18n } from "i18n-js";
+import { Pressable, ScrollView, View } from "react-native";
+// import { MonthlyWorkouts } from "~/components/charts/monthly-workouts";
+// import { Overview } from "~/components/progress/overview";
 import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
+
+const i18n = new I18n({});
 
 export default function Page() {
 	const { data: workoutCount, error: workoutCountError } = useLiveQuery(
@@ -16,6 +19,12 @@ export default function Page() {
 			})
 			.from(schema.workouts),
 	);
+
+	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
+	);
+
+	i18n.locale = userLocale?.[0]?.locale ?? "en";
 
 	// 15 workouts to see your progress
 	// if (workoutCount?.[0]?.count < 15) {
@@ -36,35 +45,24 @@ export default function Page() {
 	return (
 		<ScrollView className="flex flex-1 flex-col gap-6 p-4">
 			{/* OVERVIEW STATS ROW */}
-			<Overview />
-			<View className="flex flex-row gap-3">
-				<View className="flex-1 rounded-lg bg-purple-200 p-4">
-					<Text className="text-gray-600 text-sm">Current Streak</Text>
-					<Text className="font-bold text-2xl">12 days</Text>
-				</View>
-				<View className="flex-1 rounded-lg bg-purple-200 p-4">
-					<Text className="text-gray-600 text-sm">This Week Volume</Text>
-					<Text className="font-bold text-2xl">8,450kg</Text>
-					<Text className="text-green-600 text-xs">+17% vs last week</Text>
-				</View>
-				<View className="flex-1 rounded-lg bg-purple-200 p-4">
-					<Text className="text-gray-600 text-sm">Workouts</Text>
-					<Text className="font-bold text-2xl">4/4</Text>
-					<Text className="text-green-600 text-xs">On track</Text>
-				</View>
-			</View>
+			{/* <Overview locale={i18n.locale} /> */}
 
 			{/* RECENT ACHIEVEMENTS */}
+			<Pressable onPress={() => router.push("/welcome")}>
+				<Text>Go to welcome</Text>
+			</Pressable>
 			<View className="rounded-lg bg-green-100 p-4">
 				<Text className="mb-3 font-bold text-lg">
 					🏆 Recent Personal Records
 				</Text>
 				<View className="gap-2">
 					<Text className="text-sm">
-						• New 5RM: Bench Press 70kg (3 days ago)
+						• Est 1RM PR: Bench Press 92.5kg (today)
 					</Text>
-					<Text className="text-sm">• Volume PR: Squat 2,100kg this week</Text>
-					<Text className="text-sm">• First time: Deadlift 2x bodyweight</Text>
+					<Text className="text-sm">• 5RM PR: Squat 120kg (last week)</Text>
+					<Text className="text-sm">
+						• Volume PR: Deadlift 3,150kg (this week)
+					</Text>
 				</View>
 			</View>
 
@@ -104,7 +102,8 @@ export default function Page() {
 				</View>
 			</View>
 
-			{/* VOLUME ANALYSIS */}
+			{/* VOLUME ANALYSIS */
+			/* Feasible via sum(reps*weight) per period; duration-only sets excluded from tonnage. */}
 			<View className="gap-4">
 				<Text className="font-bold text-xl">💪 Volume Analysis</Text>
 
@@ -164,15 +163,17 @@ export default function Page() {
 			<View className="gap-4">
 				<Text className="font-bold text-xl">📊 Detailed Analytics</Text>
 
-				{/* Set & Rep Performance */}
+				{/* Execution & Rep Performance (feasible now) */}
 				<View className="rounded-lg bg-gray-100 p-4">
 					<Text className="mb-2 font-bold text-sm">
-						📋 Set & Rep Performance
+						📋 Execution & Rep Performance
 					</Text>
 					<View className="h-20 items-center justify-center rounded bg-yellow-200 p-3">
-						<Text className="text-xs">Set Completion Rate: 87%</Text>
 						<Text className="text-xs">
-							Rep Progression: +2.3 avg reps/session
+							Exercise Completion: 92% (based on completed flag)
+						</Text>
+						<Text className="text-xs">
+							Bench 8–10 reps range: +2 reps vs last month
 						</Text>
 					</View>
 				</View>
@@ -198,6 +199,17 @@ export default function Page() {
 						<Text className="text-xs">vs last year: +45% total volume</Text>
 					</View>
 				</View>
+
+				{/* Data Quality & Unlocks */}
+				<View className="gap-2 rounded-lg bg-gray-100 p-4">
+					<Text className="font-bold text-sm">🧪 Data Quality</Text>
+					<View className="h-20 items-center justify-center rounded bg-gray-200 p-3">
+						<Text className="text-xs">3 exercises missing muscle group</Text>
+						<Text className="text-xs">
+							Set bodyweight to enable relative strength
+						</Text>
+					</View>
+				</View>
 			</View>
 
 			{/* INSIGHTS & RECOMMENDATIONS */}
@@ -205,13 +217,13 @@ export default function Page() {
 				<Text className="mb-3 font-bold text-lg">💡 Smart Insights</Text>
 				<View className="gap-2">
 					<Text className="text-sm">
-						• Consider increasing bench press weight by 2.5kg next session
+						• Hit top of rep range twice → +2.5kg next session
 					</Text>
 					<Text className="text-sm">
-						• You haven't trained legs in 4 days - consider a leg workout
+						• Back volume is 3× lower than chest → add rows
 					</Text>
 					<Text className="text-sm">
-						• Your Tuesday performance is 15% better than other days
+						• Keep 3+ workouts this week to maintain streak
 					</Text>
 				</View>
 			</View>
@@ -235,12 +247,12 @@ export default function Page() {
 			</View>
 
 			{/* ORIGINAL MONTHLY CHART - MOVED TO BOTTOM */}
-			<View className="rounded-lg bg-gray-100 p-4">
+			{/* <View className="rounded-lg bg-gray-100 p-4">
 				<Text className="mb-2 font-bold text-sm">
 					📈 Monthly Workout Frequency
 				</Text>
 				<MonthlyWorkouts height={200} />
-			</View>
+			</View> */}
 		</ScrollView>
 	);
 }

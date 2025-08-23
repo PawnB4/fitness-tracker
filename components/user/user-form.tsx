@@ -63,10 +63,8 @@ const i18n = new I18n({
 });
 
 export function UserForm({
-	openDialog,
 	setOpenDialog,
 }: {
-	openDialog: boolean;
 	setOpenDialog: (open: boolean) => void;
 }) {
 	const [configObject, setConfigObject] = useState<{
