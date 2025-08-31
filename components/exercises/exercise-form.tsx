@@ -2,7 +2,7 @@ import type { Option } from "@rn-primitives/select";
 import { useForm } from "@tanstack/react-form";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { I18n } from "i18n-js";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Keyboard,
 	ScrollView,
@@ -76,6 +76,8 @@ export const ExerciseForm = ({
 		left: 12,
 		right: 12,
 	};
+
+	const [triggerWidth, setTriggerWidth] = useState(0);
 
 	const { data: userLocale, error: userLocaleError } = useLiveQuery(
 		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
@@ -155,7 +157,9 @@ export const ExerciseForm = ({
 					<form.Field name="name">
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>{i18n.t("name")}:</Label>
+								<Label className="mb-1" nativeID={field.name}>
+									{i18n.t("name")}:
+								</Label>
 								<Input
 									onChangeText={field.handleChange}
 									placeholder={i18n.t("namePlaceholder")}
@@ -172,14 +176,19 @@ export const ExerciseForm = ({
 					<form.Field name="type">
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>{i18n.t("type")}:</Label>
+								<Label className="mb-1" nativeID={field.name}>
+									{i18n.t("type")}:
+								</Label>
 								<Select
 									// @ts-expect-error
 									onValueChange={field.handleChange}
 									value={field.state.value}
 								>
 									<SelectTrigger
-										className="w-[275px]"
+										className=""
+										onLayout={(e) =>
+											setTriggerWidth(e.nativeEvent.layout.width)
+										}
 										onPressIn={() => {
 											Keyboard.dismiss();
 										}}
@@ -189,7 +198,11 @@ export const ExerciseForm = ({
 											placeholder={i18n.t("typePlaceholder")}
 										/>
 									</SelectTrigger>
-									<SelectContent className="w-[275px]" insets={contentInsets}>
+									<SelectContent
+										className=""
+										insets={contentInsets}
+										style={{ width: triggerWidth }}
+									>
 										{Object.entries(EXERCISES_TYPES[i18n.locale]).map(
 											([key, value]) => (
 												<SelectItem key={key} label={value} value={key}>
@@ -211,7 +224,7 @@ export const ExerciseForm = ({
 					<form.Field name="primaryMuscleGroup">
 						{(field) => (
 							<>
-								<Label nativeID={field.name}>
+								<Label className="mb-1" nativeID={field.name}>
 									{i18n.t("primaryMuscleGroup")}:
 								</Label>
 
@@ -220,7 +233,10 @@ export const ExerciseForm = ({
 									value={field.state.value as Option}
 								>
 									<SelectTrigger
-										className="w-[275px]"
+										className=""
+										onLayout={(e) =>
+											setTriggerWidth(e.nativeEvent.layout.width)
+										}
 										onPressIn={() => {
 											Keyboard.dismiss();
 										}}
@@ -231,7 +247,11 @@ export const ExerciseForm = ({
 										/>
 									</SelectTrigger>
 
-									<SelectContent className="w-[275px]" insets={contentInsets}>
+									<SelectContent
+										className=""
+										insets={contentInsets}
+										style={{ width: triggerWidth }}
+									>
 										<ScrollView className="max-h-56">
 											{Object.entries(MUSCLE_GROUPS[i18n.locale]).map(
 												([key, value]) => (

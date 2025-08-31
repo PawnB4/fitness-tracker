@@ -114,6 +114,7 @@ export default function Page() {
 	const [openDialog, setOpenDialog] = useState(false);
 	const [user, setUser] = useState<schema.User[] | null>(null);
 	const [hasCheckedForUser, setHasCheckedForUser] = useState(false);
+	const [triggerWidth, setTriggerWidth] = useState(0);
 
 	// Fetch workouts ordered by creation date
 	const { data: workouts, error: workoutsError } = useLiveQuery(
@@ -391,23 +392,29 @@ export default function Page() {
 					</DialogTitle>
 
 					{/* OPTION 1: FROM WORKOUT PLAN */}
-					<View className="rounded-xl bg-muted/30 p-3">
-						<Text className="mb-3 font-funnel-medium">
+					<View className="flex flex-col gap-3">
+						<Text className="font-funnel-medium">
 							{i18n.t("useWorkoutPlanTemplate")}
 						</Text>
 						{workoutPlans?.length > 0 ? (
 							<Select
-								className="mx-auto mb-3 w-[75vw]"
+								className=""
 								onValueChange={(e) => setSelectedWorkoutPlan(e)}
 								value={selectedWorkoutPlan}
 							>
-								<SelectTrigger>
+								<SelectTrigger
+									onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)}
+								>
 									<SelectValue
 										className="native:text-lg text-foreground text-sm"
 										placeholder={i18n.t("selectPlan")}
 									/>
 								</SelectTrigger>
-								<SelectContent className="w-[75vw]" insets={contentInsets}>
+								<SelectContent
+									className=""
+									insets={contentInsets}
+									style={{ width: triggerWidth }}
+								>
 									<ScrollView className="max-h-[300px]">
 										{workoutPlans?.map((plan) => (
 											<SelectItem
@@ -422,14 +429,8 @@ export default function Page() {
 								</SelectContent>
 							</Select>
 						) : (
-							<Select
-								className="mx-auto mb-3 w-[75vw]"
-								// value={{
-								// 	value: "No workout plans found",
-								// 	label: "No workout plans found",
-								// }}
-							>
-								<SelectTrigger className="w-[75vw] cursor-not-allowed opacity-50">
+							<Select className="">
+								<SelectTrigger className="cursor-not-allowed opacity-50">
 									<SelectValue
 										className="native:text-lg text-foreground/50 text-sm"
 										placeholder={i18n.t("noWorkoutPlansFound")}
@@ -439,7 +440,7 @@ export default function Page() {
 						)}
 
 						<Button
-							className="mx-auto w-[75vw]"
+							className=""
 							disabled={!selectedWorkoutPlan}
 							onPress={createWorkoutFromPlan}
 						>
@@ -459,12 +460,12 @@ export default function Page() {
 					</View>
 
 					{/* OPTION 2: FROM SCRATCH */}
-					<View className="rounded-xl bg-muted/30 p-3">
-						<Text className="mb-3 font-funnel-medium">
+					<View className="flex flex-col gap-3">
+						<Text className="font-funnel-medium">
 							{i18n.t("startWithEmptyWorkout")}
 						</Text>
 						<Button
-							className="mx-auto w-[75vw]"
+							className=""
 							onPress={createWorkoutFromScratch}
 							variant="outline"
 						>

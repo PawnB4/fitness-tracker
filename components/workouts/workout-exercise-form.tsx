@@ -129,6 +129,7 @@ export const WorkoutExerciseForm = ({
 		left: 12,
 		right: 12,
 	};
+	const [triggerWidth, setTriggerWidth] = useState(0);
 
 	useEffect(() => {
 		return () => {
@@ -588,7 +589,7 @@ export const WorkoutExerciseForm = ({
 							<View className="flex flex-row items-center justify-stretch gap-2 pb-2">
 								<form.Field name="exerciseId">
 									{(field) => (
-										<View className="">
+										<View className="flex-1">
 											<Label className="mb-1" nativeID={field.name}>
 												{i18n.t("exercise")}:
 											</Label>
@@ -598,7 +599,9 @@ export const WorkoutExerciseForm = ({
 												value={field.state.value}
 											>
 												<SelectTrigger
-													className="w-[220px]"
+													onLayout={(e) =>
+														setTriggerWidth(e.nativeEvent.layout.width)
+													}
 													onPressIn={() => {
 														Keyboard.dismiss();
 													}}
@@ -609,8 +612,8 @@ export const WorkoutExerciseForm = ({
 													/>
 												</SelectTrigger>
 												<SelectContent
-													className="w-[220px]"
 													insets={contentInsets}
+													style={{ width: triggerWidth }}
 												>
 													<ScrollView className="max-h-72">
 														{Object.entries(EXERCISES_TYPES[locale]).map(
@@ -651,7 +654,7 @@ export const WorkoutExerciseForm = ({
 									)}
 								</form.Field>
 								<Button
-									className="mt-auto grow flex-row items-center justify-center gap-1 bg-sky-500/70"
+									className="mt-auto flex-row items-center justify-center gap-1 bg-sky-500/70"
 									onPress={() => {
 										openExerciseForm?.();
 										setOpen(false);
@@ -694,14 +697,17 @@ export const WorkoutExerciseForm = ({
 						</View>
 					) : (
 						<View className="pb-2">
-							<Label>{i18n.t("exercise")}:</Label>
+							<Label className="mb-1">{i18n.t("exercise")}:</Label>
 							<Select
 								value={{
 									value: exerciseName ?? "",
 									label: exerciseName ?? "",
 								}}
 							>
-								<SelectTrigger className="w-[275px] cursor-not-allowed opacity-50">
+								<SelectTrigger
+									className="cursor-not-allowed opacity-50"
+									onLayout={(e) => setTriggerWidth(e.nativeEvent.layout.width)}
+								>
 									<SelectValue
 										className="native:text-lg text-foreground/50 text-sm"
 										placeholder={exerciseName ?? ""}
