@@ -65,7 +65,7 @@ export const Overview = ({ locale }: { locale: string }) => {
 				.limit(1),
 		);
 
-	const calculateCurrentStreak = () => {
+	const currentStreak = useMemo(() => {
 		if (!workouts || !currentWeeklyTarget?.[0]?.weeklyTarget) {
 			return 0;
 		}
@@ -75,7 +75,7 @@ export const Overview = ({ locale }: { locale: string }) => {
 				? currentWeeklyTarget[0].weeklyTarget - 1
 				: 1;
 		const now = new Date();
-		let currentStreak = 0;
+		let currentStreakCount = 0;
 
 		// Get start of current week (Monday)
 		const getWeekStart = (date: Date) => {
@@ -107,7 +107,7 @@ export const Overview = ({ locale }: { locale: string }) => {
 			const workoutsThisWeek = getWorkoutsInWeek(weekStart);
 
 			if (workoutsThisWeek >= target) {
-				currentStreak++;
+				currentStreakCount++;
 			} else {
 				break;
 			}
@@ -116,8 +116,8 @@ export const Overview = ({ locale }: { locale: string }) => {
 			weekStart.setDate(weekStart.getDate() - 7);
 		}
 
-		return currentStreak;
-	};
+		return currentStreakCount;
+	}, [workouts, currentWeeklyTarget]);
 
 	const volumeData = useMemo(() => {
 		if (!workouts || !workoutExercises) {
@@ -244,27 +244,27 @@ export const Overview = ({ locale }: { locale: string }) => {
 		if (count >= target) {
 			// Target achieved or exceeded
 			if (count > target) {
-				message = "Crushing it! 💪";
+				message = i18n.t("crushingIt");
 				status = "excellent";
 			} else {
-				message = "Target reached! 🎯";
+				message = i18n.t("targetReached");
 				status = "good";
 			}
 		} else if (remaining > daysRemainingInWeek) {
 			// Physically impossible to reach target
-			message = "Target missed 😔";
+			message = i18n.t("targetMissed");
 			status = "danger";
 		} else if (remaining === daysRemainingInWeek) {
 			// Need to workout every remaining day
-			message = "Push hard! 💥";
+			message = i18n.t("pushHard");
 			status = "warning";
 		} else {
 			// On track - have buffer days
 			if (daysRemainingInWeek >= 3) {
-				message = "On track 👍";
+				message = i18n.t("onTrack");
 				status = "good";
 			} else {
-				message = "Keep it up! 🔥";
+				message = i18n.t("keepItUp");
 				status = "good";
 			}
 		}
@@ -287,12 +287,12 @@ export const Overview = ({ locale }: { locale: string }) => {
 							{i18n.t("currentStreak")}
 						</Text>
 						<Text className="font-funnel-bold text-3xl text-foreground">
-							{calculateCurrentStreak()}
+							{currentStreak}
 						</Text>
 						<Text className="text-muted-foreground text-xs">
 							{i18n.t("week")}
-							{calculateCurrentStreak() > 1 && "s"} {i18n.t("inARow")}
-							{calculateCurrentStreak() > 1 && i18n.locale === "es" && "s"}{" "}
+							{currentStreak !== 1 && "s"} {i18n.t("inARow")}
+							{currentStreak !== 1 && i18n.locale === "es" && "s"}{" "}
 							{i18n.t("with")} {i18n.t("atLeast")}{" "}
 							{currentWeeklyTarget?.[0]?.weeklyTarget &&
 							currentWeeklyTarget[0].weeklyTarget > 1

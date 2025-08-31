@@ -1,10 +1,9 @@
 import { count } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { router } from "expo-router";
 import { I18n } from "i18n-js";
-import { Pressable, ScrollView, View } from "react-native";
-// import { MonthlyWorkouts } from "~/components/charts/monthly-workouts";
-// import { Overview } from "~/components/progress/overview";
+import { ScrollView, View } from "react-native";
+import { MonthlyWorkouts } from "~/components/charts/monthly-workouts";
+import { Overview } from "~/components/progress/overview";
 import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
@@ -45,12 +44,9 @@ export default function Page() {
 	return (
 		<ScrollView className="flex flex-1 flex-col gap-6 p-4">
 			{/* OVERVIEW STATS ROW */}
-			{/* <Overview locale={i18n.locale} /> */}
+			<Overview locale={i18n.locale} />
 
 			{/* RECENT ACHIEVEMENTS */}
-			<Pressable onPress={() => router.push("/welcome")}>
-				<Text>Go to welcome</Text>
-			</Pressable>
 			<View className="rounded-lg bg-green-100 p-4">
 				<Text className="mb-3 font-bold text-lg">
 					🏆 Recent Personal Records
@@ -247,12 +243,12 @@ export default function Page() {
 			</View>
 
 			{/* ORIGINAL MONTHLY CHART - MOVED TO BOTTOM */}
-			{/* <View className="rounded-lg bg-gray-100 p-4">
+			<View className="rounded-lg bg-gray-100 p-4">
 				<Text className="mb-2 font-bold text-sm">
 					📈 Monthly Workout Frequency
 				</Text>
 				<MonthlyWorkouts height={200} />
-			</View> */}
+			</View>
 		</ScrollView>
 	);
 }

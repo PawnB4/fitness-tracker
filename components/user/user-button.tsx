@@ -34,7 +34,7 @@ export function UserButton() {
 				</Pressable>
 			</DialogTrigger>
 			<DialogContent className="w-[90vw] min-w-[300px] max-w-[360px] self-center p-4">
-				<UserForm openDialog={openDialog} setOpenDialog={setOpenDialog} />
+				<UserForm setOpenDialog={setOpenDialog} />
 			</DialogContent>
 		</Dialog>
 	);

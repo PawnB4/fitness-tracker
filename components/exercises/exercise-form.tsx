@@ -252,7 +252,7 @@ export const ExerciseForm = ({
 						)}
 					</form.Field>
 				</View>
-				<Button onPress={() => form.handleSubmit()}>
+				<Button onPress={form.handleSubmit}>
 					<Text>{i18n.t("create")}</Text>
 				</Button>
 			</View>

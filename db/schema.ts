@@ -131,7 +131,6 @@ export const insertExerciseSchema = z.object({
 });
 
 // Workout exercises (and plan exercises)
-
 export const repsSchema = z
 	.string()
 	.min(1, { message: "Reps is required" })
@@ -223,6 +222,29 @@ export const insertUserSchema = z.object({
 		}),
 });
 
+export const updateUserSchema = z.object({
+	preferredTheme: z.object({
+		value: z.string(),
+		label: z.string(),
+	}),
+	locale: z.object({
+		value: z.string(),
+		label: z.string(),
+	}),
+	bodyweight: z
+		.string()
+		.min(1, { message: "Bodyweight is required" })
+		.refine((val) => !isNaN(Number(val)), {
+			message: "Bodyweight must be a number",
+		})
+		.refine((val) => Number(val) >= 1, {
+			message: "Bodyweight must be at least 1",
+		})
+		.refine((val) => Number(val) <= 999, {
+			message: "Bodyweight must be less than 999",
+		}),
+});
+
 // Types
 
 export type Exercise = {
@@ -299,3 +321,4 @@ export type User = {
 	bodyweight: number;
 };
 export type NewUser = z.infer<typeof insertUserSchema>;
+export type UpdateUser = z.infer<typeof updateUserSchema>;

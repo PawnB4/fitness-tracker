@@ -21,21 +21,6 @@ import { useColorScheme } from "~/lib/useColorScheme";
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
-// const MONTHLY_WORKOUTS = [
-// 	{ month: "Jan", count: 8 },
-// 	{ month: "Feb", count: 12 },
-// 	{ month: "Mar", count: 15 },
-// 	{ month: "Apr", count: 11 },
-// 	{ month: "May", count: 16 },
-// 	{ month: "Jun", count: 14 },
-// 	{ month: "Jul", count: 9 },
-// 	{ month: "Aug", count: 13 },
-// 	{ month: "Sep", count: 7 },
-// 	{ month: "Oct", count: 10 },
-// 	{ month: "Nov", count: 6 },
-// 	{ month: "Dec", count: 4 },
-// ];
-
 export const MonthlyWorkouts = ({ height }: { height: number }) => {
 	const font = useFont(FunnelSans_400Regular, 12);
 	const { colorScheme } = useColorScheme();
@@ -108,9 +93,15 @@ export const MonthlyWorkouts = ({ height }: { height: number }) => {
 	}, [isActive]);
 
 	const animatedMonthCountText = useAnimatedProps(() => {
+		const currentMonthIndex = new Date().getMonth();
+		const count =
+			state.y.count.value.value || MONTHLY_WORKOUTS[currentMonthIndex].count;
+		const month =
+			state.x.value.value || MONTHLY_WORKOUTS[currentMonthIndex].month;
+
 		return {
-			text: `${state.y.count.value.value} ${state.y.count.value.value !== 1 ? "workouts" : "workout"} in ${state.x.value.value}`,
-			defaultValue: `${MONTHLY_WORKOUTS[new Date().getMonth()].count} workouts in ${MONTHLY_WORKOUTS[new Date().getMonth()].month}`,
+			text: `${count} ${count !== 1 ? "workouts" : "workout"} in ${month}`,
+			defaultValue: `${MONTHLY_WORKOUTS[currentMonthIndex].count} workouts in ${MONTHLY_WORKOUTS[currentMonthIndex].month}`,
 		};
 	});
 

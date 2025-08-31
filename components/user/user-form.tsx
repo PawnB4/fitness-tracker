@@ -1,3 +1,4 @@
+import { useForm, useStore } from "@tanstack/react-form";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import * as DocumentPicker from "expo-document-picker";
@@ -5,10 +6,11 @@ import * as FileSystem from "expo-file-system";
 import { Directory, File, Paths } from "expo-file-system/next";
 import * as Sharing from "expo-sharing";
 import { I18n } from "i18n-js";
-import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Button } from "~/components/ui/button";
 import { DialogTitle } from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -19,18 +21,33 @@ import {
 import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
-import { TIMEZONES } from "~/lib/constants";
-import { Button } from "../ui/button";
+
+const a = [
+	{
+		code: "too_small",
+		exact: false,
+		inclusive: true,
+		message: "Bodyweight is required",
+		minimum: 1,
+		path: ["bodyweight"],
+		type: "string",
+	},
+	{
+		code: "custom",
+		message: "Bodyweight must be at least 1",
+		path: ["bodyweight"],
+	},
+];
 
 const i18n = new I18n({
 	en: {
-		title: "User settings",
+		title: "Profile",
 		preferredColorTheme: "Preferred color theme",
 		dark: "Dark",
 		light: "Light",
 		preferredLanguage: "Preferred language",
-		english: "English",
-		spanish: "Spanish",
+		en: "English",
+		es: "Spanish",
 		exportWorkoutData: "Export workout data",
 		importWorkoutData: "Import workout data",
 		save: "Save",
@@ -40,15 +57,17 @@ const i18n = new I18n({
 		no: "No",
 		share: "Share",
 		failedToShareFile: "Failed to share the file. Please try again.",
+		formBodyweight: "Bodyweight (kg)",
+		formBodyweightPlaceholder: "Enter your bodyweight",
 	},
 	es: {
-		title: "Configuración",
+		title: "Perfil",
 		preferredColorTheme: "Tema preferido",
 		dark: "Oscuro",
 		light: "Claro",
 		preferredLanguage: "Idioma preferido",
-		english: "Inglés",
-		spanish: "Español",
+		en: "Inglés",
+		es: "Español",
 		exportWorkoutData: "Exportar datos de entrenamiento",
 		importWorkoutData: "Importar datos de entrenamiento",
 		save: "Guardar",
@@ -59,6 +78,7 @@ const i18n = new I18n({
 		share: "Compartir",
 		failedToShareFile:
 			"Error al compartir el archivo. Por favor, inténtalo de nuevo.",
+		formBodyweight: "Peso corporal (kg)",
 	},
 });
 
@@ -67,26 +87,11 @@ export function UserForm({
 }: {
 	setOpenDialog: (open: boolean) => void;
 }) {
-	const [configObject, setConfigObject] = useState<{
-		preferredTheme?: string;
-		timezone?: string;
-	}>({});
 	const { data: userSettings } = useLiveQuery(
 		db.select().from(schema.user).limit(1),
 	);
-	const currentUserSettings = userSettings?.[0]?.config;
-	const currentUserLocale = userSettings?.[0]?.locale;
 
-	const [locale, setLocale] = useState("");
-	i18n.locale = locale;
-	useEffect(() => {
-		if (currentUserSettings) {
-			setConfigObject(currentUserSettings);
-		}
-		if (currentUserLocale) {
-			setLocale(currentUserLocale);
-		}
-	}, [currentUserSettings, currentUserLocale]);
+	i18n.locale = userSettings[0]?.locale ?? "en";
 
 	const insets = useSafeAreaInsets();
 	const contentInsets = {
@@ -96,24 +101,40 @@ export function UserForm({
 		right: 12,
 	};
 
-	const saveConfiguration = async () => {
-		try {
-			await db.update(schema.user).set({
-				config: configObject,
-				locale: locale,
-			});
-			setOpenDialog(false);
-		} catch (error) {
-			console.log(error);
-		}
-	};
+	const form = useForm({
+		defaultValues: {
+			preferredTheme: {
+				value: userSettings[0]?.config?.preferredTheme ?? "",
+				label: i18n.t(userSettings[0]?.config?.preferredTheme ?? ""),
+			},
+			locale: {
+				value: userSettings[0]?.locale ?? "en",
+				label: i18n.t(userSettings[0]?.locale ?? "en"),
+			},
+			bodyweight: userSettings[0]?.bodyweight.toString() ?? "70",
+		},
+		onSubmit: async ({ value }) => {
+			try {
+				await db.update(schema.user).set({
+					config: {
+						timezone: userSettings[0].config.timezone,
+						preferredTheme: value.preferredTheme.value,
+					},
+					locale: value.locale.value,
+					bodyweight: Number(value.bodyweight),
+				});
+				setOpenDialog(false);
+			} catch (error) {
+				console.log(error);
+				alert(`Error: ${error}`);
+			}
+		},
+		validators: {
+			onChange: schema.updateUserSchema,
+		},
+	});
 
-	// Find timezone label
-	const getTimezoneLabel = (timezoneValue?: string) => {
-		if (!timezoneValue) return "";
-		const timezone = TIMEZONES.find((tz) => tz.value === timezoneValue);
-		return timezone?.label || timezoneValue;
-	};
+	const errors = useStore(form.store, (state) => state.errors);
 
 	const exportWorkoutData = async () => {
 		try {
@@ -208,7 +229,7 @@ export function UserForm({
 								try {
 									await Sharing.shareAsync(file.uri, {
 										mimeType: "text/csv",
-										dialogTitle: "Share your workout data",
+										dialogTitle: "Compartir datos de entrenamiento",
 										UTI: "public.comma-separated-values-text", // for iOS
 									});
 								} catch (error) {
@@ -396,71 +417,90 @@ export function UserForm({
 	return (
 		<View className="flex flex-col justify-center gap-4">
 			<DialogTitle className="">{i18n.t("title")}</DialogTitle>
+			<View className="flex flex-col gap-2">
+				<form.Field name="bodyweight">
+					{(field) => (
+						<View className="flex flex-row items-center justify-between gap-2">
+							<Text className="font-funnel-medium">
+								{i18n.t("formBodyweight")}
+							</Text>
+							<Input
+								className="w-[38vw]"
+								inputMode="numeric"
+								onChangeText={field.handleChange}
+								value={field.state.value}
+							/>
+						</View>
+					)}
+				</form.Field>
 
-			<View className="mt-4 flex flex-row items-center justify-between gap-2">
-				<Text className="font-funnel-medium">
-					{i18n.t("preferredColorTheme")}
-				</Text>
+				<form.Field name="preferredTheme">
+					{(field) => (
+						<View className="flex flex-row items-center justify-between gap-2">
+							<Text className="font-funnel-medium">
+								{i18n.t("preferredColorTheme")}
+							</Text>
 
-				<Select
-					onValueChange={(e) =>
-						setConfigObject({
-							...configObject,
-							preferredTheme: e?.value,
-						})
-					}
-					value={{
-						value: configObject?.preferredTheme ?? "light",
-						label:
-							configObject?.preferredTheme === "dark"
-								? i18n.t("dark")
-								: i18n.t("light"),
-					}}
-				>
-					<SelectTrigger className="w-[38vw]">
-						<SelectValue
-							className="native:text-lg text-foreground text-sm"
-							placeholder={i18n.t("selectTheme")}
-						/>
-					</SelectTrigger>
-					<SelectContent className="w-[38vw]" insets={contentInsets}>
-						<SelectItem key={1} label={i18n.t("dark")} value="dark">
-							{i18n.t("dark")}
-						</SelectItem>
-						<SelectItem key={2} label={i18n.t("light")} value="light">
-							{i18n.t("light")}
-						</SelectItem>
-					</SelectContent>
-				</Select>
-			</View>
+							<Select
+								// @ts-ignore
+								onValueChange={field.handleChange}
+								value={field.state.value}
+							>
+								<SelectTrigger className="w-[38vw]">
+									<SelectValue
+										className="native:text-lg text-foreground text-sm"
+										placeholder={i18n.t("selectTheme")}
+									/>
+								</SelectTrigger>
+								<SelectContent className="w-[38vw]" insets={contentInsets}>
+									<SelectItem key={1} label={i18n.t("dark")} value="dark">
+										{i18n.t("dark")}
+									</SelectItem>
+									<SelectItem key={2} label={i18n.t("light")} value="light">
+										{i18n.t("light")}
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</View>
+					)}
+				</form.Field>
 
-			<View className="flex flex-row items-center justify-between gap-2">
-				<Text className="font-funnel-medium">
-					{i18n.t("preferredLanguage")}
-				</Text>
+				<form.Field name="locale">
+					{(field) => (
+						<View className="flex flex-row items-center justify-between gap-2">
+							<Text className="font-funnel-medium">
+								{i18n.t("preferredLanguage")}
+							</Text>
 
-				<Select
-					onValueChange={(e) => setLocale(e?.value ?? "en")}
-					value={{
-						value: locale,
-						label: locale === "en" ? i18n.t("english") : i18n.t("spanish"),
-					}}
-				>
-					<SelectTrigger className="w-[38vw]">
-						<SelectValue
-							className="native:text-lg text-foreground text-sm"
-							placeholder={i18n.t("selectLanguage")}
-						/>
-					</SelectTrigger>
-					<SelectContent className="w-[38vw]" insets={contentInsets}>
-						<SelectItem key={1} label={i18n.t("english")} value="en">
-							{i18n.t("english")}
-						</SelectItem>
-						<SelectItem key={2} label={i18n.t("spanish")} value="es">
-							{i18n.t("spanish")}
-						</SelectItem>
-					</SelectContent>
-				</Select>
+							<Select
+								// @ts-ignore
+								onValueChange={field.handleChange}
+								value={field.state.value}
+							>
+								<SelectTrigger className="w-[38vw]">
+									<SelectValue
+										className="native:text-lg text-foreground text-sm"
+										placeholder={i18n.t("selectLanguage")}
+									/>
+								</SelectTrigger>
+								<SelectContent className="w-[38vw]" insets={contentInsets}>
+									<SelectItem key={1} label={i18n.t("en")} value="en">
+										{i18n.t("en")}
+									</SelectItem>
+									<SelectItem key={2} label={i18n.t("es")} value="es">
+										{i18n.t("es")}
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</View>
+					)}
+				</form.Field>
+
+				{errors[0] ? (
+					<Text className="text-red-500">
+						{form.getFieldMeta("bodyweight")?.errors[0]?.message}
+					</Text>
+				) : null}
 			</View>
 
 			<Button onPress={() => exportWorkoutData()} variant="outline">
@@ -469,7 +509,7 @@ export function UserForm({
 			<Button onPress={() => importWorkoutData()} variant="outline">
 				<Text>{i18n.t("importWorkoutData")}</Text>
 			</Button>
-			<Button onPress={() => saveConfiguration()}>
+			<Button onPress={form.handleSubmit}>
 				<Text>{i18n.t("save")}</Text>
 			</Button>
 		</View>
