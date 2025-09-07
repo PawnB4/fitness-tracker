@@ -1,6 +1,8 @@
-{
+const IS_DEV = process.env.APP_VARIANT === 'development';
+
+export default {
   "expo": {
-    "name": "Fitness Tracker",
+    "name": IS_DEV ? "Fitness Tracker (DEV)" : "Fitness Tracker",
     "slug": "fitness-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -24,7 +26,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.pawnb4.fitnesstracker"
+      "package": IS_DEV ? "com.pawnb4.fitnesstracker.dev" : "com.pawnb4.fitnesstracker"
     },
     "web": {
       "bundler": "metro",

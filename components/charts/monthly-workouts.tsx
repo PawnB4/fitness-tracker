@@ -141,9 +141,9 @@ export const MonthlyWorkouts = ({ height }: { height: number }) => {
 	return (
 		<View className="w-full flex-col gap-2 bg-card">
 			<View className="flex-col gap-2">
-					<Text className="font-funnel-bold text-foreground">
-						Monthly Workouts
-					</Text>
+				<Text className="font-funnel-bold text-foreground">
+					Monthly Workouts
+				</Text>
 				<View className="flex-row">
 					<AnimatedTextInput
 						animatedProps={animatedMonthCountText}

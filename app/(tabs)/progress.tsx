@@ -59,7 +59,7 @@ export default function Page() {
 				{/* MAIN PROGRESS CHARTS */}
 
 				<ProgressCharts locale={i18n.locale} />
-					{/* VOLUME ANALYSIS */
+				{/* VOLUME ANALYSIS */
 				/* Feasible via sum(reps*weight) per period; duration-only sets excluded from tonnage. */}
 				<View className="gap-4">
 					<Text className="font-bold text-xl">💪 Volume Analysis</Text>
@@ -211,7 +211,6 @@ export default function Page() {
 						</View>
 					</View>
 				</View>
-
 			</View>
 		</ScrollView>
 	);
