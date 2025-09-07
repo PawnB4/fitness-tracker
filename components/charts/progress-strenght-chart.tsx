@@ -85,7 +85,7 @@ const MONTHS_LONG = {
 	],
 } as const;
 
-export const ProgressVolumeChart = ({
+export const ProgressStrengthChart = ({
 	height,
 	exerciseData,
 	timeframeFrom,
@@ -120,14 +120,26 @@ export const ProgressVolumeChart = ({
 	const formatDDMMUTC = (d: Date) =>
 		`${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 
-	// Volume calculators
-	const computeSetVolume = (set: schema.WorkoutExerciseData) =>
-		(set.reps ?? 0) * (set.weight ?? 0);
-	const computeExerciseVolume = (we: schema.WorkoutExercise) =>
-		(we.workoutExerciseData ?? []).reduce(
-			(sum, s) => sum + computeSetVolume(s),
-			0,
-		);
+	// 1RM calculators
+	const computeSet1RM = (reps: number | null, weight: number): number | null => {
+		if (reps == null) return null;
+		if (reps < 1) return null;
+		if (weight <= 0) return null;
+		// Epley & Brzycki; Brzycki valid for reps <= 36
+		if (reps >= 37) return null;
+		const epley = weight * (1 + reps / 30);
+		const brzycki = weight * (36 / (37 - reps));
+		return (epley + brzycki) / 2;
+	};
+
+	const computeSession1RM = (we: schema.WorkoutExercise): number | null => {
+		const estimates = (we.workoutExerciseData ?? [])
+			.map((s) => computeSet1RM(s.reps, s.weight))
+			.filter((v): v is number => v != null && Number.isFinite(v));
+		if (estimates.length === 0) return null;
+		const sum = estimates.reduce((a, b) => a + b, 0);
+		return sum / estimates.length;
+	};
 
 	// Build the x-axis domain based on timeframe
 	const start = toUtcDate(parseUtc(timeframeFrom));
@@ -158,23 +170,28 @@ export const ProgressVolumeChart = ({
 
 	const xDomain = useDays ? buildDays() : buildMonths();
 
-	// Aggregate volumes into domain buckets (ensure zeros for empty buckets)
-	const volumeMap = new Map<string, number>(
+	// Aggregate session 1RM averages into domain buckets -> average per bucket
+	const sumMap = new Map<string, number>(
+		xDomain.map((d) => [useDays ? dayKey(d) : monthKey(d), 0]),
+	);
+	const countMap = new Map<string, number>(
 		xDomain.map((d) => [useDays ? dayKey(d) : monthKey(d), 0]),
 	);
 
 	exerciseData.forEach((we) => {
 		const dt = parseUtc(we.createdAt);
 		const k = useDays ? dayKey(dt) : monthKey(dt);
-		if (volumeMap.has(k)) {
-			volumeMap.set(k, (volumeMap.get(k) ?? 0) + computeExerciseVolume(we));
+		const session = computeSession1RM(we);
+		if (session != null && sumMap.has(k)) {
+			sumMap.set(k, (sumMap.get(k) ?? 0) + session);
+			countMap.set(k, (countMap.get(k) ?? 0) + 1);
 		}
 	});
 
 	type SeriesPoint = {
 		x: string;
 		label: string;
-		volume: number;
+		strength: number;
 		isPartial?: boolean;
 		rangeLabel?: string;
 		monthIndex?: number;
@@ -182,38 +199,37 @@ export const ProgressVolumeChart = ({
 
 	const series: SeriesPoint[] = useDays
 		? xDomain.map((d) => {
-				const x = dayKey(d);
-				return {
-					x,
-					label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
-						d.getUTCMonth() + 1,
-					).padStart(2, "0")}`,
-					volume: volumeMap.get(x) ?? 0,
-				};
-			})
+			const x = dayKey(d);
+			const c = countMap.get(x) ?? 0;
+			const avg = c > 0 ? (sumMap.get(x) ?? 0) / c : 0;
+			return {
+				x,
+				label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
+					d.getUTCMonth() + 1,
+				).padStart(2, "0")}`,
+				strength: avg,
+			};
+		})
 		: xDomain.map((d) => {
-				const x = monthKey(d);
-				const mi = d.getUTCMonth();
-				const shortLabel =
-					(MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
-				const mStart = monthStartUTC(d);
-				const mEnd = monthEndUTC(d);
-				const bucketStart = start > mStart ? start : mStart;
-				const bucketEnd = end < mEnd ? end : mEnd;
-				const isPartial =
-					bucketStart.getTime() > mStart.getTime() ||
-					bucketEnd.getTime() < mEnd.getTime();
-				return {
-					x,
-					label: shortLabel,
-					volume: volumeMap.get(x) ?? 0,
-					isPartial,
-					rangeLabel: isPartial
-						? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}`
-						: undefined,
-					monthIndex: mi,
-				};
-			});
+			const x = monthKey(d);
+			const mi = d.getUTCMonth();
+			const shortLabel = (MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
+			const mStart = monthStartUTC(d);
+			const mEnd = monthEndUTC(d);
+			const bucketStart = start > mStart ? start : mStart;
+			const bucketEnd = end < mEnd ? end : mEnd;
+			const isPartial = bucketStart.getTime() > mStart.getTime() || bucketEnd.getTime() < mEnd.getTime();
+			const c = countMap.get(x) ?? 0;
+			const avg = c > 0 ? (sumMap.get(x) ?? 0) / c : 0;
+			return {
+				x,
+				label: shortLabel,
+				strength: avg,
+				isPartial,
+				rangeLabel: isPartial ? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}` : undefined,
+				monthIndex: mi,
+			};
+		});
 
 	// Use plain objects (not Map) so the worklet can safely capture them
 	const labelByXObj: Record<string, string> = Object.fromEntries(
@@ -226,11 +242,11 @@ export const ProgressVolumeChart = ({
 	const lastPoint = series[series.length - 1] ?? {
 		x: "",
 		label: "",
-		volume: 0,
+		strength: 0,
 	};
 	const { state, isActive } = useChartPressState({
 		x: lastPoint.x,
-		y: { volume: lastPoint.volume },
+		y: { strength: lastPoint.strength },
 	});
 
 	useEffect(() => {
@@ -239,31 +255,25 @@ export const ProgressVolumeChart = ({
 
 	const animatedText = useAnimatedProps(() => {
 		const selectedX = String(state.x.value.value || lastPoint.x);
-		const item = (pointByXObj[selectedX] ??
-			(lastPoint as SeriesPoint)) as SeriesPoint;
-		const volume = Number(state.y.volume.value.value || item.volume);
-		const monthFull =
-			!useDays && item.monthIndex != null
-				? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ??
-					MONTHS_LONG.en[item.monthIndex])
-				: item.label;
-		const suffix =
-			!useDays && item.isPartial && item.rangeLabel
-				? ` (${item.rangeLabel})`
-				: "";
+		const item = (pointByXObj[selectedX] ?? (lastPoint as SeriesPoint)) as SeriesPoint;
+		const value = Number(state.y.strength.value.value || item.strength);
+		const monthFull = !useDays && item.monthIndex != null
+			? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ?? MONTHS_LONG.en[item.monthIndex])
+			: item.label;
+		const suffix = !useDays && item.isPartial && item.rangeLabel ? ` (${item.rangeLabel})` : "";
 		return {
-			text: `${volume}kg ${locale === "en" ? "of volume in" : "de volumen en"} ${monthFull}${suffix}`,
-			defaultValue: `${lastPoint.volume}kg ${locale === "en" ? "of volume in" : "de volumen en"} ${monthFull}`,
+			text: `${value.toFixed(0)}kg ${locale === "en" ? "est. 1RM in" : "1RM estimado en"} ${monthFull}${suffix}`,
+			defaultValue: `${lastPoint.strength.toFixed(0)}kg ${locale === "en" ? "est. 1RM in" : "1RM estimado en"} ${monthFull}`,
 		};
 	});
 
-	const maxValue = Math.max(0, ...series.map((m) => m.volume));
-	const allZero = series.length > 0 && series.every((s) => s.volume === 0);
+	const maxValue = Math.max(0, ...series.map((m) => m.strength));
+	const allZero = series.length > 0 && series.every((s) => s.strength === 0);
 	const yAxisTicks = allZero
 		? [0, 1]
 		: Array.from({ length: 5 }, (_, i) => Math.ceil((maxValue / 4) * i));
 	const labelHasDataX = new Set(
-		series.filter((s) => s.volume > 0).map((s) => s.x),
+		series.filter((s) => s.strength > 0).map((s) => s.x),
 	);
 
 	if (series.length === 0 || allZero) {
@@ -309,10 +319,10 @@ export const ProgressVolumeChart = ({
 							lineColor: colors.border,
 							labelColor: colors.mutedForeground,
 							lineWidth: 1,
-							formatYLabel: (yVal) => `${yVal.toFixed(0)}kg`,
+                            formatYLabel: (yVal) => `${yVal.toFixed(0)}kg`,
 						},
 					]}
-					yKeys={["volume"]}
+					yKeys={["strength"]}
 				>
 					{({ points }) => (
 						<>
@@ -320,14 +330,14 @@ export const ProgressVolumeChart = ({
 								color={colors.gradient.start}
 								drawKey={drawKey}
 								key={drawKey}
-								points={points.volume}
+								points={points.strength}
 								strokeWidth={1}
 							/>
 							{isActive && (
 								<ToolTip
 									colorScheme={colorScheme}
 									x={state.x.position}
-									y={state.y.volume.position}
+									y={state.y.strength.position}
 								/>
 							)}
 						</>

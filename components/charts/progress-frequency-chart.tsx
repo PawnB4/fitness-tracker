@@ -85,7 +85,7 @@ const MONTHS_LONG = {
 	],
 } as const;
 
-export const ProgressVolumeChart = ({
+export const ProgressFrequencyChart = ({
 	height,
 	exerciseData,
 	timeframeFrom,
@@ -120,14 +120,16 @@ export const ProgressVolumeChart = ({
 	const formatDDMMUTC = (d: Date) =>
 		`${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 
-	// Volume calculators
-	const computeSetVolume = (set: schema.WorkoutExerciseData) =>
-		(set.reps ?? 0) * (set.weight ?? 0);
-	const computeExerciseVolume = (we: schema.WorkoutExercise) =>
-		(we.workoutExerciseData ?? []).reduce(
-			(sum, s) => sum + computeSetVolume(s),
-			0,
-		);
+	// Per-session frequency
+	const computeSessionSetsAndReps = (
+		we: schema.WorkoutExercise,
+	): { sets: number; reps: number } => {
+		const sets = (we.workoutExerciseData ?? []).length;
+		const reps = (we.workoutExerciseData ?? [])
+			.map((s) => (s.reps ?? 0))
+			.reduce((a, b) => a + b, 0);
+		return { sets, reps };
+	};
 
 	// Build the x-axis domain based on timeframe
 	const start = toUtcDate(parseUtc(timeframeFrom));
@@ -158,23 +160,29 @@ export const ProgressVolumeChart = ({
 
 	const xDomain = useDays ? buildDays() : buildMonths();
 
-	// Aggregate volumes into domain buckets (ensure zeros for empty buckets)
-	const volumeMap = new Map<string, number>(
+	// Aggregate totals per bucket
+	const sumSetsMap = new Map<string, number>(
+		xDomain.map((d) => [useDays ? dayKey(d) : monthKey(d), 0]),
+	);
+	const sumRepsMap = new Map<string, number>(
 		xDomain.map((d) => [useDays ? dayKey(d) : monthKey(d), 0]),
 	);
 
 	exerciseData.forEach((we) => {
 		const dt = parseUtc(we.createdAt);
 		const k = useDays ? dayKey(dt) : monthKey(dt);
-		if (volumeMap.has(k)) {
-			volumeMap.set(k, (volumeMap.get(k) ?? 0) + computeExerciseVolume(we));
+		const { sets, reps } = computeSessionSetsAndReps(we);
+		if (sumSetsMap.has(k)) {
+			sumSetsMap.set(k, (sumSetsMap.get(k) ?? 0) + sets);
+			sumRepsMap.set(k, (sumRepsMap.get(k) ?? 0) + reps);
 		}
 	});
 
 	type SeriesPoint = {
 		x: string;
 		label: string;
-		volume: number;
+		sets: number;
+		reps: number;
 		isPartial?: boolean;
 		rangeLabel?: string;
 		monthIndex?: number;
@@ -182,38 +190,35 @@ export const ProgressVolumeChart = ({
 
 	const series: SeriesPoint[] = useDays
 		? xDomain.map((d) => {
-				const x = dayKey(d);
-				return {
-					x,
-					label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
-						d.getUTCMonth() + 1,
-					).padStart(2, "0")}`,
-					volume: volumeMap.get(x) ?? 0,
-				};
-			})
+			const x = dayKey(d);
+			return {
+				x,
+				label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
+					d.getUTCMonth() + 1,
+				).padStart(2, "0")}`,
+				sets: sumSetsMap.get(x) ?? 0,
+				reps: sumRepsMap.get(x) ?? 0,
+			};
+		})
 		: xDomain.map((d) => {
-				const x = monthKey(d);
-				const mi = d.getUTCMonth();
-				const shortLabel =
-					(MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
-				const mStart = monthStartUTC(d);
-				const mEnd = monthEndUTC(d);
-				const bucketStart = start > mStart ? start : mStart;
-				const bucketEnd = end < mEnd ? end : mEnd;
-				const isPartial =
-					bucketStart.getTime() > mStart.getTime() ||
-					bucketEnd.getTime() < mEnd.getTime();
-				return {
-					x,
-					label: shortLabel,
-					volume: volumeMap.get(x) ?? 0,
-					isPartial,
-					rangeLabel: isPartial
-						? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}`
-						: undefined,
-					monthIndex: mi,
-				};
-			});
+			const x = monthKey(d);
+			const mi = d.getUTCMonth();
+			const shortLabel = (MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
+			const mStart = monthStartUTC(d);
+			const mEnd = monthEndUTC(d);
+			const bucketStart = start > mStart ? start : mStart;
+			const bucketEnd = end < mEnd ? end : mEnd;
+			const isPartial = bucketStart.getTime() > mStart.getTime() || bucketEnd.getTime() < mEnd.getTime();
+			return {
+				x,
+				label: shortLabel,
+				sets: sumSetsMap.get(x) ?? 0,
+				reps: sumRepsMap.get(x) ?? 0,
+				isPartial,
+				rangeLabel: isPartial ? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}` : undefined,
+				monthIndex: mi,
+			};
+		});
 
 	// Use plain objects (not Map) so the worklet can safely capture them
 	const labelByXObj: Record<string, string> = Object.fromEntries(
@@ -226,11 +231,12 @@ export const ProgressVolumeChart = ({
 	const lastPoint = series[series.length - 1] ?? {
 		x: "",
 		label: "",
-		volume: 0,
+		sets: 0,
+		reps: 0,
 	};
 	const { state, isActive } = useChartPressState({
 		x: lastPoint.x,
-		y: { volume: lastPoint.volume },
+		y: { sets: lastPoint.sets, reps: lastPoint.reps },
 	});
 
 	useEffect(() => {
@@ -239,32 +245,29 @@ export const ProgressVolumeChart = ({
 
 	const animatedText = useAnimatedProps(() => {
 		const selectedX = String(state.x.value.value || lastPoint.x);
-		const item = (pointByXObj[selectedX] ??
-			(lastPoint as SeriesPoint)) as SeriesPoint;
-		const volume = Number(state.y.volume.value.value || item.volume);
-		const monthFull =
-			!useDays && item.monthIndex != null
-				? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ??
-					MONTHS_LONG.en[item.monthIndex])
-				: item.label;
-		const suffix =
-			!useDays && item.isPartial && item.rangeLabel
-				? ` (${item.rangeLabel})`
-				: "";
+		const item = (pointByXObj[selectedX] ?? (lastPoint as SeriesPoint)) as SeriesPoint;
+		const setsVal = Number(state.y.sets.value.value || item.sets);
+		const repsVal = Number(state.y.reps.value.value || item.reps);
+		const monthFull = !useDays && item.monthIndex != null
+			? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ?? MONTHS_LONG.en[item.monthIndex])
+			: item.label;
+		const suffix = !useDays && item.isPartial && item.rangeLabel ? ` (${item.rangeLabel})` : "";
 		return {
-			text: `${volume}kg ${locale === "en" ? "of volume in" : "de volumen en"} ${monthFull}${suffix}`,
-			defaultValue: `${lastPoint.volume}kg ${locale === "en" ? "of volume in" : "de volumen en"} ${monthFull}`,
+			text: `${setsVal} ${locale === "en" ? "sets" : "series"}, ${repsVal} ${locale === "en" ? "reps" : "reps"} ${locale === "en" ? "in" : "en"} ${monthFull}${suffix}`,
+			defaultValue: `${lastPoint.sets} ${locale === "en" ? "sets" : "series"}, ${lastPoint.reps} ${locale === "en" ? "reps" : "reps"} ${locale === "en" ? "in" : "en"} ${monthFull}`,
 		};
 	});
 
-	const maxValue = Math.max(0, ...series.map((m) => m.volume));
-	const allZero = series.length > 0 && series.every((s) => s.volume === 0);
+	const maxValue = Math.max(0, ...series.flatMap((m) => [m.sets, m.reps]));
+	const allZero = series.length > 0 && series.every((s) => s.sets === 0 && s.reps === 0);
 	const yAxisTicks = allZero
 		? [0, 1]
 		: Array.from({ length: 5 }, (_, i) => Math.ceil((maxValue / 4) * i));
 	const labelHasDataX = new Set(
-		series.filter((s) => s.volume > 0).map((s) => s.x),
+		series.filter((s) => s.sets > 0 || s.reps > 0).map((s) => s.x),
 	);
+
+    
 
 	if (series.length === 0 || allZero) {
 		return (
@@ -309,26 +312,40 @@ export const ProgressVolumeChart = ({
 							lineColor: colors.border,
 							labelColor: colors.mutedForeground,
 							lineWidth: 1,
-							formatYLabel: (yVal) => `${yVal.toFixed(0)}kg`,
+							formatYLabel: (yVal) => `${Math.round(yVal)}`,
 						},
 					]}
-					yKeys={["volume"]}
+					yKeys={["sets", "reps"]}
 				>
 					{({ points }) => (
 						<>
 							<DrawnLine
 								color={colors.gradient.start}
-								drawKey={drawKey}
-								key={drawKey}
-								points={points.volume}
+								drawKey={`${drawKey}:sets`}
+								key={`${drawKey}:sets`}
+								points={points.sets}
+								strokeWidth={1}
+							/>
+							<DrawnLine
+								color={colors.gradient.end ?? colors.mutedForeground}
+								drawKey={`${drawKey}:reps`}
+								key={`${drawKey}:reps`}
+								points={points.reps}
 								strokeWidth={1}
 							/>
 							{isActive && (
-								<ToolTip
-									colorScheme={colorScheme}
-									x={state.x.position}
-									y={state.y.volume.position}
-								/>
+								<>
+									<ToolTip
+										colorScheme={colorScheme}
+										x={state.x.position}
+										y={state.y.sets.position}
+									/>
+									<ToolTip
+										colorScheme={colorScheme}
+										x={state.x.position}
+										y={state.y.reps.position}
+									/>
+								</>
 							)}
 						</>
 					)}

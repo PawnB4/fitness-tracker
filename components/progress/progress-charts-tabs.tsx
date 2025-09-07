@@ -4,14 +4,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
 
 import type * as schema from "~/db/schema";
-import { ProgressVolumeChart } from "../charts/progress-volume-chart";
+import { ProgressVolumeChart } from "~/components/charts/progress-volume-chart";
+import { ProgressStrengthChart } from "~/components/charts/progress-strenght-chart";
+import { ProgressFrequencyChart } from "~/components/charts/progress-frequency-chart";
 
 const i18n = new I18n({
 	en: {
 		selectExercise: "Select exercise",
+		strength: "Strength",
+		volume: "Volume",
+		frequency: "Frequency",
 	},
 	es: {
 		selectExercise: "Seleccionar ejercicio",
+		strength: "Fuerza",
+		volume: "Volumen",
+		frequency: "Frecuencia",
 	},
 });
 
@@ -46,7 +54,7 @@ export const ProgressChartsTabs = ({
 								: "text-secondary-foreground"
 						}
 					>
-						Strength
+						{i18n.t("strength")}
 					</Text>
 				</TabsTrigger>
 				<TabsTrigger
@@ -60,7 +68,7 @@ export const ProgressChartsTabs = ({
 								: "text-secondary-foreground"
 						}
 					>
-						Volume
+						{i18n.t("volume")}
 					</Text>
 				</TabsTrigger>
 				<TabsTrigger
@@ -74,15 +82,20 @@ export const ProgressChartsTabs = ({
 								: "text-secondary-foreground"
 						}
 					>
-						Frequency
+						{i18n.t("frequency")}
 					</Text>
 				</TabsTrigger>
 			</TabsList>
 			<TabsContent className="" value="strength">
-				{/* <StrengthChart data={exerciseData} /> */}
+				<ProgressStrengthChart
+					exerciseData={exerciseData}
+					height={250}
+					locale={locale}
+					timeframeFrom={timeframeFrom}
+					timeframeTo={timeframeTo}
+				/>
 			</TabsContent>
 			<TabsContent className="" value="volume">
-				{/* <VolumeChart data={exerciseData} /> */}
 				<ProgressVolumeChart
 					exerciseData={exerciseData}
 					height={250}
@@ -92,7 +105,13 @@ export const ProgressChartsTabs = ({
 				/>
 			</TabsContent>
 			<TabsContent className="" value="frequency">
-				{/* <FrequencyChart data={exerciseData} /> */}
+				<ProgressFrequencyChart
+					exerciseData={exerciseData}
+					height={250}
+					locale={locale}
+					timeframeFrom={timeframeFrom}
+					timeframeTo={timeframeTo}
+				/>
 			</TabsContent>
 		</Tabs>
 	);
