@@ -126,7 +126,7 @@ export const ProgressFrequencyChart = ({
 	): { sets: number; reps: number } => {
 		const sets = (we.workoutExerciseData ?? []).length;
 		const reps = (we.workoutExerciseData ?? [])
-			.map((s) => (s.reps ?? 0))
+			.map((s) => s.reps ?? 0)
 			.reduce((a, b) => a + b, 0);
 		return { sets, reps };
 	};
@@ -190,35 +190,40 @@ export const ProgressFrequencyChart = ({
 
 	const series: SeriesPoint[] = useDays
 		? xDomain.map((d) => {
-			const x = dayKey(d);
-			return {
-				x,
-				label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
-					d.getUTCMonth() + 1,
-				).padStart(2, "0")}`,
-				sets: sumSetsMap.get(x) ?? 0,
-				reps: sumRepsMap.get(x) ?? 0,
-			};
-		})
+				const x = dayKey(d);
+				return {
+					x,
+					label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
+						d.getUTCMonth() + 1,
+					).padStart(2, "0")}`,
+					sets: sumSetsMap.get(x) ?? 0,
+					reps: sumRepsMap.get(x) ?? 0,
+				};
+			})
 		: xDomain.map((d) => {
-			const x = monthKey(d);
-			const mi = d.getUTCMonth();
-			const shortLabel = (MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
-			const mStart = monthStartUTC(d);
-			const mEnd = monthEndUTC(d);
-			const bucketStart = start > mStart ? start : mStart;
-			const bucketEnd = end < mEnd ? end : mEnd;
-			const isPartial = bucketStart.getTime() > mStart.getTime() || bucketEnd.getTime() < mEnd.getTime();
-			return {
-				x,
-				label: shortLabel,
-				sets: sumSetsMap.get(x) ?? 0,
-				reps: sumRepsMap.get(x) ?? 0,
-				isPartial,
-				rangeLabel: isPartial ? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}` : undefined,
-				monthIndex: mi,
-			};
-		});
+				const x = monthKey(d);
+				const mi = d.getUTCMonth();
+				const shortLabel =
+					(MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
+				const mStart = monthStartUTC(d);
+				const mEnd = monthEndUTC(d);
+				const bucketStart = start > mStart ? start : mStart;
+				const bucketEnd = end < mEnd ? end : mEnd;
+				const isPartial =
+					bucketStart.getTime() > mStart.getTime() ||
+					bucketEnd.getTime() < mEnd.getTime();
+				return {
+					x,
+					label: shortLabel,
+					sets: sumSetsMap.get(x) ?? 0,
+					reps: sumRepsMap.get(x) ?? 0,
+					isPartial,
+					rangeLabel: isPartial
+						? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}`
+						: undefined,
+					monthIndex: mi,
+				};
+			});
 
 	// Use plain objects (not Map) so the worklet can safely capture them
 	const labelByXObj: Record<string, string> = Object.fromEntries(
@@ -245,13 +250,19 @@ export const ProgressFrequencyChart = ({
 
 	const animatedText = useAnimatedProps(() => {
 		const selectedX = String(state.x.value.value || lastPoint.x);
-		const item = (pointByXObj[selectedX] ?? (lastPoint as SeriesPoint)) as SeriesPoint;
+		const item = (pointByXObj[selectedX] ??
+			(lastPoint as SeriesPoint)) as SeriesPoint;
 		const setsVal = Number(state.y.sets.value.value || item.sets);
 		const repsVal = Number(state.y.reps.value.value || item.reps);
-		const monthFull = !useDays && item.monthIndex != null
-			? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ?? MONTHS_LONG.en[item.monthIndex])
-			: item.label;
-		const suffix = !useDays && item.isPartial && item.rangeLabel ? ` (${item.rangeLabel})` : "";
+		const monthFull =
+			!useDays && item.monthIndex != null
+				? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ??
+					MONTHS_LONG.en[item.monthIndex])
+				: item.label;
+		const suffix =
+			!useDays && item.isPartial && item.rangeLabel
+				? ` (${item.rangeLabel})`
+				: "";
 		return {
 			text: `${setsVal} ${locale === "en" ? "sets" : "series"}, ${repsVal} ${locale === "en" ? "reps" : "reps"} ${locale === "en" ? "in" : "en"} ${monthFull}${suffix}`,
 			defaultValue: `${lastPoint.sets} ${locale === "en" ? "sets" : "series"}, ${lastPoint.reps} ${locale === "en" ? "reps" : "reps"} ${locale === "en" ? "in" : "en"} ${monthFull}`,
@@ -259,15 +270,14 @@ export const ProgressFrequencyChart = ({
 	});
 
 	const maxValue = Math.max(0, ...series.flatMap((m) => [m.sets, m.reps]));
-	const allZero = series.length > 0 && series.every((s) => s.sets === 0 && s.reps === 0);
+	const allZero =
+		series.length > 0 && series.every((s) => s.sets === 0 && s.reps === 0);
 	const yAxisTicks = allZero
 		? [0, 1]
 		: Array.from({ length: 5 }, (_, i) => Math.ceil((maxValue / 4) * i));
 	const labelHasDataX = new Set(
 		series.filter((s) => s.sets > 0 || s.reps > 0).map((s) => s.x),
 	);
-
-    
 
 	if (series.length === 0 || allZero) {
 		return (

@@ -121,7 +121,10 @@ export const ProgressStrengthChart = ({
 		`${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 
 	// 1RM calculators
-	const computeSet1RM = (reps: number | null, weight: number): number | null => {
+	const computeSet1RM = (
+		reps: number | null,
+		weight: number,
+	): number | null => {
 		if (reps == null) return null;
 		if (reps < 1) return null;
 		if (weight <= 0) return null;
@@ -199,37 +202,42 @@ export const ProgressStrengthChart = ({
 
 	const series: SeriesPoint[] = useDays
 		? xDomain.map((d) => {
-			const x = dayKey(d);
-			const c = countMap.get(x) ?? 0;
-			const avg = c > 0 ? (sumMap.get(x) ?? 0) / c : 0;
-			return {
-				x,
-				label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
-					d.getUTCMonth() + 1,
-				).padStart(2, "0")}`,
-				strength: avg,
-			};
-		})
+				const x = dayKey(d);
+				const c = countMap.get(x) ?? 0;
+				const avg = c > 0 ? (sumMap.get(x) ?? 0) / c : 0;
+				return {
+					x,
+					label: `${String(d.getUTCDate()).padStart(2, "0")}/${String(
+						d.getUTCMonth() + 1,
+					).padStart(2, "0")}`,
+					strength: avg,
+				};
+			})
 		: xDomain.map((d) => {
-			const x = monthKey(d);
-			const mi = d.getUTCMonth();
-			const shortLabel = (MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
-			const mStart = monthStartUTC(d);
-			const mEnd = monthEndUTC(d);
-			const bucketStart = start > mStart ? start : mStart;
-			const bucketEnd = end < mEnd ? end : mEnd;
-			const isPartial = bucketStart.getTime() > mStart.getTime() || bucketEnd.getTime() < mEnd.getTime();
-			const c = countMap.get(x) ?? 0;
-			const avg = c > 0 ? (sumMap.get(x) ?? 0) / c : 0;
-			return {
-				x,
-				label: shortLabel,
-				strength: avg,
-				isPartial,
-				rangeLabel: isPartial ? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}` : undefined,
-				monthIndex: mi,
-			};
-		});
+				const x = monthKey(d);
+				const mi = d.getUTCMonth();
+				const shortLabel =
+					(MONTHS_SHORT as any)[locale]?.[mi] ?? MONTHS_SHORT.en[mi];
+				const mStart = monthStartUTC(d);
+				const mEnd = monthEndUTC(d);
+				const bucketStart = start > mStart ? start : mStart;
+				const bucketEnd = end < mEnd ? end : mEnd;
+				const isPartial =
+					bucketStart.getTime() > mStart.getTime() ||
+					bucketEnd.getTime() < mEnd.getTime();
+				const c = countMap.get(x) ?? 0;
+				const avg = c > 0 ? (sumMap.get(x) ?? 0) / c : 0;
+				return {
+					x,
+					label: shortLabel,
+					strength: avg,
+					isPartial,
+					rangeLabel: isPartial
+						? `${formatDDMMUTC(bucketStart)} - ${formatDDMMUTC(bucketEnd)}`
+						: undefined,
+					monthIndex: mi,
+				};
+			});
 
 	// Use plain objects (not Map) so the worklet can safely capture them
 	const labelByXObj: Record<string, string> = Object.fromEntries(
@@ -255,12 +263,18 @@ export const ProgressStrengthChart = ({
 
 	const animatedText = useAnimatedProps(() => {
 		const selectedX = String(state.x.value.value || lastPoint.x);
-		const item = (pointByXObj[selectedX] ?? (lastPoint as SeriesPoint)) as SeriesPoint;
+		const item = (pointByXObj[selectedX] ??
+			(lastPoint as SeriesPoint)) as SeriesPoint;
 		const value = Number(state.y.strength.value.value || item.strength);
-		const monthFull = !useDays && item.monthIndex != null
-			? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ?? MONTHS_LONG.en[item.monthIndex])
-			: item.label;
-		const suffix = !useDays && item.isPartial && item.rangeLabel ? ` (${item.rangeLabel})` : "";
+		const monthFull =
+			!useDays && item.monthIndex != null
+				? ((MONTHS_LONG as any)[locale]?.[item.monthIndex] ??
+					MONTHS_LONG.en[item.monthIndex])
+				: item.label;
+		const suffix =
+			!useDays && item.isPartial && item.rangeLabel
+				? ` (${item.rangeLabel})`
+				: "";
 		return {
 			text: `${value.toFixed(0)}kg ${locale === "en" ? "est. 1RM in" : "1RM estimado en"} ${monthFull}${suffix}`,
 			defaultValue: `${lastPoint.strength.toFixed(0)}kg ${locale === "en" ? "est. 1RM in" : "1RM estimado en"} ${monthFull}`,
@@ -319,7 +333,7 @@ export const ProgressStrengthChart = ({
 							lineColor: colors.border,
 							labelColor: colors.mutedForeground,
 							lineWidth: 1,
-                            formatYLabel: (yVal) => `${yVal.toFixed(0)}kg`,
+							formatYLabel: (yVal) => `${yVal.toFixed(0)}kg`,
 						},
 					]}
 					yKeys={["strength"]}

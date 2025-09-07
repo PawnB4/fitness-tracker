@@ -1,12 +1,11 @@
 import { I18n } from "i18n-js";
 import { useState } from "react";
+import { ProgressFrequencyChart } from "~/components/charts/progress-frequency-chart";
+import { ProgressStrengthChart } from "~/components/charts/progress-strenght-chart";
+import { ProgressVolumeChart } from "~/components/charts/progress-volume-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
-
 import type * as schema from "~/db/schema";
-import { ProgressVolumeChart } from "~/components/charts/progress-volume-chart";
-import { ProgressStrengthChart } from "~/components/charts/progress-strenght-chart";
-import { ProgressFrequencyChart } from "~/components/charts/progress-frequency-chart";
 
 const i18n = new I18n({
 	en: {
