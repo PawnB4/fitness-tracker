@@ -20,7 +20,7 @@ const SelectTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
 	<SelectPrimitive.Trigger
 		className={cn(
-			"flex h-10 native:h-12 flex-row items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-muted-foreground text-sm web:ring-offset-background web:focus:outline-none web:focus:ring-2 web:focus:ring-ring web:focus:ring-offset-2 [&>span]:line-clamp-1",
+			"relative flex h-10 native:h-12 flex-row items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-muted-foreground text-sm web:ring-offset-background web:focus:outline-none web:focus:ring-2 web:focus:ring-ring web:focus:ring-offset-2 [&>span]:line-clamp-1",
 			props.disabled && "web:cursor-not-allowed opacity-50",
 			className,
 		)}
@@ -30,7 +30,7 @@ const SelectTrigger = React.forwardRef<
 		{children}
 		<ChevronDown
 			aria-hidden={true}
-			className="text-foreground opacity-50"
+			className="absolute right-3 text-foreground opacity-50"
 			size={16}
 		/>
 	</SelectPrimitive.Trigger>

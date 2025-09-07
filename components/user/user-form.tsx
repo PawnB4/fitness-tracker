@@ -397,6 +397,8 @@ export function UserForm({
 							notes: exerciseData.notes || null,
 							completed: exerciseData.completed,
 							sortOrder: exerciseData.sortOrder,
+							createdAt: workoutData.date,
+							updatedAt: workoutData.date,
 						});
 						importedExercises++;
 					}
