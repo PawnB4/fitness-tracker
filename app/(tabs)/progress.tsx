@@ -12,7 +12,7 @@ import * as schema from "~/db/schema";
 const i18n = new I18n({});
 
 export default function Page() {
-	const { data: workoutCount, error: workoutCountError } = useLiveQuery(
+	const { data: workoutCount } = useLiveQuery(
 		db
 			.select({
 				count: count(),
@@ -20,27 +20,19 @@ export default function Page() {
 			.from(schema.workouts),
 	);
 
-	const { data: userLocale, error: userLocaleError } = useLiveQuery(
+	const { data: userLocale } = useLiveQuery(
 		db.select({ locale: schema.user.locale }).from(schema.user).limit(1),
 	);
 
 	i18n.locale = userLocale?.[0]?.locale ?? "en";
 
-	// 15 workouts to see your progress
-	// if (workoutCount?.[0]?.count < 15) {
-	// 	return (
-	// 		<View className="flex flex-1 items-center justify-center">
-	// 			<Text>You need to do at least 15 workouts to see your progress.</Text>
-	// 		</View>
-	// 	);
-	// }
-
-	// return (
-	// 	<View className="flex flex-1 items-center justify-center">
-	// 		{/* <Text>You need to do at least 15 workouts to see your progress.</Text> */}
-	// 		<Text>Nothing to see here yet.</Text>
-	// 	</View>
-	// );
+	if (workoutCount?.[0]?.count < 15) {
+		return (
+			<View className="flex flex-1 items-center justify-center">
+				<Text>You need to do at least 15 workouts to see your progress.</Text>
+			</View>
+		);
+	}
 
 	return (
 		<ScrollView className="flex flex-1">
@@ -67,42 +59,7 @@ export default function Page() {
 				{/* MAIN PROGRESS CHARTS */}
 
 				<ProgressCharts locale={i18n.locale} />
-				<View className="gap-4">
-					<Text className="font-bold text-xl">📈 Progress Charts</Text>
-
-					{/* Exercise Selector */}
-					<View className="rounded bg-gray-100 p-3">
-						<Text className="text-sm">Select Exercise: Bench Press ▼</Text>
-					</View>
-
-					{/* Chart Selection Tabs */}
-					<View className="flex flex-row gap-2">
-						<View className="rounded bg-blue-500 px-4 py-2">
-							<Text className="text-sm text-white">Strength</Text>
-						</View>
-						<View className="rounded bg-gray-300 px-4 py-2">
-							<Text className="text-gray-700 text-sm">Volume</Text>
-						</View>
-						<View className="rounded bg-gray-300 px-4 py-2">
-							<Text className="text-gray-700 text-sm">Frequency</Text>
-						</View>
-					</View>
-
-					{/* Main Chart */}
-					<View className="h-48 items-center justify-center rounded-lg bg-blue-200 p-6">
-						<Text className="font-bold text-lg">
-							Estimated 1RM Progression Chart
-						</Text>
-						<Text className="text-gray-600 text-sm">
-							Bench: 65kg → 70kg → 75kg
-						</Text>
-						<Text className="text-gray-600 text-sm">
-							Squat: 80kg → 85kg → 90kg
-						</Text>
-					</View>
-				</View>
-
-				{/* VOLUME ANALYSIS */
+					{/* VOLUME ANALYSIS */
 				/* Feasible via sum(reps*weight) per period; duration-only sets excluded from tonnage. */}
 				<View className="gap-4">
 					<Text className="font-bold text-xl">💪 Volume Analysis</Text>
@@ -139,7 +96,8 @@ export default function Page() {
 
 				{/* CONSISTENCY TRACKING */}
 				<View className="gap-4">
-					<Text className="font-bold text-xl">🔥 Consistency & Frequency</Text>
+					<Text className="font-bold text-xl">Consistency & Frequency</Text>
+					<MonthlyWorkouts height={200} />
 
 					{/* Workout Frequency Heatmap */}
 					<View className="h-32 items-center justify-center rounded-lg bg-green-200 p-4">
@@ -254,13 +212,6 @@ export default function Page() {
 					</View>
 				</View>
 
-				{/* ORIGINAL MONTHLY CHART - MOVED TO BOTTOM */}
-				<View className="rounded-lg bg-gray-100 p-4">
-					<Text className="mb-2 font-bold text-sm">
-						📈 Monthly Workout Frequency
-					</Text>
-					<MonthlyWorkouts height={200} />
-				</View>
 			</View>
 		</ScrollView>
 	);

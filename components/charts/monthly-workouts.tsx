@@ -10,7 +10,6 @@ import Animated, {
 	useAnimatedProps,
 } from "react-native-reanimated";
 import { Bar, CartesianChart, useChartPressState } from "victory-native";
-import { Card } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
 import { db } from "~/db/drizzle";
 import * as schema from "~/db/schema";
@@ -142,11 +141,9 @@ export const MonthlyWorkouts = ({ height }: { height: number }) => {
 	return (
 		<View className="w-full flex-col gap-2 bg-card">
 			<View className="flex-col gap-2">
-				<Card className="p-2">
-					<Text className="font-funnel-bold text-2xl text-foreground">
+					<Text className="font-funnel-bold text-foreground">
 						Monthly Workouts
 					</Text>
-				</Card>
 				<View className="flex-row">
 					<AnimatedTextInput
 						animatedProps={animatedMonthCountText}
